@@ -1,4 +1,7 @@
-﻿using System;
+/// ModuleSystemHeat.cs
+/// Basic module for the System Heat plugin
+/// Should always be on any part that wants to be part of the heat system
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,56 +11,77 @@ namespace SystemHeat
 {
     public class ModuleSystemHeat: PartModule
     {
-        
-	    // Radiative properties
+        // KSPFields
+        // --------
+
+	// RADIATION
+	
+	// Whether to use passive radiation
+	[KSPField(isPersistant = false)]
+	public bool passiveRadiation = false;
+	
+	// Emissivity (S-B law). Emissivity scales how well a part radiates heat
         [KSPField(isPersistant = false)]
-	    public float emissivity = 0.5f;
+	public float emissivity = 0.5f;
+	// Emissive temperature (S-B law). Temperature scales how well a part radiates heat
         [KSPField(isPersistant = false)]
-	    public float emissiveTemp = 290f;
+	public float emissiveTemp = 290f;
+	// Albedo. Percent of incoming solar radiation that is reflected when a part is exposed to sunlight. 
+	// High albedo = low absorption of solar energy
         [KSPField(isPersistant = false)]
         public float albedo = 0.5f;
+        // Scaling factor that represents how a part's mass relates to its radiative surface area
+        // Effective radiating area = radiative mass scalar*mass
         [KSPField(isPersistant = false)]
-	    public float radiativeMassScalar = 4f;
-
- 	    // How much of the part is exposed to the sun at a time (usually half)
+	public float radiativeMassScalar = 4f;
+ 	 // How much of the part's surface area is exposed to the sun at a time. 
         [KSPField(isPersistant = false)]
-	    public float radiativeExposure = 0.5f;
+	public float radiativeExposure = 0.3f;
 
-	    // Convective properties
+	// CONVECTION
+	
+	// Whether to use passive convection 
         [KSPField(isPersistant = false)]
-	    public float convectiveMassScalar = 4f;
+	public bool passiveConvection = false;
+	
+	// Scaling factor that represents how a part's mass relates to its convective surface area
+	// Effective convection area = convective mass scalar*mass
         [KSPField(isPersistant = false)]
-	    public float convectiveTemp = 300f;
-
-	    // whether to use passive convection and radiation
+	public float convectiveMassScalar = 4f;
+	// Temperature of the part. Should generally be the same as emissive temp
         [KSPField(isPersistant = false)]
-	    public bool passiveConvection = false;
+	public float convectiveTemp = 300f;
+
+	// Frequency (physics frames) of passive updates
         [KSPField(isPersistant = false)]
-	    public bool passiveRadiation = false;
-
-	    // frequency (physics frames) of passive updates
-        [KSPField(isPersistant = false)]
-	    public int updateFrequency = 3; 
-        // counter
-	    private int frameCounter = 0;
-
-	    private bool partHeatStorage = false;
-
-        // last frame's variables
-	    private float lastFramePartHeat = 0f;
-	    private float lastFrameVesselHeat = 0f;
-
-        // last frame's deltas
+	public int updateFrequency = 3; 
+	
+	// Change in Part Heat 
         [KSPField(isPersistant = false, guiActive = true, guiName = "Part Heat Delta")]
-	    public float partHeatDelta = 0f;
+	public float partHeatDelta = 0f;
+	
+	// Change in Vessel Heat
         [KSPField(isPersistant = false, guiActive = true, guiName = "Vessel Heat Delta")]
-	    public float vesselHeatDelta = 0f;
+	public float vesselHeatDelta = 0f;
+	
+	// Private variables
+	
+        // Counter
+	private int frameCounter = 0;
+	
+	private bool partHeatStorage = false;
 
-        // GUI
+        // Last frame's heat totals
+	private float lastFramePartHeat = 0f;
+	private float lastFrameVesselHeat = 0f;
+
+        // Actions and UI
+        // --------------
+        
         // debug mostly
-
         [KSPField(isPersistant = false, guiActive = true, guiName = "Rad Heat In")]
         public float HeatInputRadiation;
+        
         [KSPField(isPersistant = false, guiActive = true, guiName = "Rad Heat Out")]
         public float HeatOutputRadiation;
 
@@ -79,7 +103,8 @@ namespace SystemHeat
        // [KSPField(isPersistant = false, guiActive = true, guiName = "Path Len")]
         //public float PathLen;
 
-        // ACCESSORS
+        // Accessors
+        // --------------
 
         // PART: Get heat stored
         public float PartHeatStored
@@ -155,19 +180,21 @@ namespace SystemHeat
             }
         }
 
-        // METHODS
-        // -------
+        // Public Methods
+        // --------------
         // Add or subtract heat from the vessel
+        // Do it with a flow mode if you like
 	    public float AddHeat(float amt)
 	    {
-            //Utils.Log(amt.ToString());
-
 		    return (float)AddHeat((double)amt);
 	    }
 	    public double AddHeat(double amt)
 	    {
-            
-		    double remainder = part.RequestResource(Utils.HeatResourceName, -amt, ResourceFlowMode.ALL_VESSEL);
+		    return  AddHeat(amt,ResourceFlowMode.ALL_VESSEL);
+	    }
+	    public double AddHeat(double amt,ResourceFlowMode flow)
+	    {
+		    double remainder = part.RequestResource(Utils.HeatResourceName, -amt, flow);
 		    return  remainder;
 	    }
 
@@ -175,16 +202,16 @@ namespace SystemHeat
 
         public override void OnStart(PartModule.StartState state)
 	    {
-		    // Find if the part has heat storage!
-            if (part.Resources.Get(Utils.HeatResourceID) != null)
-            {
-                Utils.Log("Part has heat storage");
-                partHeatStorage = true;
-            }
-            else
-            {
-                partHeatStorage = false;
-            }
+		// Find if the part has heat storage!
+            	if (part.Resources.Get(Utils.HeatResourceID) != null)
+            	{
+                	Utils.Log("Part has heat storage");
+                	partHeatStorage = true;
+            	}
+		else
+		{
+			partHeatStorage = false;
+		}
 	    }
 
         protected void FixedUpdate()
@@ -192,21 +219,21 @@ namespace SystemHeat
 		    if (HighLogic.LoadedScene == GameScenes.FLIGHT)
 		    {
 
+		// Update debug variables
                 WindSpeed = Utils.GetAirSpeed(part.vessel);
                 AirTemp = Utils.GetAirTemperature(part.vessel);
                 Insolation = Utils.CalculateSolarInput(part.vessel);
                 //PathLen = Utils.AtmosphericPathLength(part.vessel);
                 //Zenith = Utils.ZenithAngle(part.vessel,part.vessel.mainBody);
+                
+                // Update heat changes
 partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 			vesselHeatDelta = (lastFrameVesselHeat - VesselHeatStored)/TimeWarp.fixedDeltaTime;
 
                     
 			    if ( frameCounter > updateFrequency)
 			    {
-				    // Update heat deltas
-				    
-				    
-
+				    /
 				    // do convection
 			        if (passiveConvection)
 			        {
@@ -230,7 +257,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 
 	    }
 
-	    // calculates net convection balance
+	    // Calculates net convection balance in kW
 	    protected float CalculatePassiveConvection()
 	    {
 		    float heatChange  = 0f;
@@ -252,7 +279,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 
 	    }
 
-	    // Calculates net radiation balance
+	    // Calculates net radiation balance in kW
 	    protected float CalculatePassiveRadiation()
 	    {
 		    float heatInput = 0f;
