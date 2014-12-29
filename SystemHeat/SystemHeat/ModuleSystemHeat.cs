@@ -127,8 +127,22 @@ namespace SystemHeat
         // VESSEL: Get heat stored
         public float VesselHeatStored
         {
+        	float maxAmount = 0f;
+        	float curAmount = 0f;
             get {
-                return 0f;
+            	foreach (Part p in this.vessel.parts)
+            	{
+            		foreach (PartResource resource in p.Resources)
+            		{
+            			if (resource.resourceName == Utils.HeatResourceName)
+            			{
+            				maxAmount += (float)resource.maxAmount;
+            				curAmount += (float)resource.amount;
+            			}
+            		}
+            	
+            	}
+                return curAmount;
             }
         }
 
@@ -183,14 +197,14 @@ namespace SystemHeat
                 Insolation = Utils.CalculateSolarInput(part.vessel);
                 //PathLen = Utils.AtmosphericPathLength(part.vessel);
                 //Zenith = Utils.ZenithAngle(part.vessel,part.vessel.mainBody);
+partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
+			vesselHeatDelta = (lastFrameVesselHeat - VesselHeatStored)/TimeWarp.fixedDeltaTime;
 
+                    
 			    if ( frameCounter > updateFrequency)
 			    {
 				    // Update heat deltas
-				    partHeatDelta = lastFramePartHeat - PartHeatStored;
 				    
-
-				    vesselHeatDelta = lastFrameVesselHeat - VesselHeatStored;
 				    
 
 				    // do convection
@@ -205,12 +219,13 @@ namespace SystemHeat
                         float amtRadiated = CalculatePassiveRadiation();
                         this.AddHeat(amtRadiated * TimeWarp.fixedDeltaTime);
                     }
-
-                    lastFramePartHeat = PartHeatStored;
-                    lastFrameVesselHeat = VesselHeatStored;
+                    
+			
 			        frameCounter = 0;
 			    }
 			    frameCounter = frameCounter+1;
+			    lastFramePartHeat = PartHeatStored;
+                    lastFrameVesselHeat = VesselHeatStored;
 		    }
 
 	    }
