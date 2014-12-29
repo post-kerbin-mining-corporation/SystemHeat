@@ -6,31 +6,53 @@ using UnityEngine;
 
 namespace SystemHeat
 {
-    // Defines a simplistic radiator
-    // Can be deployed or undeployed
+    
+    // A simplistic heat radiator
+    // Can represent a simple radiator or a deplyed radiator
+    // Hijacks ModuleDeplyableSolarPanel to do sun-parallel rotation
+    
     public class ModuleGenericRadiator: ModuleDeployableSolarPanel
     {
-        // kW radiated when open
+        // KSPFields
+        // --------
+        
+        // GAMEPLAY
+        
+        // Heat radiated when open (kW)
         [KSPField(isPersistant = false)]
         public float HeatRadiatedExtended;
 
-        // kW radiated when closed
+        // Heat radiated when closed (kW)
         [KSPField(isPersistant = false)]
         public float HeatRadiated;
      
-        // Tweakable to allow or disallow sun tracking
+        // Resource use when extended
+        [KSPField(isPersistant = false)]
+        public float ResourceUseExtended = false
+        
+        // Resource use when closed
+        [KSPField(isPersistant = false)]
+        public float ResourceUse = false
+        
+        // Name of the resource to use
+        [KSPField(isPersistant = false)]
+        public string ResourceName = ""
+        
+        // ANIMATION
+      
+        // Allow or disallow sun tracking (cosmetic only for now)
         [KSPField(guiName = "Tracking", guiActiveEditor = true, isPersistant = true)]
         [UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
         public bool TrackSun = true;
 
-        // animation for radiator heat
+        // Animation that plays with increasing heat
         [KSPField(isPersistant = false)]
         public string HeatAnimation;
-
+        // Transform for animation mixing
         [KSPField(isPersistant = false)]
         public string HeatTransformName;
 
-         // Private
+         // Private variables
         private AnimationState[] heatStates;
         private Transform heatTransform;
         private ModuleSystemHeat heatModule;
@@ -38,10 +60,9 @@ namespace SystemHeat
         // Actions and UI
         // --------------
 
-        // Heat Rejection UI
+        // Heat Rejection UI note
         [KSPField(isPersistant = false, guiActive = true, guiName = "Current Heat Rejection")]
         public string HeatRejectionGUI = "0 kW";
-
 
         // Toggle radiator
         public void Toggle()
@@ -52,9 +73,7 @@ namespace SystemHeat
                 base.Extend();
         }
 
-       
-
-
+        // UI shown in VAB/SPH
         public override string GetInfo()
         {
             string info = "";
@@ -80,83 +99,101 @@ namespace SystemHeat
             if (heatModule == null)
             {
                 Utils.LogError("No SystemHeat Module on part!");
+                return;
             }
 
-            heatStates = Utils.SetUpAnimation(HeatAnimation, part);
-            heatTransform = part.FindModelTransform(HeatTransformName);
-
-            foreach (AnimationState heatState in heatStates)
+            // Set up animation
+            if (heatTransform != null && HeatAnimation != """)
             {
-                heatState.AddMixingTransform(heatTransform);
-                heatState.blendMode = AnimationBlendMode.Blend;
-                heatState.layer = 15;
-                heatState.weight = 1.0f;
-                heatState.enabled = true;
+                heatStates = Utils.SetUpAnimation(HeatAnimation, part);
+                heatTransform = part.FindModelTransform(HeatTransformName);
+            
+                foreach (AnimationState heatState in heatStates)
+                {
+                    heatState.AddMixingTransform(heatTransform);
+                    heatState.blendMode = AnimationBlendMode.Blend;
+                    heatState.layer = 15;
+                    heatState.weight = 1.0f;
+                    heatState.enabled = true;
+                }
             }
 
             if (!TrackSun)
                 base.trackingSpeed = 0f;
 
-            part.force_activate();
+            
         }
 
-        public override void OnUpdate()
+        public void Update()
         {
- 
-            base.OnUpdate();
-            foreach (BaseField fld in base.Fields)
+            // Hide all the solar panel fields
+            if  (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-                if (fld.guiName == "Sun Exposure")
-                    fld.guiActive = false;
-                if (fld.guiName == "Energy Flow")
-                    fld.guiActive = false;
-                if (fld.guiName == "Status")
-                    fld.guiActive = false;
-               
+                foreach (BaseField fld in base.Fields)
+                {
+                    if (fld.guiName == "Sun Exposure")
+                        fld.guiActive = false;
+                    if (fld.guiName == "Energy Flow")
+                        fld.guiActive = false;
+                    if (fld.guiName == "Status")
+                        fld.guiActive = false;
+                }
             }
         }
-        public override void OnFixedUpdate()
+        public void FixedUpdate()
         {
-            base.OnFixedUpdate();
-
-            if (heatModule != null)
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-
-                float availableHeatRejection = 0f;
-
-                // Heat rejection from panels
-                if (base.animationName != "")
+                if (heatModule == null)
                 {
-                    if (base.panelState != ModuleDeployableSolarPanel.panelStates.EXTENDED && base.panelState != ModuleDeployableSolarPanel.panelStates.BROKEN)
-                    {
-                        // Debug.Log("Closed! " + HeatRadiatedClosed.ToString());
-                        availableHeatRejection += HeatRadiated;
-                    }
-                    else if (base.panelState == ModuleDeployableSolarPanel.panelStates.BROKEN)
-                    {
-                        // Debug.Log("Broken!! " + 0.ToString());
-                        availableHeatRejection = 0f;
-                    }
-                    else
-                    {
-                        // Debug.Log("Open! " + HeatRadiated.ToString());
-                        availableHeatRejection += HeatRadiatedExtended;
-                    }
+                    Utils.LogError("No SystemHeat Module on part!");
+                    return;
                 }
                 else
                 {
-                    availableHeatRejection += HeatRadiated;
+                    // Heat rejection from panels
+                    float availableHeatRejection = 0f;
+    
+                    // If an animation name is present, assume deployable
+                    if (base.animationName != "")
+                    {
+                        if (base.panelState != ModuleDeployableSolarPanel.panelStates.EXTENDED && base.panelState != ModuleDeployableSolarPanel.panelStates.BROKEN)
+                        {
+                            // Utils.Log("Closed! " + HeatRadiated.ToString());
+                            availableHeatRejection += HeatRadiated;
+                        }
+                        else if (base.panelState == ModuleDeployableSolarPanel.panelStates.BROKEN)
+                        {
+                            // Utils.Log("Broken!! " + 0.ToString());
+                            availableHeatRejection = 0f;
+                        }
+                        else
+                        {
+                            // Utils.Log("Open! " + HeatRadiatedExtended.ToString());
+                            availableHeatRejection += HeatRadiatedExtended;
+                        }
+                    }
+                    // always radiate
+                    else
+                    {
+                        availableHeatRejection += HeatRadiated;
+                    }
+    
+                    // Add the heat via the HeatModule
+                    heatModule.AddHeat(-availableHeatRejection*TimeWarp.fixedDeltaTime);
+    
+                    // Update the UI widget
+                    HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
+                    
+                    if (HeatAnimation != "")
+                    {
+                        foreach (AnimationState state in heatStates)
+                        {
+                            //state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01(requestedHeatRejection / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
+                        }
+                    }
+                    
                 }
-
-                // Add the heat
-                heatModule.AddHeat(-availableHeatRejection*TimeWarp.fixedDeltaTime);
-
-                foreach (AnimationState state in heatStates)
-                {
-
-                    //state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01(requestedHeatRejection / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
-                }
-                HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
             }
         }
 
