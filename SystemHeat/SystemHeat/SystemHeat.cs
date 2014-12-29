@@ -7,7 +7,7 @@ using UnityEngine;
 namespace SystemHeat
 {
     // This class loads and stores data mostly
-    [KSPAddon(KSPAddon.Startup.MainMenu, true)]
+    [KSPAddon(KSPAddon.Startup.EveryScene, true)]
     public class SystemHeat : MonoBehaviour
     {
         public void Awake()

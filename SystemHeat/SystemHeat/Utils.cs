@@ -19,14 +19,33 @@ namespace SystemHeat
 			//key = 0 10 0 0
 
             solarCurve = new FloatCurve();
-            solarCurve.Add(0f, 10f);
-            solarCurve.Add(68773560320f, 0.5f);
-            solarCurve.Add(13599840256f, 1f);
+            solarCurve.Add(0f, 13660f);
+            solarCurve.Add(68773560320f, 683f);
+            solarCurve.Add(13599840256f, 1366f);
             solarCurve.Add(206000000000f, 0f);
         }
 
         public static FloatCurve solarCurve;
         public static float aerosolOpticalDepth = 0.2f;
+        public static float sigma = 0.0000000567f;
+
+        // This function loads up some animationstates
+        public static AnimationState[] SetUpAnimation(string animationName, Part part)
+        {
+            var states = new List<AnimationState>();
+            foreach (var animation in part.FindModelAnimators(animationName))
+            {
+                var animationState = animation[animationName];
+                animationState.speed = 0;
+                animationState.enabled = true;
+                // Clamp this or else weird things happen
+                animationState.wrapMode = WrapMode.ClampForever;
+                animation.Blend(animationName);
+                states.Add(animationState);
+            }
+            // Convert 
+            return states.ToArray();
+        }
 
         // Name of the 'heat' resource
         public static string HeatResourceName = "SystemHeat";
@@ -53,12 +72,17 @@ namespace SystemHeat
 		    else 
 			    return false;
 	    }
+        public static  float MaxAtmosphereHeight(CelestialBody body)
+        {
+            return (float)body.atmosphereScaleHeight * 1000f * Mathf.Log(1000000);
+        }
 
 	    // Radiative calculations
 	    public static float CalculateSolarInput(Vessel vessel)
 	    {
-		
-		    float baseIrradiance = solarCurve.Evaluate(GetSolarAltitude(vessel));
+		    // Divide by 1000 for kW
+		    float baseIrradiance = solarCurve.Evaluate(GetSolarAltitude(vessel))/1000f;
+
 		    if (InAtmosphere(vessel))
 		    {
 			    return baseIrradiance*Mathf.Exp(-AtmosphericPathLength(vessel)*aerosolOpticalDepth);
@@ -117,7 +141,9 @@ namespace SystemHeat
             CelestialBody body = vessel.mainBody;
 		    float zenithAngle = ZenithAngle(vessel,body);
 		    // Geometric calculation
-		    return (float)Mathf.Sqrt(Mathf.Pow((float)body.Radius+(float)vessel.altitude+body.maxAtmosphereAltitude,2)-
+		    return (float)Mathf.Sqrt(Mathf.Pow(
+                ((float)body.Radius + (float)vessel.altitude) + (MaxAtmosphereHeight(body) - (float)vessel.altitude)
+                , 2 ) -
                 Mathf.Pow((float)body.Radius+(float)vessel.altitude,2)*Mathf.Pow(Mathf.Sin(zenithAngle),2))-
                 (float)(body.Radius+vessel.altitude)*Mathf.Cos(zenithAngle);
 	    }
@@ -154,11 +180,11 @@ namespace SystemHeat
 	    {
 		    FloatCurve planetCurve = new FloatCurve();
 		    // aloft wind speed = 0
-		    planetCurve.Add(body.maxAtmosphereAltitude,0f);
+            planetCurve.Add(MaxAtmosphereHeight(body), 0f);
 		    // WRONG
             
             float srfSpeedRot =( Mathf.PI*2f* (float)(body.Radius))/(float)body.rotationPeriod;
-		    planetCurve.Add(body.maxAtmosphereAltitude/2f,0.5f*srfSpeedRot   );
+            planetCurve.Add(MaxAtmosphereHeight(body) / 2f, 0.5f * srfSpeedRot);
 		    // surface wind speed = 1x of rotation speed
 		    planetCurve.Add(0f,0.05f*srfSpeedRot);
 
@@ -170,7 +196,7 @@ namespace SystemHeat
 	    {
 		    FloatCurve planetCurve = new FloatCurve();
 		    // it is zero at the top 
-		    planetCurve.Add(body.maxAtmosphereAltitude,0f);
+            planetCurve.Add(MaxAtmosphereHeight(body), 0f);
 		    // defined in terms of incoming radiation, atmospheric pressure at sea level
 		    // earth or kerbin is 1366 w/m2
 		    float baseIrradiance = solarCurve.Evaluate((float)FlightGlobals.getAltitudeAtPos(body.position, FlightGlobals.Bodies[0]));
