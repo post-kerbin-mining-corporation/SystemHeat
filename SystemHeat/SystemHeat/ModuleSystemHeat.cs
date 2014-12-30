@@ -1,4 +1,4 @@
-/// ModuleSystemHeat.cs
+﻿/// ModuleSystemHeat.cs
 /// Basic module for the System Heat plugin
 /// Should always be on any part that wants to be part of the heat system
 using System;
@@ -152,9 +152,10 @@ namespace SystemHeat
         // VESSEL: Get heat stored
         public float VesselHeatStored
         {
-        	float maxAmount = 0f;
-        	float curAmount = 0f;
+        	
             get {
+                float maxAmount = 0f;
+                float curAmount = 0f;
             	foreach (Part p in this.vessel.parts)
             	{
             		foreach (PartResource resource in p.Resources)
@@ -233,7 +234,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
                     
 			    if ( frameCounter > updateFrequency)
 			    {
-				    /
+				    
 				    // do convection
 			        if (passiveConvection)
 			        {

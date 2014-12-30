@@ -28,15 +28,15 @@ namespace SystemHeat
      
         // Resource use when extended
         [KSPField(isPersistant = false)]
-        public float ResourceUseExtended = false
+        public float ResourceUseExtended = 0f;
         
         // Resource use when closed
         [KSPField(isPersistant = false)]
-        public float ResourceUse = false
+        public float ResourceUse = 0f;
         
         // Name of the resource to use
         [KSPField(isPersistant = false)]
-        public string ResourceName = ""
+        public string ResourceName = "";
         
         // ANIMATION
       
@@ -103,7 +103,7 @@ namespace SystemHeat
             }
 
             // Set up animation
-            if (heatTransform != null && HeatAnimation != """)
+            if (heatTransform != null && HeatAnimation != "")
             {
                 heatStates = Utils.SetUpAnimation(HeatAnimation, part);
                 heatTransform = part.FindModelTransform(HeatTransformName);
