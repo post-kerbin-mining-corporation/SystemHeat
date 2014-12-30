@@ -183,24 +183,30 @@ namespace SystemHeat
 
         // Public Methods
         // --------------
-        // Add or subtract heat from the vessel
-        // Do it with a flow mode if you like
-	    public float AddHeat(float amt)
-	    {
-		    return (float)AddHeat((double)amt);
-	    }
-	    public double AddHeat(double amt)
-	    {
-		    return  AddHeat(amt,ResourceFlowMode.ALL_VESSEL);
-	    }
-	    public double AddHeat(double amt,ResourceFlowMode flow)
-	    {
-		    double remainder = part.RequestResource(Utils.HeatResourceName, -amt, flow);
-		    return  remainder;
-	    }
-
-
-
+        // Adds heat to the part
+        // Returns the amount of extra 
+        public double GenerateHeat(double amt)
+        {
+        	return this.GenerateHeat(amt,ResourceFlowMode.ALL_VESSEL )
+        }
+        public double GenerateHeat(double amt, ResourceFlowMode mode)
+        {
+        	// returns actual amount generated
+        	double actual = part.RequestResource(Utils.HeatResourceName, -amt, mode);
+        	return (amt - actual);
+        }
+        // Consumes heat from the part
+        // Returns the shortfall 
+        public double ConsumeHeat(double amt)
+        {
+        	return this.ConsumeHeat(amt,ResourceFlowMode.ALL_VESSEL )
+        }
+        public double ConsumeHeat(double amt, ResourceFlowMode mode)
+        {
+        	double actual = part.RequestResource(Utils.HeatResourceName, -amt, mode);
+        	return actual;
+        }
+  
         public override void OnStart(PartModule.StartState state)
 	    {
 		// Find if the part has heat storage!
@@ -239,13 +245,22 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 			        if (passiveConvection)
 			        {
 				        float amtConvected = CalculatePassiveConvection();
-				        this.AddHeat(amtConvected*TimeWarp.fixedDeltaTime);
+				        if (amtConvected > 0f)
+				        	this.GenerateHeat((float)amtConvected*TimeWarp.fixedDeltaTime)
+				        else 
+				        	this.ConsumeHeat((float)amtConvected*TimeWarp.fixedDeltaTime)
 			        }
 				        // do radiation
                     if (passiveRadiation)
                     {
-                        float amtRadiated = CalculatePassiveRadiation();
-                        this.AddHeat(amtRadiated * TimeWarp.fixedDeltaTime);
+                    	float amtRadiated = CalculatePassiveRadiation();
+                    	if (amtRadiated > 0f)
+                    		this.GenerateHeat((float)amtRadiated*TimeWarp.fixedDeltaTime)
+			 else 
+				this.ConsumeHeat((float)amtRadiated*TimeWarp.fixedDeltaTime)
+                    	
+                        
+                      
                     }
                     
 			
@@ -259,6 +274,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 	    }
 
 	    // Calculates net convection balance in kW
+	    // Positive means the part is gaining heat
 	    protected float CalculatePassiveConvection()
 	    {
 		    float heatChange  = 0f;
@@ -281,6 +297,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 	    }
 
 	    // Calculates net radiation balance in kW
+	    // positive means the part is gaining heat
 	    protected float CalculatePassiveRadiation()
 	    {
 		    float heatInput = 0f;
@@ -293,34 +310,30 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 		    // Calculate obscurance by terrain and ships
             if (Utils.SolarExposure(part))
             {
-                RaycastHit[] cast = Physics.RaycastAll(part.transform.position, part.transform.position - FlightGlobals.Bodies[0].position, 2500f);
+            	// ray origin is 2000 units in the direciton of the sun
+            	Vector3 castDirection = FlightGlobals.Bodies[0].position - part.transform.position;
+            	Vector3 castOrigin = (part.transform.position-FlightGlobals.Bodies[0].position).normalized*2000f+part.transform.position
+            	
+                RaycastHit[] cast = Physics.RaycastAll(castOrigin, castDirection, 2500f);
 
-                // If not hits, do solar input
+                // If no hits, do nothing
                 if (cast.Length == 0)
                 {
-                    heatInput = RadiativeHeatInput();
+                    heatInput = 0f;
                 }
                 else
                 {
-                    int hitCounter = 0;
-                    foreach (RaycastHit hit in cast)
-                    {
-                        if (!hit.collider.attachedRigidbody == part.Rigidbody)
-                        {
-                            hitCounter = hitCounter + 1;
-                        }
-                    }
-                    // Just ourself was in the way!
-                    if (hitCounter == 0)
-                    {
-                        heatInput = RadiativeHeatInput();
-                    }
-                    else
-                    {
-                        heatInput = -1f;
-                    }
+                	bool hitSelfOnly = true
+                	foreach (RaycastHit hit in cast)
+                	{
+                		if (hit.collider.attachedRigidbody != part.Rigidbody)
+                			hitSelfOnly = false;
+                	}
+                	if (hitSelfOnly)
+                	{
+                		heatInput = RadiativeHeatInput();
+                	}
                 }
-
             }
             else
             {
@@ -330,7 +343,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
             HeatInputRadiation = heatInput;
             HeatOutputRadiation = heatOutput;
 
-		    return heatOutput-heatInput;
+		    return heatInput-heatOutput;
 	    }
 
         protected float RadiativeHeatInput()
