@@ -180,7 +180,7 @@ namespace SystemHeat
                     }
     
                     // Add the heat via the HeatModule
-                    heatModule.AddHeat(-availableHeatRejection*TimeWarp.fixedDeltaTime);
+                    heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
     
                     // Update the UI widget
                     HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
