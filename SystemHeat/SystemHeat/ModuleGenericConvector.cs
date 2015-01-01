@@ -46,9 +46,7 @@ namespace SystemHeat
         // Info for ui
         public override string GetInfo()
         {
-            return String.Format("Maximum Power: {0:F2} Ec/s", PowerGenerationMaximum) + "\n" +
-                String.Format("Heat Generated: {0:F2} kW", ThermalPower) + "\n" +
-                "Estimated Core Life: " + FindTimeRemaining(BurnRate);
+            return "";
         }
         
         /// ACTIONS AND EVENTS
@@ -125,7 +123,7 @@ namespace SystemHeat
 		                    success = CalculateConvection(out errorReason, out heatChange);
 		                } else 
 		                {
-		                    errorReason = ResourceName + " deprived!"
+                            errorReason = ResourceName + " deprived!";
 		                }
 		            }
 		            else 
@@ -136,11 +134,11 @@ namespace SystemHeat
 		            if (success)
 		            {
     	                HeatStatus = String.Format("{0:F0}", heatChange);
-    	                heatModule.ConsumeHeat((double)heatRemoved);
+    	                heatModule.ConsumeHeat((double)heatChange);
 		            } else 
 		            {
 		                HeatStatus = errorReason;
-		                Disable();
+		                DisableConvector();
 		            }
 		        } 
 		        
@@ -153,7 +151,7 @@ namespace SystemHeat
 	    //convection amount, in kW
 	    protected bool CalculateConvection(out string err, out float heatChange)
 	    {
-		    
+            heatChange = 0f;
 		    // Convector really only works in atmo
 		    if (Utils.InAtmosphere(vessel))
 		    {
@@ -183,7 +181,7 @@ namespace SystemHeat
                 return false;
             }
             
-            return true;
+      
 
 	    }
     }

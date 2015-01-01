@@ -48,6 +48,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModuleGenericConvector.cs" />
+    <Compile Include="ModuleGenericHeatStorage.cs" />
     <Compile Include="ModuleGenericRadiator.cs" />
     <Compile Include="ModuleSystemHeat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

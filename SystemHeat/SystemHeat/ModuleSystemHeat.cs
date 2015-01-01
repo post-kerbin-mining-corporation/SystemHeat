@@ -187,7 +187,7 @@ namespace SystemHeat
         // Returns the amount of extra 
         public double GenerateHeat(double amt)
         {
-        	return this.GenerateHeat(amt,ResourceFlowMode.ALL_VESSEL )
+            return this.GenerateHeat(amt, ResourceFlowMode.ALL_VESSEL);
         }
         public double GenerateHeat(double amt, ResourceFlowMode mode)
         {
@@ -199,7 +199,7 @@ namespace SystemHeat
         // Returns the shortfall 
         public double ConsumeHeat(double amt)
         {
-        	return this.ConsumeHeat(amt,ResourceFlowMode.ALL_VESSEL )
+            return this.ConsumeHeat(amt, ResourceFlowMode.ALL_VESSEL);
         }
         public double ConsumeHeat(double amt, ResourceFlowMode mode)
         {
@@ -246,18 +246,18 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
 			        {
 				        float amtConvected = CalculatePassiveConvection();
 				        if (amtConvected > 0f)
-				        	this.GenerateHeat((float)amtConvected*TimeWarp.fixedDeltaTime)
+				        	this.GenerateHeat((float)amtConvected*TimeWarp.fixedDeltaTime);
 				        else 
-				        	this.ConsumeHeat((float)amtConvected*TimeWarp.fixedDeltaTime)
+				        	this.ConsumeHeat((float)amtConvected*TimeWarp.fixedDeltaTime);
 			        }
 				        // do radiation
                     if (passiveRadiation)
                     {
                     	float amtRadiated = CalculatePassiveRadiation();
-                    	if (amtRadiated > 0f)
-                    		this.GenerateHeat((float)amtRadiated*TimeWarp.fixedDeltaTime)
-			 else 
-				this.ConsumeHeat((float)amtRadiated*TimeWarp.fixedDeltaTime)
+                        if (amtRadiated > 0f)
+                            this.GenerateHeat((float)amtRadiated * TimeWarp.fixedDeltaTime);
+                        else
+                            this.ConsumeHeat((float)amtRadiated * TimeWarp.fixedDeltaTime);
                     	
                         
                       
@@ -312,7 +312,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
             {
             	// ray origin is 2000 units in the direciton of the sun
             	Vector3 castDirection = FlightGlobals.Bodies[0].position - part.transform.position;
-            	Vector3 castOrigin = (part.transform.position-FlightGlobals.Bodies[0].position).normalized*2000f+part.transform.position
+            	Vector3 castOrigin = (part.transform.position-FlightGlobals.Bodies[0].position).normalized*2000f+part.transform.position;
             	
                 RaycastHit[] cast = Physics.RaycastAll(castOrigin, castDirection, 2500f);
 
@@ -323,7 +323,7 @@ partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
                 }
                 else
                 {
-                	bool hitSelfOnly = true
+                    bool hitSelfOnly = true;
                 	foreach (RaycastHit hit in cast)
                 	{
                 		if (hit.collider.attachedRigidbody != part.Rigidbody)

@@ -57,7 +57,7 @@ namespace SystemHeat
                 {
                     foreach (AnimationState state in heatStates)
                     {
-                        state.normalizedTime = heatModule.PartHeatFraction;
+                        state.normalizedTime = heatModule.PartHeatStoredFraction;
                     }
                 }
             }
