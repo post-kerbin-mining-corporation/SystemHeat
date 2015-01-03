@@ -203,7 +203,7 @@ namespace SystemHeat
         }
         public double ConsumeHeat(double amt, ResourceFlowMode mode)
         {
-        	double actual = part.RequestResource(Utils.HeatResourceName, -amt, mode);
+        	double actual = part.RequestResource(Utils.HeatResourceName, amt, mode);
         	return actual;
         }
   
@@ -234,8 +234,8 @@ namespace SystemHeat
                 //Zenith = Utils.ZenithAngle(part.vessel,part.vessel.mainBody);
                 
                 // Update heat changes
-partHeatDelta = (lastFramePartHeat - PartHeatStored)/TimeWarp.fixedDeltaTime;
-			vesselHeatDelta = (lastFrameVesselHeat - VesselHeatStored)/TimeWarp.fixedDeltaTime;
+                partHeatDelta = (PartHeatStored-lastFramePartHeat) / TimeWarp.fixedDeltaTime;
+			vesselHeatDelta = (VesselHeatStored-lastFrameVesselHeat )/TimeWarp.fixedDeltaTime;
 
                     
 			    if ( frameCounter > updateFrequency)

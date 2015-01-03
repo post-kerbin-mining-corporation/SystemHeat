@@ -47,10 +47,10 @@ namespace SystemHeat
 
         // Animation that plays with increasing heat
         [KSPField(isPersistant = false)]
-        public string HeatAnimation;
+        public string HeatAnimation = "";
         // Transform for animation mixing
         [KSPField(isPersistant = false)]
-        public string HeatTransformName;
+        public string HeatTransformName = "";
 
          // Private variables
         private AnimationState[] heatStates;
@@ -121,11 +121,15 @@ namespace SystemHeat
             if (!TrackSun)
                 base.trackingSpeed = 0f;
 
-            
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+            {
+                part.force_activate();
+            }
         }
 
-        public void Update()
+        public override void OnUpdate()
         {
+            base.OnUpdate();
             // Hide all the solar panel fields
             if  (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
@@ -140,8 +144,9 @@ namespace SystemHeat
                 }
             }
         }
-        public void FixedUpdate()
+        public override void OnFixedUpdate()
         {
+            base.OnFixedUpdate();  
             if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
                 if (heatModule == null)
@@ -153,7 +158,8 @@ namespace SystemHeat
                 {
                     // Heat rejection from panels
                     float availableHeatRejection = 0f;
-    
+
+                    
                     // If an animation name is present, assume deployable
                     if (base.animationName != "")
                     {
@@ -178,14 +184,14 @@ namespace SystemHeat
                     {
                         availableHeatRejection += HeatRadiated;
                     }
-    
+                    
                     // Add the heat via the HeatModule
                     heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
-    
+                    
                     // Update the UI widget
                     HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
                     
-                    if (HeatAnimation != "")
+                    if (HeatAnimation != "" && heatStates != null)
                     {
                         foreach (AnimationState state in heatStates)
                         {
@@ -195,6 +201,7 @@ namespace SystemHeat
                     
                 }
             }
+          
         }
 
     }
