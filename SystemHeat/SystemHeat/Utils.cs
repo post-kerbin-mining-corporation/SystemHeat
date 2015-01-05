@@ -61,8 +61,11 @@ namespace SystemHeat
             return PartResourceLibrary.Instance.GetDefinition(nm).id;
         }
 
+        
 
         //public static FloatCurve 
+
+
 
         // Finds if a vessel is in an atmosphere
 	    public static bool InAtmosphere(Vessel vessel)

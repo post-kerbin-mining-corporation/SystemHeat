@@ -79,22 +79,22 @@ namespace SystemHeat
         // --------------
         
         // debug mostly
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Rad Heat In")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Rad Heat In")]
         public float HeatInputRadiation;
-        
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Rad Heat Out")]
+
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Rad Heat Out")]
         public float HeatOutputRadiation;
 
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Conv Net Heat ")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Conv Net Heat ")]
         public float HeatChangeConvec;
 
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Solar Insolation ")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Solar Insolation ")]
         public float Insolation;
 
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Air Temperature ")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Air Temperature ")]
         public float AirTemp;
 
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Wind Speed")]
+        [KSPField(isPersistant = false, guiActive = false, guiName = "Wind Speed")]
         public float WindSpeed;
 
         //[KSPField(isPersistant = false, guiActive = true, guiName = "Zenith Angle")]
@@ -171,6 +171,28 @@ namespace SystemHeat
                 return curAmount;
             }
         }
+        public float VesselMaxHeatStored
+        {
+
+            get
+            {
+                float maxAmount = 0f;
+                float curAmount = 0f;
+                foreach (Part p in this.vessel.parts)
+                {
+                    foreach (PartResource resource in p.Resources)
+                    {
+                        if (resource.resourceName == Utils.HeatResourceName)
+                        {
+                            maxAmount += (float)resource.maxAmount;
+                            curAmount += (float)resource.amount;
+                        }
+                    }
+
+                }
+                return maxAmount;
+            }
+        }
 
         // VESSEL: get heat balance
         public float VesselHeatBalance
@@ -192,8 +214,22 @@ namespace SystemHeat
         public double GenerateHeat(double amt, ResourceFlowMode mode)
         {
         	// returns actual amount generated
-        	double actual = part.RequestResource(Utils.HeatResourceName, -amt, mode);
-        	return (amt - actual);
+        	double actual = part.RequestResource(Utils.HeatResourceName, -amt*0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
+
+            if (VesselHeatStored >= VesselMaxHeatStored)
+            {
+                return (amt - actual);
+            }
+            else
+            {
+                return 0d;
+            }
+
+        	
         }
         // Consumes heat from the part
         // Returns the shortfall 
@@ -203,7 +239,11 @@ namespace SystemHeat
         }
         public double ConsumeHeat(double amt, ResourceFlowMode mode)
         {
-        	double actual = part.RequestResource(Utils.HeatResourceName, amt, mode);
+            double actual = part.RequestResource(Utils.HeatResourceName, amt*0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, amt * 0.2d, mode);
+            actual += part.RequestResource(Utils.HeatResourceName, amt * 0.2d, mode);
         	return actual;
         }
   

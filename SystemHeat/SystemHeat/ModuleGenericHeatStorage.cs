@@ -33,18 +33,22 @@ namespace SystemHeat
             }
 
             // Set up animation
-            if (heatTransform != null && HeatAnimation != "")
+            if (HeatAnimation != "")
             {
                 heatStates = Utils.SetUpAnimation(HeatAnimation, part);
-                heatTransform = part.FindModelTransform(HeatTransformName);
-            
-                foreach (AnimationState heatState in heatStates)
+
+
+                if (heatTransform != null)
                 {
-                    heatState.AddMixingTransform(heatTransform);
-                    heatState.blendMode = AnimationBlendMode.Blend;
-                    heatState.layer = 15;
-                    heatState.weight = 1.0f;
-                    heatState.enabled = true;
+                    heatTransform = part.FindModelTransform(HeatTransformName);
+                    foreach (AnimationState heatState in heatStates)
+                    {
+                        heatState.AddMixingTransform(heatTransform);
+                        heatState.blendMode = AnimationBlendMode.Blend;
+                        heatState.layer = 15;
+                        heatState.weight = 1.0f;
+                        heatState.enabled = true;
+                    }
                 }
             }
         }
