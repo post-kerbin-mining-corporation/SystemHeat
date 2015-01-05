@@ -40,10 +40,17 @@ namespace SystemHeat
         
         // ANIMATION
       
+        // Start deployed or closed
+        [KSPField(guiName = "Start", guiActiveEditor = true, isPersistant = true)]
+        [UI_Toggle(disabledText = "Closed", enabledText = "Open")]
+        public bool StartDeployed = false;
+        
         // Allow or disallow sun tracking (cosmetic only for now)
         [KSPField(guiName = "Tracking", guiActiveEditor = true, isPersistant = true)]
         [UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
         public bool TrackSun = true;
+        
+        
 
         // Animation that plays with increasing heat
         [KSPField(isPersistant = false)]
@@ -53,6 +60,7 @@ namespace SystemHeat
         public string HeatTransformName = "";
 
          // Private variables
+        private AnimationState[] deployStates;
         private AnimationState[] heatStates;
         private Transform heatTransform;
         private ModuleSystemHeat heatModule;
@@ -102,7 +110,10 @@ namespace SystemHeat
                 return;
             }
 
-            // Set up animation
+            // get the animation state for panel deployment
+            deployStates = Utils.SetUpAnimation(base.animationName, part);
+            
+            // Set up heat animation
             if (heatTransform != null && HeatAnimation != "")
             {
                 heatStates = Utils.SetUpAnimation(HeatAnimation, part);
@@ -144,6 +155,40 @@ namespace SystemHeat
                 }
             }
         }
+        public void LateUpdate()
+        {
+            // If in the editor
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                // If we have a panel animation...
+                if (deployStates != null)
+                {
+                    if (StartDeployed)
+                    {
+                        // Play the animation
+                        foreach (Animation a in deployStates)
+                        {
+                            a.speed = 2f;
+                            a.normalizedTime = 1f;
+                        }
+                        base.panelState = ModuleDeployableSolarPanel.panelStates.EXTENDED;
+                    } else 
+                    {
+                        // Reverse the animation
+                        foreach (Animation a in deployStates)
+                        {
+                            a.speed = -2f;
+                            a.normalizedTime = 0f;
+                        }
+                        base.panelState = ModuleDeployableSolarPanel.panelStates.RETRACTED;
+                    }
+                    //Unbreak the persistance
+                    base.stateString = Enum.GetName(typeof(ModuleDeployableSolarPanel.panelStates),base.panelState);
+                }
+                
+            }
+        }
+        
         public override void OnFixedUpdate()
         {
             base.OnFixedUpdate();  
