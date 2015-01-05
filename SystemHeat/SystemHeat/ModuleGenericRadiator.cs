@@ -166,7 +166,7 @@ namespace SystemHeat
                     if (StartDeployed)
                     {
                         // Play the animation
-                        foreach (Animation a in deployStates)
+                        foreach (AnimationState a in deployStates)
                         {
                             a.speed = 2f;
                             a.normalizedTime = 1f;
@@ -175,7 +175,7 @@ namespace SystemHeat
                     } else 
                     {
                         // Reverse the animation
-                        foreach (Animation a in deployStates)
+                        foreach (AnimationState a in deployStates)
                         {
                             a.speed = -2f;
                             a.normalizedTime = 0f;
@@ -231,7 +231,7 @@ namespace SystemHeat
                     }
                     
                     // Add the heat via the HeatModule
-                    heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
+                    float actualHeat = heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
                     
                     // Update the UI widget
                     HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
@@ -240,7 +240,7 @@ namespace SystemHeat
                     {
                         foreach (AnimationState state in heatStates)
                         {
-                            //state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01(requestedHeatRejection / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
+                            state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01(actualHeat / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
                         }
                     }
                     
