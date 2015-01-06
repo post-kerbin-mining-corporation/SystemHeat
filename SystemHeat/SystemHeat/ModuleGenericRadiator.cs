@@ -154,9 +154,7 @@ namespace SystemHeat
                         fld.guiActive = false;
                 }
             }
-        }
-        public void LateUpdate()
-        {
+                   
             // If in the editor
             if (HighLogic.LoadedSceneIsEditor)
             {
@@ -231,7 +229,7 @@ namespace SystemHeat
                     }
                     
                     // Add the heat via the HeatModule
-                    float actualHeat = heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
+                    float actualHeat = (float)heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
                     
                     // Update the UI widget
                     HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
