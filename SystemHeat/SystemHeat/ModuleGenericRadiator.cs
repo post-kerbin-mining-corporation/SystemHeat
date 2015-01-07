@@ -60,6 +60,7 @@ namespace SystemHeat
         public string HeatTransformName = "";
 
          // Private variables
+        private bool startDeployedLast = false;
         private AnimationState[] deployStates;
         private AnimationState[] heatStates;
         private Transform heatTransform;
@@ -161,27 +162,32 @@ namespace SystemHeat
                 // If we have a panel animation...
                 if (base.animationName != "")
                 {
-                    if (StartDeployed)
+                    if (StartDeployed != startDeployedLast)
                     {
-                        // Play the animation
-                        foreach (AnimationState a in deployStates)
+                        
+                        if (StartDeployed)
                         {
-                            a.speed = 2f;
-                            a.normalizedTime = 1f;
-                        }
-                        base.panelState = ModuleDeployableSolarPanel.panelStates.EXTENDED;
-                    } else 
-                    {
-                        // Reverse the animation
-                        foreach (AnimationState a in deployStates)
+                            // Play the animation
+                            foreach (AnimationState a in deployStates)
+                            {
+                                a.speed = 2f;
+                                a.normalizedTime = 1f;
+                            }
+                            base.panelState = ModuleDeployableSolarPanel.panelStates.EXTENDED;
+                        } else 
                         {
-                            a.speed = -2f;
-                            a.normalizedTime = 0f;
+                            // Reverse the animation
+                            foreach (AnimationState a in deployStates)
+                            {
+                                a.speed = -2f;
+                                a.normalizedTime = 0f;
+                            }
+                            base.panelState = ModuleDeployableSolarPanel.panelStates.RETRACTED;
                         }
-                        base.panelState = ModuleDeployableSolarPanel.panelStates.RETRACTED;
+                        StartDeployed = startDeployedLast;
+                        //Unbreak the persistance
+                        base.stateString = Enum.GetName(typeof(ModuleDeployableSolarPanel.panelStates),base.panelState);
                     }
-                    //Unbreak the persistance
-                    base.stateString = Enum.GetName(typeof(ModuleDeployableSolarPanel.panelStates),base.panelState);
                 }
                 
             }
