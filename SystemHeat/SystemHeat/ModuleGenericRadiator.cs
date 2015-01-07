@@ -132,10 +132,10 @@ namespace SystemHeat
             if (!TrackSun)
                 base.trackingSpeed = 0f;
 
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-            {
+            //if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+            //{
                 part.force_activate();
-            }
+            //}
         }
 
         public override void OnUpdate()
@@ -159,7 +159,7 @@ namespace SystemHeat
             if (HighLogic.LoadedSceneIsEditor)
             {
                 // If we have a panel animation...
-                if (deployStates != null)
+                if (base.animationName != "")
                 {
                     if (StartDeployed)
                     {
