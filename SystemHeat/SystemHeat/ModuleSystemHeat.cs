@@ -213,7 +213,7 @@ namespace SystemHeat
         }
         public double GenerateHeat(double amt, ResourceFlowMode mode)
         {
-            Utils.Log("Trying to add " + amt.ToString());
+            //Utils.Log("Trying to add " + amt.ToString());
         	// returns actual amount generated
         	double actual = part.RequestResource(Utils.HeatResourceName, -amt*0.2d, mode);
             actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
