@@ -256,7 +256,7 @@ namespace SystemHeat
                     {
                         foreach (AnimationState state in heatStates)
                         {
-                            state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01(actualHeat / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
+                            state.normalizedTime = Mathf.MoveTowards(state.normalizedTime, Mathf.Clamp01((actualHeat/TimeWarp.fixedDeltaTime) / availableHeatRejection), 0.1f * TimeWarp.fixedDeltaTime);
                         }
                     }
                     
