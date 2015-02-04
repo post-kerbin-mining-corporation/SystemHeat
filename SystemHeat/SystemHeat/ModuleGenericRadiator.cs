@@ -18,11 +18,11 @@ namespace SystemHeat
         
         // GAMEPLAY
         
-        // Heat radiated when open (kW)
+        // Heat radiated when open (MW)
         [KSPField(isPersistant = false)]
         public float HeatRadiatedExtended;
 
-        // Heat radiated when closed (kW)
+        // Heat radiated when closed (MW)
         [KSPField(isPersistant = false)]
         public float HeatRadiated;
      
@@ -71,7 +71,7 @@ namespace SystemHeat
 
         // Heat Rejection UI note
         [KSPField(isPersistant = false, guiActive = true, guiName = "Current Heat Rejection")]
-        public string HeatRejectionGUI = "0 kW";
+        public string HeatRejectionGUI = "0 MW";
 
         // Toggle radiator
         public void Toggle()
@@ -89,11 +89,11 @@ namespace SystemHeat
 
             if (base.animationName == "")
             {
-               info += String.Format("Heat Radiated: {0:F1} kW", HeatRadiated);
+               info += String.Format("Heat Radiated: {0:F3} MW", HeatRadiated);
             } else 
             {
-                info += String.Format("Heat Radiated (Retracted): {0:F1} kW", HeatRadiated) + "\n" +
-                    String.Format("Heat Radiated (Deployed): {0:F1} kW", HeatRadiatedExtended);
+                info += String.Format("Heat Radiated (Retracted): {0:F3} MW", HeatRadiated) + "\n" +
+                    String.Format("Heat Radiated (Deployed): {0:F3} MW", HeatRadiatedExtended);
             }
 
             return info;
@@ -104,6 +104,7 @@ namespace SystemHeat
             base.OnStart(state);
 
             heatModule = part.gameObject.GetComponent<ModuleSystemHeat>();
+            // startDeployedLast = !StartDeployed;
 
             if (heatModule == null)
             {
@@ -112,7 +113,7 @@ namespace SystemHeat
             }
 
             // get the animation state for panel deployment
-            deployStates = Utils.SetUpAnimation(base.animationName, part);
+            //deployStates = Utils.SetUpAnimation(base.animationName, part);
             
             // Set up heat animation
             if (heatTransform != null && HeatAnimation != "")
@@ -133,10 +134,10 @@ namespace SystemHeat
             if (!TrackSun)
                 base.trackingSpeed = 0f;
 
-            //if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-            //{
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
+            {
                 part.force_activate();
-            //}
+            }
         }
 
         public override void OnUpdate()
@@ -155,43 +156,54 @@ namespace SystemHeat
                         fld.guiActive = false;
                 }
             }
-                   
-            // If in the editor
-            if (HighLogic.LoadedSceneIsEditor)
-            {
-                // If we have a panel animation...
-                if (base.animationName != "")
-                {
-                    if (StartDeployed != startDeployedLast)
-                    {
-                        
-                        if (StartDeployed)
-                        {
-                            // Play the animation
-                            foreach (AnimationState a in deployStates)
-                            {
-                                a.speed = 2f;
-                                a.normalizedTime = 1f;
-                            }
-                            base.panelState = ModuleDeployableSolarPanel.panelStates.EXTENDED;
-                        } else 
-                        {
-                            // Reverse the animation
-                            foreach (AnimationState a in deployStates)
-                            {
-                                a.speed = -2f;
-                                a.normalizedTime = 0f;
-                            }
-                            base.panelState = ModuleDeployableSolarPanel.panelStates.RETRACTED;
-                        }
-                        StartDeployed = startDeployedLast;
-                        //Unbreak the persistance
-                        base.stateString = Enum.GetName(typeof(ModuleDeployableSolarPanel.panelStates),base.panelState);
-                    }
-                }
-                
-            }
         }
+        
+            // Broken, don't know how to fix!
+
+            //base.LateUpdate();
+            // If in the editor
+            //if (HighLogic.LoadedSceneIsEditor)
+            //{
+                
+            //    // If we have a panel animation...
+            //    if (base.animationName != "")
+            //    {
+                    
+            //        if (StartDeployed != startDeployedLast)
+            //        {
+                       
+                        
+            //            if (StartDeployed)
+            //            {
+            //                // Play the animation
+            //                foreach (AnimationState a in deployStates)
+            //                {
+            //                    Debug.Log("X");
+            //                    a.speed = 1f;
+            //                    a.normalizedTime = 1f;
+            //                }
+            //                base.panelState = ModuleDeployableSolarPanel.panelStates.EXTENDED;
+            //            } else 
+            //            {
+                            
+            //                // Reverse the animation
+            //                foreach (AnimationState a in deployStates)
+            //                {
+                               
+            //                    a.speed = -1f;
+            //                    a.normalizedTime = 0f;
+            //                }
+            //                base.panelState = ModuleDeployableSolarPanel.panelStates.RETRACTED;
+            //            }
+            //            StartDeployed = startDeployedLast;
+            //            //Unbreak the persistance
+            //            base.stateString = Enum.GetName(typeof(ModuleDeployableSolarPanel.panelStates),base.panelState);
+            //            GetComponentInChildren<Animation>().Play(base.animationName);
+            //        }
+            //    }
+                
+            //}
+        
         
         public override void OnFixedUpdate()
         {
@@ -208,7 +220,6 @@ namespace SystemHeat
                     // Heat rejection from panels
                     float availableHeatRejection = 0f;
 
-                    
                     // If an animation name is present, assume deployable
                     if (base.animationName != "")
                     {
@@ -224,6 +235,7 @@ namespace SystemHeat
                         }
                         else
                         {
+        
                             // Utils.Log("Open! " + HeatRadiatedExtended.ToString());
                             availableHeatRejection += HeatRadiatedExtended;
                         }
@@ -238,7 +250,7 @@ namespace SystemHeat
                     float actualHeat = (float)heatModule.ConsumeHeat(availableHeatRejection*TimeWarp.fixedDeltaTime);
                     
                     // Update the UI widget
-                    HeatRejectionGUI = String.Format("{0:F1} kW", availableHeatRejection);
+                    HeatRejectionGUI = String.Format("{0:F3} MW", availableHeatRejection);
                     
                     if (HeatAnimation != "" && heatStates != null)
                     {

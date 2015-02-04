@@ -213,6 +213,7 @@ namespace SystemHeat
         }
         public double GenerateHeat(double amt, ResourceFlowMode mode)
         {
+            Utils.Log("Trying to add " + amt.ToString());
         	// returns actual amount generated
         	double actual = part.RequestResource(Utils.HeatResourceName, -amt*0.2d, mode);
             actual += part.RequestResource(Utils.HeatResourceName, -amt * 0.2d, mode);
@@ -313,7 +314,7 @@ namespace SystemHeat
 
 	    }
 
-	    // Calculates net convection balance in kW
+	    // Calculates net convection balance in MW
 	    // Positive means the part is gaining heat
 	    protected float CalculatePassiveConvection()
 	    {
@@ -329,14 +330,14 @@ namespace SystemHeat
                 heatChange = (atmoSpeed / 2f) * (atmoPressure / 2f) * part.mass * convectiveMassScalar * (atmoTemp-convectiveTemp);
 		    }
 
-            HeatChangeConvec = heatChange / 1000f;
+            HeatChangeConvec = heatChange / 1000000f;
 
 
-            return heatChange / 1000f;
+            return heatChange / 1000000f;
 
 	    }
 
-	    // Calculates net radiation balance in kW
+	    // Calculates net radiation balance in MW
 	    // positive means the part is gaining heat
 	    protected float CalculatePassiveRadiation()
 	    {
@@ -344,8 +345,8 @@ namespace SystemHeat
 		    float heatOutput = 0f;
 		    // Wow, this doesn't take into account anything!
 		    // This temperature value should eventually mean something
-		    // result is in kW
-		    heatOutput = part.mass*radiativeMassScalar*Utils.sigma*emissivity*Mathf.Pow(emissiveTemp,4)/1000f;
+		    // result is in MW
+		    heatOutput = part.mass*radiativeMassScalar*Utils.sigma*emissivity*Mathf.Pow(emissiveTemp,4)/1000000f;
 
 		    // Calculate obscurance by terrain and ships
             if (Utils.SolarExposure(part))

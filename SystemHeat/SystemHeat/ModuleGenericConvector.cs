@@ -148,7 +148,7 @@ namespace SystemHeat
 	    }
 	    
 	    // returns whether convection was successful
-	    //convection amount, in kW
+	    //convection amount, in MW
 	    protected bool CalculateConvection(out string err, out float heatChange)
 	    {
             heatChange = 0f;

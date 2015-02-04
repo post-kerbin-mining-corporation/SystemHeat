@@ -83,8 +83,8 @@ namespace SystemHeat
 	    // Radiative calculations
 	    public static float CalculateSolarInput(Vessel vessel)
 	    {
-		    // Divide by 1000 for kW
-		    float baseIrradiance = solarCurve.Evaluate(GetSolarAltitude(vessel))/1000f;
+		    // Divide by 1000000 for MW
+		    float baseIrradiance = solarCurve.Evaluate(GetSolarAltitude(vessel))/1000000f;
 
 		    if (InAtmosphere(vessel))
 		    {
