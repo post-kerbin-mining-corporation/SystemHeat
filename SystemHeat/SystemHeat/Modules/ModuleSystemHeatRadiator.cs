@@ -24,11 +24,30 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve;
 
+    [KSPField(isPersistant = true, guiActive = true, guiName = "Radiator Status")]
+    public string RadiatorStatus = "Sleepy";
+
+    [KSPField(isPersistant = true, guiActive = true, guiName = "Radiator Efficiency")]
+    public string RadiatorEfficiency = "-1%";
+
     protected ModuleSystemHeat heatModule;
 
     public override void Start()
     {
       heatModule = Utils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      if (SystemHeatSettings.DebugPartUI)
+      {
+        Fields["totalSystemTemperature"].guiActive = true;
+        Fields["totalSystemTemperature"].guiActiveEditor = true;
+        Fields["totalSystemFlux"].guiActive = true;
+        Fields["totalSystemFlux"].guiActiveEditor = true;
+        Fields["nominalLoopTemperature"].guiActive = true;
+        Fields["nominalLoopTemperature"].guiActiveEditor = true;
+        Fields["currentLoopTemperature"].guiActive = true;
+        Fields["currentLoopTemperature"].guiActiveEditor = true;
+        Fields["currentLoopFlux"].guiActive = true;
+        Fields["currentLoopFlux"].guiActiveEditor = true;
+      }
     }
 
     public override void FixedUpdate()

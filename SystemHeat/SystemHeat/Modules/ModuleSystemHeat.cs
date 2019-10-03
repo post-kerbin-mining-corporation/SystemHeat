@@ -22,11 +22,11 @@ namespace SystemHeat
 
     //  -- System level data storage --
     // Current total system temperature of all associated modules
-    [KSPField(isPersistant = true)]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Sys Temp")]
     public float totalSystemTemperature = 0f;
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true)]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Sys Flux")]
     public float totalSystemFlux = 0f;
 
     // -- Loop level data storage --
@@ -36,15 +36,15 @@ namespace SystemHeat
     public int currentLoopID = 0;
 
     // Current temperature of the loop
-    [KSPField(isPersistant = true)]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Loop Temp")]
     public float currentLoopTemperature = 0f;
 
     // Current nominal temperature of the loop
-    [KSPField(isPersistant = true, guiActive=false, guiName = "Loop Flux")]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Loop Nom. Temp")]
     public float nominalLoopTemperature = 0f;
 
     // Current net flux of the loop
-    [KSPField(isPersistant = true, guiActive=false, guiName = "Loop Flux")]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Loop Flux")]
     public float currentLoopFlux = 0f;
 
     // Coolant being used (maps to a COOLANTTYPE)
@@ -67,11 +67,25 @@ namespace SystemHeat
     }
     protected Dictionary<string, float> fluxes;
 
-    public override void OnStart(PartModule.StartState state)
+    public  void Start()
     {
       fluxes = new Dictionary<string, float>();
-      if (Settings.DebugMode)
-        Utils.Log("");
+      if (SystemHeatSettings.DebugModules)
+        Utils.Log("[ModuleSystemHeat]: Setup complete");
+
+      if (SystemHeatSettings.DebugPartUI)
+      {
+        Fields["totalSystemTemperature"].guiActive = true;
+        Fields["totalSystemTemperature"].guiActiveEditor = true;
+        Fields["totalSystemFlux"].guiActive = true;
+        Fields["totalSystemFlux"].guiActiveEditor = true;
+        Fields["nominalLoopTemperature"].guiActive = true;
+        Fields["nominalLoopTemperature"].guiActiveEditor = true;
+        Fields["currentLoopTemperature"].guiActive = true;
+        Fields["currentLoopTemperature"].guiActiveEditor = true;
+        Fields["currentLoopFlux"].guiActive = true;
+        Fields["currentLoopFlux"].guiActiveEditor = true;
+      }
     }
 
     /// <summary>
