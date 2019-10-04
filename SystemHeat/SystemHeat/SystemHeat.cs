@@ -18,7 +18,7 @@ namespace SystemHeat
     }
     protected void Start()
     {
-      SytemHeatSettings.Load();
+      SystemHeatSettings.Load();
     }
   }
 
@@ -38,6 +38,9 @@ namespace SystemHeat
 
     // Show debug info in part UIs
     public static bool DebugPartUI = true;
+
+    // The maximum allows change in temperature per simulation time step
+    public static float UIUpdateInterval = 1f;
 
     public static float TimeWarpLimit = 100f;
 
@@ -103,9 +106,9 @@ namespace SystemHeat
       Utils.Log("[Settings]: Finished loading");
     }
 
-    public static GetCoolantType(string name)
+    public static CoolantType GetCoolantType(string name)
     {
-      CoolantData coolant;
+      CoolantType coolant;
       if (CoolantData.TryGetValue(name, out coolant))
         return coolant;
       else
@@ -133,7 +136,7 @@ namespace SystemHeat
     public CoolantType()
     {
       Name = "undefined";
-      Title = "undefined"
+      Title = "undefined";
       Density = 1000f;
       HeatCapacity = 1000f;
     }
@@ -142,14 +145,17 @@ namespace SystemHeat
     {
       Name = node.GetValue("name");
       Title = Localizer.Format(node.GetValue("title"));
+      float density = 1f;
+      float heatCap = 1f;
+      node.TryGetValue("density", ref density);
+      node.TryGetValue("heatCapacity", ref heatCap);
 
-      node.TryGetValue("density", ref Density);
-      node.TryGetValue("heatCapacity", ref HeatCapacity);
-
-      Utils.Log(String.Fomat("Loaded coolant {0}", this.ToString()));
+      Density = density;
+      HeatCapacity = heatCap;
+      Utils.Log(String.Format("Loaded coolant {0}", this.ToString()));
     }
 
-    public string ToString()
+    public override string ToString()
     {
       return String.Format("{0}: Density {1}, heat Capacity {2}", Name, Density, HeatCapacity);
     }

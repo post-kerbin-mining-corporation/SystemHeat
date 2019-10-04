@@ -77,7 +77,7 @@ namespace SystemHeat
       {
         if (simulator == null)
         {
-          simulator = new SystemHeatSimulator(ship.Parts);
+          simulator = new SystemHeatSimulator();
           simulator.Reset(ship.Parts);
         }
         if (simulator != null && forceReset)
@@ -87,7 +87,7 @@ namespace SystemHeat
         {
           simulator.Refresh(ship.Parts);
         }
-        if (SystemHeatSettings.DebugMode)
+        if (SystemHeatSettings.DebugSimulation)
         {
           Utils.Log(String.Format("[SystemHeatEditor]: Dumping simulator: \n{0}", simulator.ToString()));
         }
@@ -95,11 +95,11 @@ namespace SystemHeat
       }
       else
       {
-        if (Settings.DebugMode)
+        if (SystemHeatSettings.DebugSimulation)
         {
           Utils.Log(String.Format("[SystemHeatEditor]: Ship is null"));
         }
-        simulator = new SystemHeatSimulator(new List<Part>());
+        simulator = new SystemHeatSimulator();
       }
     }
 
@@ -113,7 +113,7 @@ namespace SystemHeat
     #region Game Events
     public void onEditorPartDeleted(Part part)
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Part Delete");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
@@ -121,39 +121,39 @@ namespace SystemHeat
     }
     public void onEditorVesselReset()
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Vessel RESET");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(EditorLogic.fetch.ship, true);
     }
     public void onEditorVesselStart()
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Vessel START");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(EditorLogic.fetch.ship, true);
     }
     public void onEditorVesselLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType type)
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Vessel LOAD");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(ship, true);
     }
     public void onEditorVesselPartRemoved(GameEvents.HostTargetAction<Part, Part> p)
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Vessel PART REMOVE");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
-      if (electricalData == null || heatData == null)
+      if (simulator == null)
         InitializeEditorConstruct(EditorLogic.fetch.ship, false);
       else
         RemovePart(p.target);
     }
     public void onEditorVesselModified(ShipConstruct ship)
     {
-      if (Settings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log("[SystemHeatEditor]: Vessel MODIFIED");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(ship, false);

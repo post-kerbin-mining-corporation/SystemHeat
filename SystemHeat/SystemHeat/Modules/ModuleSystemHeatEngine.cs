@@ -49,25 +49,25 @@ namespace SystemHeat
     public override string GetInfo()
     {
         string msg = "";
-        engines = part.GetComponents<ModuleEnginesFX>();
+        ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
 
         msg += String.Format("Thermal Output: {0} kW\nThermal Output Temperature {1} K\nNominal Operating Temperature Range {2}-{3} K",
           systemPower.ToString("F1"),
           systemTemperature.ToString("F1"),
           systemTemperatureRange.x.ToString("F1"),
-          systemTemperatureRange.y.ToString("F1"),
+          systemTemperatureRange.y.ToString("F1")
           );
 
         return msg;
     }
 
-    public override void Start()
+    public void Start()
     {
-      heatModule = Utils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
-      engineModule = Utils.FindNamedComponent<ModuleEngines>(this.part, engineModuleID);
+      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      engineModule = ModuleUtils.FindNamedComponent<ModuleEngines>(this.part, engineModuleID);
     }
 
-    public override void FixedUpdate()
+    public void FixedUpdate()
     {
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -93,21 +93,21 @@ namespace SystemHeat
           engineFraction = engineModule.thrustPercentage / 100f;
 
       systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
-      heatModule.AddFlux(this, systemTemperature, engineFraction* systemPower);
+      heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
 
     }
     protected void GenerateHeatFlight()
     {
       float engineFraction = 0f;
       if (engineModule.isActiveAndEnabled)
-          engineFraction = engine.GetCurrentThrust() / engine.GetMaxThrust();
+          engineFraction = engineModule.GetCurrentThrust() / engineModule.GetMaxThrust();
 
       systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
-      heatModule.AddFlux(this, systemTemperature, engineFraction* systemPower);
+      heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
     }
     protected void UpdateSystemHeatFlight()
     {
-      if (engine.EngineIgnited)
+      if (engineModule.EngineIgnited)
       {
         if (heatModule.currentLoopTemperature > systemTemperatureRange.y)
         {
@@ -115,7 +115,7 @@ namespace SystemHeat
                                                              part.partInfo.title),
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
-          engine.Events["Shutdown"].Invoke();
+          engineModule.Events["Shutdown"].Invoke();
         }
       }
     }

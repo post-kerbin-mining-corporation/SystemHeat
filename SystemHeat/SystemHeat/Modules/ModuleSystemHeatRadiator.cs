@@ -34,7 +34,7 @@ namespace SystemHeat
 
     public override void Start()
     {
-      heatModule = Utils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
       if (SystemHeatSettings.DebugPartUI)
       {
         Fields["totalSystemTemperature"].guiActive = true;
@@ -55,13 +55,13 @@ namespace SystemHeat
       base.FixedUpdate();
       if (heatModule != null)
       {
-        if (base.IsCooling())
+        if (base.IsCooling)
         {
           // We only cool if the loop is too hot.
-          if (module.currentLoopTemperature > module.nominalLoopTemperature)
+          if (heatModule.currentLoopTemperature > heatModule.nominalLoopTemperature)
           {
             // Note a consumption flux is negative
-            float flux = -temperatureCurve.Evaluate(module.currentLoopTemperature);
+            float flux = -temperatureCurve.Evaluate(heatModule.currentLoopTemperature);
             heatModule.AddFlux(moduleID, 0f, flux);
           } else
           {

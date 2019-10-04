@@ -25,7 +25,7 @@ namespace SystemHeat
 
     public List<ModuleSystemHeat> LoopModules
     {
-      get {return modules}
+      get { return modules;  }
     }
 
     protected List<ModuleSystemHeat> modules;
@@ -53,7 +53,7 @@ namespace SystemHeat
 
       // Get loop properties set up
       CoolantName = GetCoolantType();
-      CoolantType = SytemHeatSettings.GetCoolantType(CoolantName);
+      CoolantType = SystemHeatSettings.GetCoolantType(CoolantName);
       Volume = CalculateLoopVolume();
       NominalTemperature = CalculateNominalTemperature();
     }
@@ -62,9 +62,9 @@ namespace SystemHeat
     /// Add a ModuleSystemHeat to this loop. Adding means adding Volume and recalculating the nominal temperature
     /// </summary>
     /// <param name="heatModule">the module to add</param>
-    public AddHeatModule(ModuleSystemHeat heatModule)
+    public void AddHeatModule(ModuleSystemHeat heatModule)
     {
-      volume += heatModule.volume;
+      Volume += heatModule.volume;
       modules.Add(heatModule);
       heatModule.coolantName = CoolantName;
       // Recalculate the nominal temperature
@@ -75,9 +75,9 @@ namespace SystemHeat
     /// Remove a ModuleSystemHeat to this loop. Removing means removing Volume and recalculating the nominal temperature
     /// </summary>
     /// <param name="heatModule">the module to remove</param>
-    public RemoveHeatModule(ModuleSystemHeat heatModule)
+    public void RemoveHeatModule(ModuleSystemHeat heatModule)
     {
-      volume -= heatModule.volume;
+      Volume -= heatModule.volume;
       modules.Remove(heatModule);
       // Recalculate the nominal temperature
       NominalTemperature = CalculateNominalTemperature();
@@ -143,7 +143,7 @@ namespace SystemHeat
       float deltaTemperatureIdeal = NetFlux / (Volume * CoolantType.Density * CoolantType.HeatCapacity);
 
       // Flux has be be higher than a tolerance threshold in order to do things
-      if (absFlux > SytemHeatSettings.AbsFluxThreshold)
+      if (absFlux > SystemHeatSettings.AbsFluxThreshold)
       {
         // If flux is positive
         if (currentNetFlux > 0f)

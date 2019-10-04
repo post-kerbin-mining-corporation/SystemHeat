@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace DynamicBatteryStorage.UI
+namespace SystemHeat.UI
 {
   public static class UIUtils
   {

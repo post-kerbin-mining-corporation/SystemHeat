@@ -49,13 +49,13 @@ namespace SystemHeat.UI
         if (heatVessel != null)
           simulator = heatVessel.Simulator;
         partCount = activeVessel.Parts.Count;
-        if (SystemHeatSettings.DebugUIMode)
+        if (SystemHeatSettings.DebugUI)
           Utils.Log("[Debug UI]: Located Flight data");
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
         simulator = SystemHeatEditor.Instance.Simulator;
-        if (Settings.DebugUIMode)
+        if (SystemHeatSettings.DebugUI)
           Utils.Log("[Debug UI]: Located Editor data");
       }
     }
@@ -191,7 +191,7 @@ namespace SystemHeat.UI
 
     void ResetAppLauncher()
     {
-      if (Settings.DebugUIMode)
+      if (SystemHeatSettings.DebugUI)
         Utils.Log("[UI]: Reset App Launcher");
       FindData();
       if (stockToolbarButton == null)

@@ -6,26 +6,27 @@ using UnityEngine;
 
 namespace SystemHeat
 {
-  class SystemHeatSimulator
+  public class SystemHeatSimulator
   {
     public Dictionary<int,HeatLoop> HeatLoops { get; private set;}
 
     public SystemHeatSimulator()
     {
     }
-
-    public void Reset(List<Part> parts)
+    public void Refresh(List<Part> parts)
     {
 
-      if (SystemHeatSettings.DebugMode)
-        Utils.Log(String.Format("Building heat loops from {0} ModuleSystemHeat modules", heatModules.Count.ToString()));
-
+    }
+    public void Reset(List<Part> parts)
+    {
       HeatLoops = new Dictionary<int, HeatLoop>();
       List<ModuleSystemHeat> heatModules = new List<ModuleSystemHeat>();
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("Building heat loops from {0} ModuleSystemHeat modules", heatModules.Count.ToString()));
 
       for (int i = parts.Count - 1; i >= 0; --i)
       {
-        Part part = vessel.Parts[i];
+        Part part = parts[i];
         heatModules.AddRange(part.GetComponents<ModuleSystemHeat>().ToList());
       }
 
@@ -77,13 +78,13 @@ namespace SystemHeat
       // Build a new heat loop as needed
       if (!HeatLoops.ContainsKey(loopID))
       {
-        HeatLoops.Add(loopID, new HeatLoop(loopID))
-        if (SystemHeatSettings.DebugMode)
-          Utils.Log(String.Format("Created new Heat Loop {1}", loopID));
+        HeatLoops.Add(loopID, new HeatLoop(loopID));
+        if (SystemHeatSettings.DebugSimulation)
+          Utils.Log(String.Format("Created new Heat Loop {0}", loopID));
       }
       HeatLoops[loopID].AddHeatModule(module);
 
-      if (SystemHeatSettings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("Added module {0} to Heat Loop {1}", module.moduleID, loopID));
     }
 
@@ -118,13 +119,13 @@ namespace SystemHeat
     {
       HeatLoops[loopID].RemoveHeatModule(module);
 
-      if (SystemHeatSettings.DebugMode)
+      if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("Removed module {0} from Heat Loop {1}", module.moduleID, loopID));
 
       if (HeatLoops[loopID].LoopModules.Count == 0)
       {
         HeatLoops.Remove(loopID);
-        if (SystemHeatSettings.DebugMode)
+        if (SystemHeatSettings.DebugSimulation)
           Utils.Log(String.Format("Heat Loop {0} has no more members, removing", loopID));
       }
     }

@@ -14,11 +14,11 @@ namespace SystemHeat
     {
       Debug.Log(String.Format("[{0}]: {1}", logTag, toLog));
     }
-    public static void Warn(string toLog)
+    public static void LogWarning(string toLog)
     {
       Debug.LogWarning(String.Format("[{0}]: {1}", logTag, toLog));
     }
-    public static void Error(string toLog)
+    public static void LogError(string toLog)
     {
       Debug.LogError(String.Format("[{0}]: {1}", logTag, toLog));
     }

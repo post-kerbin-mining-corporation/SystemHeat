@@ -21,12 +21,14 @@ namespace SystemHeat
 
     #region PrivateVariables
     SystemHeatSimulator simulator;
+    bool vesselLoaded = false;
+    bool dataReady = false;
     #endregion
 
     protected override void OnStart()
     {
       base.OnStart();
-      simulator = new SystemHeatSimulator()
+      simulator = new SystemHeatSimulator();
 
       // These events need to trigger a refresh
       GameEvents.onVesselGoOnRails.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
@@ -64,16 +66,16 @@ namespace SystemHeat
     /// </summary>
     protected void RefreshVesselData(Vessel eventVessel)
     {
-      if (SystemHeatSettings.DebugMode)
-        Utils.Log(String.Format("[{0}]: Refreshing VesselData from Vessel event", this.GetType().Name));
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from Vessel event"));
     }
     /// <summary>
     /// Referesh the data, given a ConfigNode event
     /// </summary>
     protected void RefreshVesselData(ConfigNode node)
     {
-      if (SystemHeatSettings.DebugMode)
-        Utils.Log(String.Format("[{0}]: Refreshing VesselData from save node event", this.GetType().Name));
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name));
     }
 
 
@@ -85,8 +87,8 @@ namespace SystemHeat
       if (vessel == null || vessel.Parts == null)
         return;
 
-      if (SystemHeatSettings.DebugMode)
-        Utils.Log(String.Format("Resetting Simulation for {0}", vessel.name));
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("[SystemHeatVessel]: Resetting Simulation for {0}", vessel.name));
 
       if (simulator != null)
         simulator.Reset(vessel.Parts);

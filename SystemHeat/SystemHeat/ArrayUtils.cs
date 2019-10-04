@@ -16,9 +16,9 @@ namespace SystemHeat
       z = new float[values.Length];
       for (int i = 0; i < values.Length; i++)
       {
-        x = values[i][0];
-        y = values[i][1];
-        z = values[i][2];
+        x[i] = values[i][0];
+        y[i] = values[i][1];
+        z[i] = values[i][2];
       }
     }
   }

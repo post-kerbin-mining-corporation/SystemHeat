@@ -73,7 +73,7 @@ namespace SystemHeat.UI
 
     public static void SetVisible(bool visible)
     {
-      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility set to {0}", visible))
+      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility set to {0}", visible));
       Drawn = visible;
     }
 

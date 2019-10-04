@@ -14,7 +14,7 @@ namespace SystemHeat
   {
     // Unique name of the module on a part
     [KSPField(isPersistant = false)]
-    public string moduleID = heater;
+    public string moduleID = "heatModule";
 
     // Volume of coolant provided by this system in L
     [KSPField(isPersistant = false)]

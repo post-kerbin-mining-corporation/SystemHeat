@@ -45,7 +45,7 @@ namespace SystemHeat.UI
       CreateIconList();
       CreateStyleList();
       CreateColorList();
-      if (Settings.DebugUIMode)
+      if (SystemHeatSettings.DebugUI)
         Utils.Log("[UI]: Loaded Assets");
     }
 

@@ -6,7 +6,7 @@ using UnityEngine;
 using KSP.UI.Screens;
 using KSP.Localization;
 
-namespace DynamicBatteryStorage.UI
+namespace SystemHeat.UI
 {
 
     public class UIWidget

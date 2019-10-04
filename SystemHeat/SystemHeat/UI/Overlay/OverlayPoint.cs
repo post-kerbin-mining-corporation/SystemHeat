@@ -10,7 +10,7 @@ namespace SystemHeat.UI
   /// <summary>
   /// Represents a single point on the loop overlay
   /// </summary>
-  class OverlayPoint
+  public class OverlayPoint
   {
     public Vector3 coords { get; set; }
     public Vector3 coordsProjected { get; set; }
@@ -29,21 +29,21 @@ namespace SystemHeat.UI
     {
       Vector3[] coordsList = new Vector3[1] ;
       coordsList[0] = coords;
-      return coords;
+      return coordsList;
     }
   }
 
   /// <summary>
   /// Represents a single influx point on the loop overlay
   /// </summary>
-  class OverlaySystemPoint: OverlayPoint
+  public class OverlaySystemPoint : OverlayPoint
   {
 
     protected Vector3[] bounds;
     protected int closestBounds;
     protected float projectedDepth;
 
-    public OverlaySystemPoint(Vector3 coordinates, float depth, float[] bounds)
+    public OverlaySystemPoint(Vector3 coordinates, float depth, float[] bounds):base(coordinates, depth)
     {
       coords = coordinates;
       closestBounds = FindNearestBounds(bounds, coords);
@@ -68,7 +68,7 @@ namespace SystemHeat.UI
     /// <summary>
     /// Gets the drawing coordinates for the point with a padding
     /// </summary>
-    public override Vector3 GetDrawingCoords(float padding)
+    public override Vector3[] GetDrawingCoords(float padding)
     {
       Vector3[] coordsList = new Vector3[4];
 
@@ -98,7 +98,7 @@ namespace SystemHeat.UI
     /// </summary>
     protected int FindNearestBounds(float[] bounds, Vector3 point)
     {
-      Vector3[] boundsDelta = {Mathf.Abs(point[0] - bounds[0]), Mathf.Abs(point[0] - bounds[1]), Mathf.Abs(point[1] - bounds[2]), Mathf.Abs(point[1] - bounds[3])};
+      float[] boundsDelta = {Mathf.Abs(point[0] - bounds[0]), Mathf.Abs(point[0] - bounds[1]), Mathf.Abs(point[1] - bounds[2]), Mathf.Abs(point[1] - bounds[3])};
       int idx = 0;
       float counter = 999999f;
       for (int i =0 ; i < boundsDelta.Length; i++)

@@ -25,10 +25,12 @@ namespace SystemHeat.UI
 
     public void Draw()
     {
-      if (dataHost.Simulator.Loops != null) ]]]
-      for (int i = 0; i < dataHost.Simulator.Loops.Count; i++)
+      if (dataHost.Simulator.HeatLoops != null)
       {
-        DrawLoop(dataHost.Simulator.Loops[i]);
+        for (int i = 0; i < dataHost.Simulator.HeatLoops.Count; i++)
+        {
+          DrawLoop(dataHost.Simulator.HeatLoops[i]);
+        }
       }
     }
 
