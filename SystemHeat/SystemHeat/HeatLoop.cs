@@ -23,6 +23,9 @@ namespace SystemHeat
     public string CoolantName { get; set; }
     public CoolantType CoolantType;
 
+    public float timeStep { get; set; }
+    public int numSteps { get; set; }
+
     public List<ModuleSystemHeat> LoopModules
     {
       get { return modules;  }
@@ -38,6 +41,7 @@ namespace SystemHeat
     {
       ID = id;
       modules = new List<ModuleSystemHeat>();
+      CoolantType = SystemHeatSettings.GetCoolantType("");
     }
 
     /// <summary>
@@ -90,8 +94,9 @@ namespace SystemHeat
     /// <param name="fixedDeltaTime">the current fixed delta time</param>
     public void Simulate(float fixedDeltaTime)
     {
-      int numSteps = CalculateStepCount(fixedDeltaTime);
-      float timeStep = fixedDeltaTime/(float)numSteps;
+      NominalTemperature = CalculateNominalTemperature();
+      numSteps = CalculateStepCount(fixedDeltaTime);
+      timeStep = fixedDeltaTime/(float)numSteps;
 
       for (int i = 0; i < numSteps; i++)
       {
@@ -108,7 +113,7 @@ namespace SystemHeat
     protected int CalculateStepCount(float fixedDeltaTime)
     {
       // Calculate the approximate predicted change in temp for the time step and the heat parameters
-      float predictedDeltaTPerStep = CalculateNetFlux() / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * fixedDeltaTime;
+      float predictedDeltaTPerStep = CalculateNetFlux()*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * fixedDeltaTime;
 
       return Mathf.Clamp((int)(predictedDeltaTPerStep/SystemHeatSettings.MaxDeltaTPerStep), SystemHeatSettings.MinSteps, SystemHeatSettings.MaxSteps);
     }
@@ -131,8 +136,8 @@ namespace SystemHeat
     /// 2) calculates the temperature change of the loop
     /// 3) propagates all new values to the simulation members
     /// </summary>
-    /// <param name="timeStep">the time step</param>
-    void SimulateIteration(float timeStep)
+    /// <param name="simTimStep">the time step</param>
+    void SimulateIteration(float simTimStep)
     {
       // Calculate the loop net flux
       float currentNetFlux = CalculateNetFlux();
@@ -140,7 +145,7 @@ namespace SystemHeat
       NetFlux = currentNetFlux;
 
       // Determine the ideal change in temperature
-      float deltaTemperatureIdeal = NetFlux / (Volume * CoolantType.Density * CoolantType.HeatCapacity);
+      float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimStep;
 
       // Flux has be be higher than a tolerance threshold in order to do things
       if (absFlux > SystemHeatSettings.AbsFluxThreshold)
@@ -159,6 +164,8 @@ namespace SystemHeat
           // If current temp is lower than nominal temp
           if (Temperature < NominalTemperature)
           {
+            if (deltaTemperatureIdeal <= 0)
+              deltaTemperatureIdeal = 1f;
             Temperature += deltaTemperatureIdeal;
           }
 
@@ -168,11 +175,25 @@ namespace SystemHeat
           // Unlikely case of perfectly stable flux
         }
       }
+      // Ensure temperature doesn't go super high or low
+      Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), 32000f);
       // Propagate to all modules
       for (int i=0; i< modules.Count; i++)
       {
         modules[i].UpdateSimulationValues(NominalTemperature, Temperature, NetFlux);
       }
+    }
+
+    protected float GetEnvironmentTemperature()
+    {
+      if (HighLogic.LoadedSceneIsEditor)
+        return SystemHeatSettings.SpaceTemperature;
+
+      if (modules.Count > 0 && modules[0] != null)
+      {
+        return (float)modules[0].part.vessel.externalTemperature;
+      }
+      return SystemHeatSettings.SpaceTemperature;
     }
 
     /// <summary>
@@ -203,11 +224,12 @@ namespace SystemHeat
     {
       float temp = 0f;
       float totalPower = 0.001f;
+
       for (int i=0; i< modules.Count; i++)
       {
         if (modules[i].totalSystemFlux > 0f)
         {
-          temp += modules[i].totalSystemTemperature * modules[i].totalSystemFlux;
+          temp += modules[i].systemNominalTemperature * modules[i].totalSystemFlux;
           totalPower += modules[i].totalSystemFlux;
         }
       }

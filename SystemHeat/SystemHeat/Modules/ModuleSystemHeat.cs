@@ -16,6 +16,10 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public string moduleID = "heatModule";
 
+    // Name of the icon to use
+    [KSPField(isPersistant = false)]
+    public string iconName = "Icon_Gears";
+
     // Volume of coolant provided by this system in L
     [KSPField(isPersistant = false)]
     public float volume = 10f;
@@ -29,10 +33,12 @@ namespace SystemHeat
     [KSPField(isPersistant = true, guiActive = false, guiName = "Sys Flux")]
     public float totalSystemFlux = 0f;
 
+    public float systemNominalTemperature = 0f;
+
     // -- Loop level data storage --
     // Loop that this system is part of
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Fuel Mode")]
-    [UI_ChooseOption(affectSymCounterparts = UI_Scene.None, scene = UI_Scene.All, suppressEditorShipModified = true)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Loop ID")]
+    [UI_ChooseOption(affectSymCounterparts = UI_Scene.Editor, options = new[] { "None" }, scene = UI_Scene.All, suppressEditorShipModified = false)]
     public int currentLoopID = 0;
 
     // Current temperature of the loop
@@ -49,7 +55,7 @@ namespace SystemHeat
 
     // Coolant being used (maps to a COOLANTTYPE)
     [KSPField(isPersistant = false)]
-    public string coolantName = "";
+    public string coolantName = "default";
 
     public int LoopID {
       get {return currentLoopID; }
@@ -65,13 +71,40 @@ namespace SystemHeat
       get {return currentLoopFlux; }
       set {currentLoopFlux = value; }
     }
-    protected Dictionary<string, float> fluxes;
 
-    public  void Start()
+    public string CurrentStatusString
     {
+      get
+      {
+        if (totalSystemFlux >= 0f)
+        {
+          return $"Temperature Output: {systemNominalTemperature} K \nHeat Output: {totalSystemFlux} kW";
+        }
+        else
+        {
+          return $"Maximum Temperature {systemNominalTemperature} K \nHeat Consumed {totalSystemFlux} kW";
+        }
+      }
+    }
+
+    protected Dictionary<string, float> fluxes;
+    protected Dictionary<string, float> temperatures;
+    protected List<int> loopIDs;
+
+    public void Start()
+    {
+      loopIDs = new List<int>();
+      for (int i = 0; i < SystemHeatSettings.maxLoopCount; i++)
+        loopIDs.Add(i);
+
       fluxes = new Dictionary<string, float>();
+      temperatures = new Dictionary<string, float>();
+      SetupUI();
+
       if (SystemHeatSettings.DebugModules)
         Utils.Log("[ModuleSystemHeat]: Setup complete");
+
+
 
       if (SystemHeatSettings.DebugPartUI)
       {
@@ -88,6 +121,20 @@ namespace SystemHeat
       }
     }
 
+    void SetupUI()
+    {
+      BaseField chooseField = Fields["currentLoopID"];
+      UI_ChooseOption chooseOption = HighLogic.LoadedSceneIsFlight ? chooseField.uiControlFlight as UI_ChooseOption : chooseField.uiControlEditor as UI_ChooseOption;
+      chooseOption.options = new string[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+      chooseOption.onFieldChanged = ChangeLoop;
+     
+    }
+
+    private void ChangeLoop(BaseField field, object oldFieldValueObj)
+    {
+      //LoopID = currentLoopID;
+    }
+
     /// <summary>
     /// Add heat flux at a given temperature to system
     /// </summary>
@@ -97,23 +144,33 @@ namespace SystemHeat
     public void AddFlux(string id, float sourceTemperature, float flux)
     {
       fluxes[id] = flux;
-      totalSystemFlux = fluxes.Sum(x => x.Value);
 
-      if (sourceTemperature > 0f)
+      int count = 0;
+      if (flux > 0f)
       {
-        totalSystemTemperature = totalSystemTemperature + (sourceTemperature - totalSystemTemperature);
+        count++;
+        temperatures[id] = sourceTemperature;
       }
+      else
+      {
+        temperatures[id] = 0f;
+      }
+
+      totalSystemFlux = fluxes.Sum(x => x.Value);
+      totalSystemTemperature = temperatures.Sum(x => x.Value);
+
+      systemNominalTemperature = totalSystemTemperature / count;
     }
+
     public void UpdateSimulationValues(float nominalTemp, float currentTemp, float currentNetFlux)
     {
       nominalLoopTemperature = nominalTemp;
       currentLoopTemperature = currentTemp;
       currentLoopFlux = currentNetFlux;
     }
+
     protected void FixedUpdate()
     {
-      // Collect the total system flux at the end of an update
-
     }
   }
 }

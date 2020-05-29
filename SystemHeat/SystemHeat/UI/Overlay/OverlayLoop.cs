@@ -18,6 +18,7 @@ namespace SystemHeat.UI
     protected Transform root;
     protected OverlayLine overlayLine;
     protected List<OverlayPoint> overlayPoints;
+    protected List<OverlayPanel> overlaPanels;
     protected HeatLoop heatLoop;
 
     public OverlayLoop(HeatLoop loop, Transform overlayRoot, bool startVisible)
@@ -25,34 +26,49 @@ namespace SystemHeat.UI
       root = overlayRoot;
       heatLoop = loop;
       overlayLine = new OverlayLine(root, loop);
+
       SetVisible(startVisible);
     }
 
-    public void Update()
+    public void Update(HeatLoop loop)
     {
-      GenerateLoopOverlayPoints();
-      UpdatePositions();
+      heatLoop = loop;
+      if (!Drawn)
+        SetVisible(true);
+
+      GenerateLinePoints();
+      UpdateLinePositions();
       UpdateLoopProperties();
     }
+
+
     protected void UpdateLoopProperties()
     {
       overlayLine.UpdateGlow(heatLoop.Temperature, heatLoop.NominalTemperature);
     }
-    protected void UpdatePositions()
+
+
+    protected void UpdateLinePositions()
     {
       List<Vector3[]> positions = overlayPoints.Select(x => x.GetDrawingCoords(SystemHeatSettings.OverlayPadding)).ToList();
-      overlayLine.UpdatePositions(positions.SelectMany(i => i).ToArray());
+      List<Vector3> pos3d = positions.SelectMany(i => i).ToList();
+      pos3d.Add(pos3d[0]);
+
+      overlayLine.UpdatePositions(pos3d);
+      overlayLine.Draw();
     }
 
-    public void GenerateLoopOverlayPoints()
+
+
+    public void GenerateLinePoints()
     {
       // Collect positions of all heat modules
       Vector3[] systemCoords = new Vector3[heatLoop.LoopModules.Count];
-      for (int i=0; i < heatLoop.LoopModules.Count; i++)
+      for (int i = 0; i < heatLoop.LoopModules.Count; i++)
       {
         systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
       }
-
+      
       float[] x0 = null;
       float[] y0 = null;
       float[] z0 = null;
@@ -64,24 +80,24 @@ namespace SystemHeat.UI
       float padding = SystemHeatSettings.OverlayPadding;
       float padding_bounds = SystemHeatSettings.OverlayBoundsPadding;
 
-      float[] bounds = {x0.Min()-padding_bounds, x0.Max()+padding_bounds, y0.Min()-padding_bounds, y0.Max()+padding_bounds};
-      Vector3[] boundsCoords = {new Vector3(bounds[0], bounds[2], origin), new Vector3(bounds[0], bounds[3], origin),new Vector3(bounds[1], bounds[2], origin), new Vector3(bounds[1], bounds[3], origin)};
+      float[] bounds = { x0.Min() - padding_bounds, x0.Max() + padding_bounds, y0.Min() - padding_bounds, y0.Max() + padding_bounds };
+      Vector3[] boundsCoords = { new Vector3(bounds[0], bounds[2], origin), new Vector3(bounds[0], bounds[3], origin), new Vector3(bounds[1], bounds[2], origin), new Vector3(bounds[1], bounds[3], origin) };
 
       List<OverlayPoint> systemPoints = new List<OverlayPoint>();
-      for (int i=0; i < systemCoords.Length; i++)
+      for (int i = 0; i < systemCoords.Length; i++)
       {
-        systemPoints.Add(new OverlaySystemPoint(systemCoords[i], origin, bounds));
+        systemPoints.Add(new OverlaySystemPoint(systemCoords[i], 0f, bounds));
       }
-      for (int i=0; i < boundsCoords.Length; i++)
+      for (int i = 0; i < boundsCoords.Length; i++)
       {
-        systemPoints.Add(new OverlayPoint(boundsCoords[i], origin));
+        systemPoints.Add(new OverlayPoint(boundsCoords[i], 0f));
       }
 
       Vector3 projectedMean = new Vector3(systemPoints.Average(x => x.coordsProjected[0]),
         systemPoints.Average(x => x.coordsProjected[1]), origin);
 
       // Sort by angles
-      for (int i=0; i < systemPoints.Count; i++)
+      for (int i = 0; i < systemPoints.Count; i++)
       {
         Vector2 upVector = new Vector2(0, 1);
         Vector2 pointVector = new Vector2(systemPoints[i].coordsProjected.x - projectedMean.x, systemPoints[i].coordsProjected.y - projectedMean.y);
@@ -89,6 +105,7 @@ namespace SystemHeat.UI
       }
       overlayPoints = systemPoints.OrderBy(p => p.sortingAngle).ToList();
     }
+
     protected float AngleBetween(Vector2 up, Vector2 fwd)
     {
       float ang1 = Mathf.Atan2(up.x, up.y);
@@ -107,76 +124,5 @@ namespace SystemHeat.UI
     }
   }
 
-  public class OverlayLine
-  {
-
-    protected GameObject lineObject;
-    protected GameObject glowObject;
-
-    protected LineRenderer glowRenderer;
-    protected LineRenderer lineRenderer;
-
-    public OverlayLine(Transform parent, HeatLoop loop)
-    {
-      lineObject = new GameObject(String.Format("SHOverlay_LineRenderer_{0}", loop.ID));
-      lineObject.transform.SetParent(parent, true);
-      lineRenderer = lineObject.AddComponent<LineRenderer>();
-
-      // Set up the material
-      lineRenderer.material = new Material(Shader.Find(SystemHeatSettings.OverlayLineShader));
-      lineRenderer.material.color = Color.white;
-      lineRenderer.material.renderQueue = 3000;
-      lineObject.layer = 0;
-
-      lineRenderer.positionCount = 2;
-      lineRenderer.startWidth = SystemHeatSettings.OverlayBaseLineWidth;
-      lineRenderer.endWidth = SystemHeatSettings.OverlayBaseLineWidth;
-
-      glowRenderer = glowObject.AddComponent<LineRenderer>();
-      glowObject = new GameObject(String.Format("SHOverlay_GlowRenderer_{0}", loop.ID));
-      glowObject.transform.SetParent(parent, true);
-
-      // Set up the material
-      glowRenderer.material = new Material(Shader.Find(SystemHeatSettings.OverlayGlowShader));
-      glowRenderer.material.color = Color.white;
-      glowRenderer.material.renderQueue = 3000;
-      glowObject.layer = 0;
-      
-      glowRenderer.positionCount = 2;
-      glowRenderer.startWidth = SystemHeatSettings.OverlayBaseGlowWidth;
-      glowRenderer.endWidth = SystemHeatSettings.OverlayBaseGlowWidth;
-
-    }
-    public void UpdatePositions(Vector3[] positions)
-    {
-      glowRenderer.positionCount = positions.Length;
-      lineRenderer.positionCount = positions.Length;
-    }
-    public void UpdateGlow(float currentTemp, float nominalTemp)
-    {
-      if (currentTemp <= nominalTemp)
-      {
-        glowRenderer.startColor = Color.green;
-        glowRenderer.endColor = Color.green;
-      }
-      else
-      {
-        glowRenderer.startColor  = Color.Lerp(Color.green, Color.red, (currentTemp - nominalTemp) / 1000f);
-        glowRenderer.endColor = Color.Lerp(Color.green, Color.red, (currentTemp - nominalTemp) / 1000f);
-      }
-    }
-
-    public void  SetVisible(bool visible)
-    {
-      glowRenderer.enabled = visible;
-      lineRenderer.enabled = visible;
-    }
-    public void Destroy()
-    {
-      GameObject.Destroy(glowObject);
-      GameObject.Destroy(lineObject);
-    }
-
-
-  }
+  
 }

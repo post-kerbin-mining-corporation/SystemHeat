@@ -39,6 +39,9 @@ namespace SystemHeat
     // Show debug info in part UIs
     public static bool DebugPartUI = true;
 
+    public static float SpaceTemperature = 2.7f;
+    public static int maxLoopCount = 20;
+
     // The maximum allows change in temperature per simulation time step
     public static float UIUpdateInterval = 1f;
 
@@ -52,24 +55,36 @@ namespace SystemHeat
     // The maximum number of time steps to take in a simulation frame
     public static int MaxSteps = 25;
     // The standard timestep in the editor
-    public static float SimulationRateEditor = 1f;
-
+    public static float SimulationRateEditor = 50f;
+    
     // Loop flux tolerance
     public static float AbsFluxThreshold = 0.5f;
 
 
-    public static float OverlayBaseLineWidth;
-    public static string OverlayLineShader;
-
-    public static float OverlayBaseGlowWidth;
-    public static string OverlayGlowShader;
-
-    public static float OverlayPadding;
-    public static float OverlayBoundsPadding;
-
+    public static float OverlayBaseLineWidth = 2f;
+    
+    public static float OverlayPadding = 1f;
+    public static float OverlayBoundsPadding = 1f;
 
     public static Dictionary<string, CoolantType> CoolantData;
 
+    public static Dictionary<int, Color> ColorData = new Dictionary<int, Color> {
+      { 0, XKCDColors.Algae},
+      { 1, XKCDColors.BlueGrey},
+      { 2, XKCDColors.Reddish},
+      { 3, XKCDColors.YellowBrown},
+      { 4, XKCDColors.GrassGreen},
+      { 5, XKCDColors.PurpleGrey},
+      { 6, XKCDColors.RustRed},
+      { 7, XKCDColors.Saffron},
+      { 8, XKCDColors.Sage},
+      { 9, XKCDColors.LightIndigo}
+    };
+
+    public static Color GetLoopColor(int id)
+    {
+      return SystemHeatSettings.ColorData[Mathf.Clamp(id, 0, 9)];
+    }
     /// <summary>
     /// Load data from configuration
     /// </summary>
@@ -82,7 +97,7 @@ namespace SystemHeat
       {
         Utils.Log("[Settings]: Located settings file");
 
-        settingsNode = GameDatabase.Instance.GetConfigNode("SystemHeat/SYSTEMHEAT");
+        settingsNode = GameDatabase.Instance.GetConfigNodes("SYSTEMHEAT")[0];
 
         settingsNode.TryGetValue("MinimumWarpFactor", ref TimeWarpLimit);
       }
@@ -110,10 +125,14 @@ namespace SystemHeat
     {
       CoolantType coolant;
       if (CoolantData.TryGetValue(name, out coolant))
+      {
+
+        Utils.Log(String.Format("[Settings]: Using coolant {0}", coolant.Name));
         return coolant;
+      }
       else
       {
-        Utils.LogWarning(String.Format("[Settings] {0} not found, using defaults", name));
+        Utils.LogWarning(String.Format("[Settings] {0} not found, using default coolant", name));
         return new CoolantType();
       }
     }
@@ -152,7 +171,7 @@ namespace SystemHeat
 
       Density = density;
       HeatCapacity = heatCap;
-      Utils.Log(String.Format("Loaded coolant {0}", this.ToString()));
+      Utils.Log(String.Format("[Settings]: Loaded coolant {0}", this.ToString()));
     }
 
     public override string ToString()

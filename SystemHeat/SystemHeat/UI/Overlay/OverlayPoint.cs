@@ -31,6 +31,16 @@ namespace SystemHeat.UI
       coordsList[0] = coords;
       return coordsList;
     }
+
+    /// <summary>
+    /// Gets the drawing coordinates for the point with a padding
+    /// </summary>
+    public virtual Vector2[] GetDrawingCoords2D(float padding)
+    {
+      Vector2[] coordsList = new Vector2[1];
+      coordsList[0] = new Vector2(coords.x, coords.y);
+      return coordsList;
+    }
   }
 
   /// <summary>
@@ -77,18 +87,43 @@ namespace SystemHeat.UI
 
       if (closestBounds < 2)
       {
-        coordsList[0] = coordsProjected + new Vector3(0, padding, 0);
-        coordsList[3] = coordsProjected + new Vector3(0, -padding, 0);
+        coordsList[3] = coordsProjected + new Vector3(0, padding, 0);
+        coordsList[0] = coordsProjected + new Vector3(0, -padding, 0);
 
-        coordsList[1] = coords + new Vector3(0, padding, 0);
-        coordsList[2] = coords + new Vector3(0, -padding, 0);
+        coordsList[2] = coords + new Vector3(0, padding, 0);
+        coordsList[1] = coords + new Vector3(0, -padding, 0);
       } else
       {
-        coordsList[0] = coordsProjected + new Vector3(padding, 0, 0);
-        coordsList[3] = coordsProjected + new Vector3(-padding, 0, 0);
+        coordsList[3] = coordsProjected + new Vector3(padding, 0, 0);
+        coordsList[0] = coordsProjected + new Vector3(-padding, 0, 0);
 
-        coordsList[1] = coords + new Vector3(padding, 0, 0);
-        coordsList[2] = coords +  new Vector3(-padding, 0, 0);
+        coordsList[2] = coords + new Vector3(padding, 0, 0);
+        coordsList[1] = coords +  new Vector3(-padding, 0, 0);
+      }
+      return coordsList;
+    }
+    public override Vector2[] GetDrawingCoords2D(float padding)
+    {
+      Vector2[] coordsList = new Vector2[4];
+
+      if (closestBounds == 0 || closestBounds == 3)
+        padding = -padding;
+
+      if (closestBounds < 2)
+      {
+        coordsList[3] = new Vector2(coordsProjected.x, coordsProjected.y + padding);
+        coordsList[0] = new Vector2(coordsProjected.x, coordsProjected.y - padding);
+
+        coordsList[2] = new Vector2(coords.x, coords.y + padding);
+        coordsList[1] = new Vector2(coords.x, coords.y - padding);
+      }
+      else
+      {
+        coordsList[3] = new Vector2(coordsProjected.x + padding, coordsProjected.y);
+        coordsList[0] = new Vector2(coordsProjected.x - padding, coordsProjected.y);
+
+        coordsList[2] = new Vector2(coords.x + padding, coords.y);
+        coordsList[1] = new Vector2(coords.x - padding, coords.y);
       }
       return coordsList;
     }

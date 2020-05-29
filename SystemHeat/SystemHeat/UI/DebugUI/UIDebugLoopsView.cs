@@ -37,7 +37,8 @@ namespace SystemHeat.UI
 
     protected void DrawLoop(HeatLoop loop)
     {
-      GUILayout.BeginHorizontal(UIHost.GUIResources.GetStyle("block_background"));
+      GUILayout.BeginVertical(UIHost.GUIResources.GetStyle("block_background"));
+      GUILayout.BeginHorizontal();
       GUILayout.Label(String.Format("ID {0}",loop.ID));
 
       GUILayout.BeginVertical();
@@ -48,8 +49,19 @@ namespace SystemHeat.UI
       GUILayout.Label(String.Format("Using coolant {0}",loop.CoolantName), UIHost.GUIResources.GetStyle("negative_category_header"));
       GUILayout.Label(String.Format("Volume {0}",loop.Volume), UIHost.GUIResources.GetStyle("negative_category_header"));
       GUILayout.EndVertical();
+      GUILayout.BeginVertical();
+      GUILayout.Label(String.Format("Number of timesteps {0}", loop.numSteps), UIHost.GUIResources.GetStyle("negative_category_header"));
+      GUILayout.Label(String.Format("Time step {0}", loop.timeStep), UIHost.GUIResources.GetStyle("negative_category_header"));
+      GUILayout.EndVertical();
 
+ 
       GUILayout.EndHorizontal();
+      foreach (ModuleSystemHeat mod in loop.LoopModules)
+      {
+
+        GUILayout.Label(String.Format("Part {0}: Total Flux: {1} kW Total Temp: {2}K Volume: {3}", mod.part.partInfo.title, mod.totalSystemFlux, mod.totalSystemTemperature, mod.volume), UIHost.GUIResources.GetStyle("negative_category_header"));
+      }
+      GUILayout.EndVertical();
     }
 
 

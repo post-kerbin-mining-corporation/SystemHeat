@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using KSP.Localization;
 
+
 namespace SystemHeat
 {
   /// <summary>
@@ -32,11 +33,19 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public float systemPower = 0f;
 
+    // UI field for showing heat
     [KSPField(isPersistant = false, guiActive = true, guiName = "Heat Generation")]
     public string systemHeatGeneration = "";
 
+    // Temeperature at which we scram
     [KSPField(isPersistant = false)]
-    public Vector2 systemTemperatureRange = new Vector2(500f, 1000f);
+    public float shutdownTemperature = 4000f;
+
+    // Map loop temperature to system efficiency (0-1.0)
+    [KSPField(isPersistant = false)]
+    public FloatCurve temperatureCurve = new FloatCurve();
+
+
 
     protected ModuleSystemHeat heatModule;
     protected ModuleEngines engineModule;
@@ -50,12 +59,10 @@ namespace SystemHeat
     {
         string msg = "";
         ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
-
-        msg += String.Format("Thermal Output: {0} kW\nThermal Output Temperature {1} K\nNominal Operating Temperature Range {2}-{3} K",
-          systemPower.ToString("F1"),
-          systemTemperature.ToString("F1"),
-          systemTemperatureRange.x.ToString("F1"),
-          systemTemperatureRange.y.ToString("F1")
+        msg += String.Format("<b>Thermal Output:</b> {0} kW\n<b>System Temperature:</b> {1} K\n<b>Maximum Temperature</b> {2} K",
+          systemPower.ToString("F0"),
+          systemTemperature.ToString("F0"),
+          temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
           );
 
         return msg;
@@ -65,6 +72,10 @@ namespace SystemHeat
     {
       heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
       engineModule = ModuleUtils.FindNamedComponent<ModuleEngines>(this.part, engineModuleID);
+      if (SystemHeatSettings.DebugModules)
+      {
+        Utils.Log("[ModuleSystemHeatEngine] Setup completed");
+      }
     }
 
     public void FixedUpdate()
@@ -85,6 +96,11 @@ namespace SystemHeat
         }
       }
     }
+
+
+    /// <summary>
+    /// Generates heat in the editor scene
+    /// </summary>
     protected void GenerateHeatEditor()
     {
 
@@ -96,11 +112,17 @@ namespace SystemHeat
       heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
 
     }
+
+    /// <summary>
+    /// Generates heat in the flight scene
+    /// </summary>
     protected void GenerateHeatFlight()
     {
       float engineFraction = 0f;
       if (engineModule.isActiveAndEnabled)
-          engineFraction = engineModule.GetCurrentThrust() / engineModule.GetMaxThrust();
+      {
+        engineFraction = engineModule.requestedThrottle;
+      }
 
       systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
       heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
@@ -109,13 +131,20 @@ namespace SystemHeat
     {
       if (engineModule.EngineIgnited)
       {
-        if (heatModule.currentLoopTemperature > systemTemperatureRange.y)
+        if (heatModule.currentLoopTemperature > shutdownTemperature)
         {
-          ScreenMessages.PostScreenMessage(new ScreenMessage(String.Format("Engine system temperature was exceeded on {0}! Emergency shutdown!",
+          ScreenMessages.PostScreenMessage(
+            new ScreenMessage(
+              String.Format("Engine system maximum temperature of {0} was exceeded on {1}! Emergency shutdown!",
+                                                             shutdownTemperature.ToString("F0"),
                                                              part.partInfo.title),
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           engineModule.Events["Shutdown"].Invoke();
+          if (SystemHeatSettings.DebugModules)
+          {
+            Utils.Log("[ModuleSystemHeatEngine] Engine overheated: fired shutdown");
+          }
         }
       }
     }

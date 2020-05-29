@@ -13,16 +13,15 @@ namespace SystemHeat
     public SystemHeatSimulator()
     {
     }
+    /// TODO: This should update the simulator in place instead of reset completely
     public void Refresh(List<Part> parts)
     {
-
+      Reset(parts);
     }
     public void Reset(List<Part> parts)
     {
       HeatLoops = new Dictionary<int, HeatLoop>();
       List<ModuleSystemHeat> heatModules = new List<ModuleSystemHeat>();
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("Building heat loops from {0} ModuleSystemHeat modules", heatModules.Count.ToString()));
 
       for (int i = parts.Count - 1; i >= 0; --i)
       {
@@ -30,12 +29,19 @@ namespace SystemHeat
         heatModules.AddRange(part.GetComponents<ModuleSystemHeat>().ToList());
       }
 
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("[SystemHeatSimulator]: Building heat loops from {0} ModuleSystemHeat modules", heatModules.Count.ToString()));
+
+
       foreach (ModuleSystemHeat heatModule in heatModules)
       {
         AddHeatModule(heatModule);
       }
     }
 
+    /// <summary>
+    /// Do simulation in flight
+    /// </summary>
     public virtual void Simulate()
     {
 
@@ -47,6 +53,10 @@ namespace SystemHeat
         }
       }
     }
+
+    /// <summary>
+    /// Do simulation in the editor
+    /// </summary>
     public virtual void SimulateEditor()
     {
 
@@ -80,12 +90,12 @@ namespace SystemHeat
       {
         HeatLoops.Add(loopID, new HeatLoop(loopID));
         if (SystemHeatSettings.DebugSimulation)
-          Utils.Log(String.Format("Created new Heat Loop {0}", loopID));
+          Utils.Log(String.Format("[SystemHeatSimulator]: Created new Heat Loop {0}", loopID));
       }
       HeatLoops[loopID].AddHeatModule(module);
 
       if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("Added module {0} to Heat Loop {1}", module.moduleID, loopID));
+        Utils.Log(String.Format("[SystemHeatSimulator]: Added module {0} to Heat Loop {1}", module.moduleID, loopID));
     }
 
     /// <summary>
@@ -120,13 +130,13 @@ namespace SystemHeat
       HeatLoops[loopID].RemoveHeatModule(module);
 
       if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("Removed module {0} from Heat Loop {1}", module.moduleID, loopID));
+        Utils.Log(String.Format("[SystemHeatSimulator]: Removed module {0} from Heat Loop {1}", module.moduleID, loopID));
 
       if (HeatLoops[loopID].LoopModules.Count == 0)
       {
         HeatLoops.Remove(loopID);
         if (SystemHeatSettings.DebugSimulation)
-          Utils.Log(String.Format("Heat Loop {0} has no more members, removing", loopID));
+          Utils.Log(String.Format("[SystemHeatSimulator]: Heat Loop {0} has no more members, removing", loopID));
       }
     }
   }
