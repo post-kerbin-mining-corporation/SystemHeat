@@ -10,6 +10,64 @@ namespace SystemHeat
   {
     public Dictionary<int,HeatLoop> HeatLoops { get; private set;}
 
+    /// <summary>
+    /// Returns the total heat generation of the vessel in question
+    /// </summary>
+    public float TotalHeatGeneration
+    {
+      get
+      {
+        float total = 0;
+        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        {
+          for (int i = 0; i < kvp.Value.LoopModules.Count; i++)
+          {
+            total = kvp.Value.LoopModules[i].totalSystemFlux > 0f ? total + kvp.Value.LoopModules[i].totalSystemFlux : total;
+          }
+        }
+        return total;
+      }
+    }
+
+    /// <summary>
+    /// Returns the total heat rejection of the vessel in question
+    /// </summary>
+
+    public float TotalHeatRejection
+    {
+      get
+      {
+        float total = 0;
+        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        {
+          for (int i = 0; i < kvp.Value.LoopModules.Count; i++)
+          {
+            total = kvp.Value.LoopModules[i].totalSystemFlux < 0f ? total + kvp.Value.LoopModules[i].totalSystemFlux : total;
+          }
+        }
+        return total;
+      }
+    }
+
+    /// <summary>
+    /// Returns the total volume of the vessel in question
+    /// </summary>
+    public float TotalVolume
+    {
+      get
+      {
+        float total = 0;
+        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        {
+
+          total = total + kvp.Value.Volume;
+        }
+        return total;
+      }
+    }
+
+
+
     public SystemHeatSimulator()
     {
     }

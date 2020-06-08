@@ -130,6 +130,19 @@ namespace SystemHeat
       }
       return currentNetFlux;
     }
+
+    /// <summary>
+    /// Calculates the total positive flux of the loop
+    /// </summary>
+    protected float CalculatePositiveFlux()
+    {
+      float currentNetFlux = 0f;
+      for (int i = 0; i < modules.Count; i++)
+      {
+        currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux +currentNetFlux: currentNetFlux;
+      }
+      return currentNetFlux;
+    }
     /// <summary>
     /// Simulates a single iteration of the heat loop. Broadly:
     /// 1) finds all fluxes in the Loop
@@ -137,36 +150,43 @@ namespace SystemHeat
     /// 3) propagates all new values to the simulation members
     /// </summary>
     /// <param name="simTimStep">the time step</param>
-    void SimulateIteration(float simTimStep)
+    void SimulateIteration(float simTimeStep)
     {
       // Calculate the loop net flux
       float currentNetFlux = CalculateNetFlux();
+      float currentPositiveFlux = CalculatePositiveFlux();
       float absFlux = Mathf.Abs(currentNetFlux);
       NetFlux = currentNetFlux;
 
       // Determine the ideal change in temperature
-      float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimStep;
+      float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
 
       // Flux has be be higher than a tolerance threshold in order to do things
       if (absFlux > SystemHeatSettings.AbsFluxThreshold)
       {
-        // If flux is positive
+        // If flux is positive (loop overheating)
         if (currentNetFlux > 0f)
         {
           Temperature += deltaTemperatureIdeal;
-        } else if (currentNetFlux < 0f)
+        }
+        // If flux is negative (loop adequeately cooled)
+        else if (currentNetFlux < 0f)
         {
+          float deltaToNominal = Mathf.Abs(NominalTemperature - Temperature);
+          float scale = Mathf.Clamp01(deltaToNominal/50f);
+
+
           // If current temp is greater than nominal temp
           if (Temperature > NominalTemperature)
           {
-            Temperature += deltaTemperatureIdeal;
+            Temperature = Temperature + deltaTemperatureIdeal*scale ;
           }
           // If current temp is lower than nominal temp
           if (Temperature < NominalTemperature)
           {
             if (deltaTemperatureIdeal <= 0)
-              deltaTemperatureIdeal = 1f;
-            Temperature += deltaTemperatureIdeal;
+              Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
+            Temperature += deltaTemperatureIdeal * scale;
           }
 
         }
@@ -176,7 +196,7 @@ namespace SystemHeat
         }
       }
       // Ensure temperature doesn't go super high or low
-      Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), 32000f);
+      Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), float.MaxValue);
       // Propagate to all modules
       for (int i=0; i< modules.Count; i++)
       {
@@ -233,7 +253,7 @@ namespace SystemHeat
           totalPower += modules[i].totalSystemFlux;
         }
       }
-      return temp/totalPower;
+      return Mathf.Clamp(GetEnvironmentTemperature(), temp/totalPower,float.MaxValue);
     }
   }
 }

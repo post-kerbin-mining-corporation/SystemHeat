@@ -34,7 +34,7 @@ namespace SystemHeat.UI
     public Canvas parentCanvas;
     protected HeatLoop loop;
 
-    public void Awake()
+    public void SetupComponents()
     {
       // Find all the components
       rect = this.GetComponent<RectTransform>();
@@ -62,7 +62,10 @@ namespace SystemHeat.UI
       iconButton.onClick.AddListener(delegate { OnButtonClick(); });
       SetPanel(panelOpen);
 
+      heatIconBackground.enabled = false;
+      heatIconGlow.enabled = false;
       heatIcon.enabled = false;
+      colorRingAnimated.enabled = false;
     }
 
     public void OnButtonClick()
@@ -70,25 +73,28 @@ namespace SystemHeat.UI
       SetPanel(!panelOpen);
     }
 
-    public void Update()
+    public void LateUpdate()
     {
       if (active && loop != null && heatModule != null)
       {
         if (panelOpen)
         {
-          infoPanelUpperText.text = $"Temperature Output {heatModule.systemNominalTemperature} K \nHeat Output {heatModule.totalSystemFlux} kW";
-          infoPanelLowerText.text = $"<b>Loop Status</b>\n Nominal Temperature {loop.NominalTemperature} K \n Net Flux {loop.NetFlux} kW";
+          infoPanelUpperText.text = $"Temperature Output {heatModule.systemNominalTemperature.ToString("F0")} K \nHeat Output {heatModule.totalSystemFlux.ToString("F0")} kW";
+          infoPanelLowerText.text = $"<b>Loop Status</b>\n Temperature {loop.Temperature.ToString("F0")}/{loop.NominalTemperature.ToString("F0")} K \n Net Flux {loop.NetFlux.ToString("F0")} kW";
         }
 
-        if (loop.NominalTemperature > heatModule.systemNominalTemperature && !heatIcon.enabled)
+        if ((loop.NominalTemperature > heatModule.systemNominalTemperature || loop.Temperature > heatModule.systemNominalTemperature) && !heatIconBackground.enabled)
         {
-          heatIcon.enabled = true;
+          heatIconBackground.enabled = true;
           heatIconGlow.enabled = true;
+          heatIcon.enabled = true;
         }
-        if (loop.NominalTemperature <= heatModule.systemNominalTemperature && heatIcon.enabled)
+
+        if (loop.NominalTemperature <= heatModule.systemNominalTemperature && loop.Temperature <= heatModule.systemNominalTemperature && heatIconBackground.enabled)
         {
-          heatIcon.enabled = false;
+          heatIconBackground.enabled = false;
           heatIconGlow.enabled = false;
+          heatIcon.enabled = false;
         }
 
         Vector2 screenPoint = Camera.main.WorldToScreenPoint(heatModule.part.transform.position);
@@ -96,7 +102,10 @@ namespace SystemHeat.UI
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.GetComponent<RectTransform>(), screenPoint, parentCanvas.worldCamera, out localPoint);
         transform.localPosition = localPoint;
       }
-      
+      if (heatModule == null)
+      {
+        Destroy(this.gameObject);
+      }      
     }
 
     public Vector3 worldToUISpace(Canvas parentCanvas, Vector3 worldPos)
@@ -111,7 +120,23 @@ namespace SystemHeat.UI
       return parentCanvas.transform.TransformPoint(movePos);
     }
 
-    public void SetupLoop(HeatLoop lp, ModuleSystemHeat sh)
+    public void SetupLoop(HeatLoop lp, ModuleSystemHeat sh, bool visible)
+    {
+      SetupComponents();
+      loop = lp;
+      heatModule = sh;
+     // Utils.Log($"{loop} {heatModule}, {colorRing}, {infoPanelTitle}");
+      infoPanelTitle.text = heatModule.part.partInfo.title;
+      colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
+      Transform xform = transform.FindDeepChild(heatModule.iconName);
+      if (xform != null)
+      {
+        systemIcon.sprite = xform.GetComponent<Image>().sprite;
+      }
+      SetVisibility(visible);
+    }
+
+    public void UpdateLoop(HeatLoop lp, ModuleSystemHeat sh, bool visible)
     {
       loop = lp;
       heatModule = sh;
@@ -123,7 +148,7 @@ namespace SystemHeat.UI
       {
         systemIcon.sprite = xform.GetComponent<Image>().sprite;
       }
-      SetVisibility(true);
+      SetVisibility(visible);
     }
 
     public void SetPanel(bool state)
@@ -131,12 +156,16 @@ namespace SystemHeat.UI
       infoPanel.SetActive(state);
       panelOpen = state;
     }
+
     public void SetVisibility(bool state)
     {
       active = state;
       icon.SetActive(state);
+
       if (!state)
         SetPanel(state);
+
+      
     }
     
 

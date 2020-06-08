@@ -62,25 +62,20 @@ namespace SystemHeat
       base.FixedUpdate();
       if (heatModule != null)
       {
-        if (base.IsCooling)
+        if (HighLogic.LoadedSceneIsFlight)
         {
-          // We only cool if the loop is too hot.
-          if (heatModule.currentLoopTemperature > heatModule.nominalLoopTemperature)
+          if (base.IsCooling)
           {
-            // Note a consumption flux is negative
             float flux = -temperatureCurve.Evaluate(heatModule.currentLoopTemperature);
             heatModule.AddFlux(moduleID, 0f, flux);
-          } else
-          {
-            heatModule.AddFlux(moduleID, 0f, 0f);
+            RadiatorEfficiency = $"{(temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.maxTime)) * 100f}%";
           }
-          RadiatorEfficiency = $"{(temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.maxTime)) * 100f}%";
-        }
-        else
-        {
-          
-          heatModule.AddFlux(moduleID, 0f, 0f);
-          RadiatorEfficiency = $"Radiator Offline";
+          else
+          {
+
+            heatModule.AddFlux(moduleID, 0f, 0f);
+            RadiatorEfficiency = $"Radiator Offline";
+          }
         }
 
         if (HighLogic.LoadedSceneIsEditor)
@@ -92,7 +87,7 @@ namespace SystemHeat
           }
           else
           {
-            heatModule.AddFlux(moduleID, 0f, 0f);
+            heatModule.AddFlux(moduleID, temperatureCurve.maxTime, -temperatureCurve.Evaluate(temperatureCurve.maxTime));
           }
           RadiatorEfficiency = String.Format("{0}%",(temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.maxTime)) * 100f);
         }

@@ -12,10 +12,15 @@ namespace SystemHeat.UI
   public class SystemHeatUILoader : MonoBehaviour
   {
     private static GameObject overlayPanelPrefab;
+    private static GameObject toolbarPanelPrefab;
 
     public static GameObject OverlayPanelPrefab
     {
       get { return overlayPanelPrefab; }
+    }
+    public static GameObject ToolbarPanelPrefab
+    {
+      get { return toolbarPanelPrefab; }
     }
 
     private void Awake()
@@ -23,6 +28,7 @@ namespace SystemHeat.UI
       Utils.Log("[SystemHeatUILoader]: Loading UI Prefabs");
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SystemHeat/UI/systemheatui.dat"));
       overlayPanelPrefab = prefabs.LoadAsset("SystemInfo") as GameObject;
+      toolbarPanelPrefab = prefabs.LoadAsset("ToolbarWindow") as GameObject;
       Utils.Log("[SystemHeatUILoader]: Loaded UI Prefabs");
     }
   }

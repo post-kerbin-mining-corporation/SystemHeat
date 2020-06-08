@@ -101,7 +101,9 @@
     <Compile Include="UI\Overlay\OverlayPanel.cs" />
     <Compile Include="UI\Overlay\OverlayPoint.cs" />
     <Compile Include="UI\Overlay\SystemHeatOverlay.cs" />
-    <Compile Include="UI\Overlay\SystemHeatUILoader.cs" />
+    <Compile Include="UI\SystemHeatUI.cs" />
+    <Compile Include="UI\SystemHeatUILoader.cs" />
+    <Compile Include="UI\ToolbarPanel.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

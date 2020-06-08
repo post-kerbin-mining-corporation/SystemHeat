@@ -36,8 +36,8 @@ namespace SystemHeat
     // Emit module  debug messages
     public static bool DebugModules = true;
 
-    // Show debug info in part UIs
-    public static bool DebugPartUI = true;
+    // Show debug info in PAW UIs
+    public static bool DebugPartUI = false;
 
     public static float SpaceTemperature = 2.7f;
     public static int maxLoopCount = 20;
@@ -55,23 +55,23 @@ namespace SystemHeat
     // The maximum number of time steps to take in a simulation frame
     public static int MaxSteps = 25;
     // The standard timestep in the editor
-    public static float SimulationRateEditor = 50f;
+    public static float SimulationRateEditor = 1f;
     
     // Loop flux tolerance
     public static float AbsFluxThreshold = 0.5f;
 
 
-    public static float OverlayBaseLineWidth = 2f;
+    public static float OverlayBaseLineWidth = 8f;
     
-    public static float OverlayPadding = 1f;
+    public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;
 
     public static Dictionary<string, CoolantType> CoolantData;
 
     public static Dictionary<int, Color> ColorData = new Dictionary<int, Color> {
       { 0, XKCDColors.Algae},
-      { 1, XKCDColors.BlueGrey},
-      { 2, XKCDColors.Reddish},
+      { 1, XKCDColors.Reddish},
+      { 2, XKCDColors.BlueGrey},
       { 3, XKCDColors.YellowBrown},
       { 4, XKCDColors.GrassGreen},
       { 5, XKCDColors.PurpleGrey},
@@ -93,7 +93,7 @@ namespace SystemHeat
       ConfigNode settingsNode;
 
       Utils.Log("[Settings]: Started loading");
-      if (GameDatabase.Instance.ExistsConfigNode("SystemHeat/SYSTEMHEAT"))
+      if (GameDatabase.Instance.ExistsConfigNode("SystemHeat/Settings/SYSTEMHEAT"))
       {
         Utils.Log("[Settings]: Located settings file");
 
@@ -157,7 +157,7 @@ namespace SystemHeat
       Name = "undefined";
       Title = "undefined";
       Density = 1000f;
-      HeatCapacity = 1000f;
+      HeatCapacity = 4f;
     }
 
     public void Load(ConfigNode node)

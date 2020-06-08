@@ -17,27 +17,34 @@ namespace SystemHeat.UI
     public OverlayLine(Transform parent, HeatLoop loop)
     {
       Utils.Log($"[OverlayLine]: building line for loop ID {loop.ID}");
-      
 
       line = new VectorLine($"SystemHeat_Loop{loop.ID}_VectorLine", new List<Vector3>(), SystemHeatSettings.OverlayBaseLineWidth, LineType.Continuous, Joins.Weld);
+      line.layer = 0;
+      line.material = new Material(Shader.Find("GUI/Text Shader"));
+      line.material.renderQueue = 3000;
+      //if (HighLogic.LoadedSceneIsEditor)
+      //  VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
 
-      VectorLine.canvas.renderMode = RenderMode.ScreenSpaceCamera;
-      VectorLine.canvas.sortingLayerName = UIMasterController.Instance.appCanvas.sortingLayerName;
-      VectorLine.canvas.sortingLayerID = UIMasterController.Instance.appCanvas.sortingLayerID;
-      VectorLine.canvas.planeDistance = 200f;
-      VectorLine.canvas.worldCamera = UIMasterController.Instance.uiCamera;
-      VectorLine.canvas.gameObject.SetLayerRecursive(5);
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        VectorLine.SetCamera3D(FlightCamera.fetch.mainCamera);
+        //VectorLine.canvas.worldCamera = UIMasterController.Instance.vectorCamera;
+      }
+      
+      //VectorLine.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+      //VectorLine.canvas.sortingLayerName = UIMasterController.Instance.appCanvas.sortingLayerName;
+      //VectorLine.canvas.sortingLayerID = UIMasterController.Instance.appCanvas.sortingLayerID;
+      //VectorLine.canvas.planeDistance = 200f;
+      //VectorLine.canvas.worldCamera = UIMasterController.Instance.uiCamera;
+      //VectorLine.canvas.gameObject.SetLayerRecursive(0);
 
       lineColor = SystemHeatSettings.GetLoopColor(loop.ID);
     }
     public void UpdatePositions(List<Vector3> positions)
     {
-      Utils.Log(positions[0].ToString());
-      Utils.Log(positions[1].ToString());
-      Utils.Log(positions[2].ToString());
-      Utils.Log(positions[3].ToString());
       line.points3 = positions;
       line.SetColor(lineColor);
+      line.Draw3D();
     }
 
     public void Draw()

@@ -33,8 +33,6 @@ namespace SystemHeat.UI
     public void Update(HeatLoop loop)
     {
       heatLoop = loop;
-      if (!Drawn)
-        SetVisible(true);
 
       GenerateLinePoints();
       UpdateLinePositions();
@@ -53,7 +51,13 @@ namespace SystemHeat.UI
       List<Vector3[]> positions = overlayPoints.Select(x => x.GetDrawingCoords(SystemHeatSettings.OverlayPadding)).ToList();
       List<Vector3> pos3d = positions.SelectMany(i => i).ToList();
       pos3d.Add(pos3d[0]);
-
+      for (int i=0;i < pos3d.Count  ; i++)
+      {
+        //if (HighLogic.LoadedSceneIsEditor)
+        //  pos3d[i] = heatLoop.LoopModules[0].transform.parent.TransformPoint(pos3d[i]);
+        if (HighLogic.LoadedSceneIsFlight)
+          pos3d[i] = heatLoop.LoopModules[0].part.vessel.vesselTransform.TransformPoint(pos3d[i]);
+      }
       overlayLine.UpdatePositions(pos3d);
       overlayLine.Draw();
     }
@@ -66,7 +70,10 @@ namespace SystemHeat.UI
       Vector3[] systemCoords = new Vector3[heatLoop.LoopModules.Count];
       for (int i = 0; i < heatLoop.LoopModules.Count; i++)
       {
+        // Utils.Log($"System Coords: {heatLoop.LoopModules[i].part.transform.position.ToString()}");
         systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
+        if (HighLogic.LoadedSceneIsFlight)
+          systemCoords[i] = heatLoop.LoopModules[i].part.vessel.vesselTransform.InverseTransformPoint(heatLoop.LoopModules[i].part.transform.position);
       }
       
       float[] x0 = null;
@@ -80,17 +87,17 @@ namespace SystemHeat.UI
       float padding = SystemHeatSettings.OverlayPadding;
       float padding_bounds = SystemHeatSettings.OverlayBoundsPadding;
 
-      float[] bounds = { x0.Min() - padding_bounds, x0.Max() + padding_bounds, y0.Min() - padding_bounds, y0.Max() + padding_bounds };
+      float[] bounds = { x0.Min() - padding_bounds, x0.Max() + padding_bounds, y0.Min() - padding_bounds*1.05f, y0.Max() + padding_bounds*1.05f };
       Vector3[] boundsCoords = { new Vector3(bounds[0], bounds[2], origin), new Vector3(bounds[0], bounds[3], origin), new Vector3(bounds[1], bounds[2], origin), new Vector3(bounds[1], bounds[3], origin) };
 
       List<OverlayPoint> systemPoints = new List<OverlayPoint>();
       for (int i = 0; i < systemCoords.Length; i++)
       {
-        systemPoints.Add(new OverlaySystemPoint(systemCoords[i], 0f, bounds));
+        systemPoints.Add(new OverlaySystemPoint(systemCoords[i], origin, bounds));
       }
       for (int i = 0; i < boundsCoords.Length; i++)
       {
-        systemPoints.Add(new OverlayPoint(boundsCoords[i], 0f));
+        systemPoints.Add(new OverlayPoint(boundsCoords[i], origin));
       }
 
       Vector3 projectedMean = new Vector3(systemPoints.Average(x => x.coordsProjected[0]),

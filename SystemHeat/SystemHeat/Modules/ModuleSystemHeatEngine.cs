@@ -27,15 +27,12 @@ namespace SystemHeat
 
     // The current system temperature
     [KSPField(isPersistant = false)]
-    public float systemTemperature = 0f;
+    public float systemOutletTemperature = 0f;
 
     // The current system power
     [KSPField(isPersistant = false)]
     public float systemPower = 0f;
 
-    // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Heat Generation")]
-    public string systemHeatGeneration = "";
 
     // Temeperature at which we scram
     [KSPField(isPersistant = false)]
@@ -45,6 +42,14 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve = new FloatCurve();
 
+    // UI Fields
+    // UI field for showing heat
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Engine Heat Generation")]
+    public string systemHeatGeneration = "";
+
+    // UI field for showing heat
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Engine System Temperature")]
+    public string systemTemperature = "";
 
 
     protected ModuleSystemHeat heatModule;
@@ -61,7 +66,7 @@ namespace SystemHeat
         ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
         msg += String.Format("<b>Thermal Output:</b> {0} kW\n<b>System Temperature:</b> {1} K\n<b>Maximum Temperature</b> {2} K",
           systemPower.ToString("F0"),
-          systemTemperature.ToString("F0"),
+          systemOutletTemperature.ToString("F0"),
           temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
           );
 
@@ -109,7 +114,7 @@ namespace SystemHeat
           engineFraction = engineModule.thrustPercentage / 100f;
 
       systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
-      heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
+      heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction* systemPower);
 
     }
 
@@ -122,10 +127,14 @@ namespace SystemHeat
       if (engineModule.isActiveAndEnabled)
       {
         engineFraction = engineModule.requestedThrottle;
+        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+      } else
+      {
+        heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
       }
+      systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+      systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
 
-      systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
-      heatModule.AddFlux(moduleID, systemTemperature, engineFraction* systemPower);
     }
     protected void UpdateSystemHeatFlight()
     {
@@ -135,7 +144,7 @@ namespace SystemHeat
         {
           ScreenMessages.PostScreenMessage(
             new ScreenMessage(
-              String.Format("Engine system maximum temperature of {0} was exceeded on {1}! Emergency shutdown!",
+              String.Format("Engine system maximum temperature of {0} K was exceeded on {1}! Emergency shutdown!",
                                                              shutdownTemperature.ToString("F0"),
                                                              part.partInfo.title),
                                                              3.0f,

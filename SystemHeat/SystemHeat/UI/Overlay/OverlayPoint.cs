@@ -80,25 +80,32 @@ namespace SystemHeat.UI
     /// </summary>
     public override Vector3[] GetDrawingCoords(float padding)
     {
-      Vector3[] coordsList = new Vector3[4];
+      Vector3[] coordsList = new Vector3[6];
 
       if (closestBounds == 0 || closestBounds == 3)
         padding = -padding;
 
       if (closestBounds < 2)
       {
-        coordsList[3] = coordsProjected + new Vector3(0, padding, 0);
+        coordsList[5] = coordsProjected + new Vector3(0, padding, 0);
         coordsList[0] = coordsProjected + new Vector3(0, -padding, 0);
 
-        coordsList[2] = coords + new Vector3(0, padding, 0);
-        coordsList[1] = coords + new Vector3(0, -padding, 0);
+        coordsList[3] = coords + new Vector3(0, padding, 0);
+        coordsList[2] = coords + new Vector3(0, -padding, 0);
+
+        coordsList[4] = new Vector3(coordsProjected.x, coordsProjected.y + padding, coords.z);
+        coordsList[1] = new Vector3(coordsProjected.x, coordsProjected.y - padding, coords.z);
+
       } else
       {
-        coordsList[3] = coordsProjected + new Vector3(padding, 0, 0);
+        coordsList[5] = coordsProjected + new Vector3(padding, 0, 0);
         coordsList[0] = coordsProjected + new Vector3(-padding, 0, 0);
 
-        coordsList[2] = coords + new Vector3(padding, 0, 0);
-        coordsList[1] = coords +  new Vector3(-padding, 0, 0);
+        coordsList[3] = coords + new Vector3(padding, 0, 0);
+        coordsList[2] = coords +  new Vector3(-padding, 0, 0);
+
+        coordsList[4] = new Vector3(coordsProjected.x + padding, coordsProjected.y , coords.z);
+        coordsList[1] = new Vector3(coordsProjected.x - padding, coordsProjected.y, coords.z);
       }
       return coordsList;
     }
@@ -136,6 +143,7 @@ namespace SystemHeat.UI
       float[] boundsDelta = {Mathf.Abs(point[0] - bounds[0]), Mathf.Abs(point[0] - bounds[1]), Mathf.Abs(point[1] - bounds[2]), Mathf.Abs(point[1] - bounds[3])};
       int idx = 0;
       float counter = 999999f;
+
       for (int i =0 ; i < boundsDelta.Length; i++)
       {
         if (boundsDelta[i] < counter)

@@ -20,12 +20,8 @@ namespace SystemHeat.UI
     protected bool initUI = false;
 
     // Assets
-    protected string toolbarUIIconURLOff = "SystemHeat/UI/toolbar_off";
-    protected string toolbarUIIconURLOn = "SystemHeat/UI/toolbar_on";
     protected UIResources resources;
 
-    // Stock toolbar button
-    protected static ApplicationLauncherButton stockToolbarButton = null;
 
     public Rect WindowPosition { get {return windowPos; } set { windowPos = value; } }
     public UIResources GUIResources { get { return resources; } }
@@ -36,9 +32,8 @@ namespace SystemHeat.UI
     public static void ToggleWindow()
     {
       if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Toggle Window");
+        Utils.Log("[DebugUI]: Toggled");
       showWindow = !showWindow;
-      SystemHeatOverlay.SetVisible(showWindow);
     }
 
     /// <summary>
@@ -47,7 +42,7 @@ namespace SystemHeat.UI
     protected virtual void InitUI()
     {
       if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Initializing");
+        Utils.Log("[DebugUI]: Initializing");
 
       resources = new UIResources();
       initUI = true;
@@ -55,19 +50,12 @@ namespace SystemHeat.UI
 
     protected virtual void Awake()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Awake fired");
-      GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
-      GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
+     
     }
 
     protected virtual void Start()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Start fired");
-
-      if (ApplicationLauncher.Ready)
-        OnGUIAppLauncherReady();
+      
     }
 
     protected virtual void OnGUI()
@@ -99,65 +87,6 @@ namespace SystemHeat.UI
     protected virtual void DrawWindow(int windowId)
     {}
 
-    // Stock toolbar handling methods
-    public void OnDestroy()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: OnDestroy Fired");
-      // Remove the stock toolbar button
-      GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
-      if (stockToolbarButton != null)
-      {
-        ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
-      }
-    }
-
-    protected void OnToolbarButtonToggle()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Toolbar Button Toggled");
-      ToggleWindow();
-      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
-    }
-
-
-    protected void OnGUIAppLauncherReady()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Ready");
-      if (ApplicationLauncher.Ready && stockToolbarButton == null)
-      {
-        stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
-            (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
-      }
-    }
-
-    protected void OnGUIAppLauncherDestroyed()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Destroyed");
-      if (stockToolbarButton != null)
-      {
-        ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
-        stockToolbarButton = null;
-      }
-    }
-
-    protected void onAppLaunchToggleOff()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Toggle Off");
-      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
-    }
-
-    protected void DummyVoid() { }
   }
 
 

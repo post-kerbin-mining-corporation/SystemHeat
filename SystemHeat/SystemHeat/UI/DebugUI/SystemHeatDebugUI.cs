@@ -54,10 +54,18 @@ namespace SystemHeat.UI
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
-        simulator = SystemHeatEditor.Instance.Simulator;
-        if (SystemHeatSettings.DebugUI)
-          Utils.Log("[Debug UI]: Located Editor data");
+        if (simulator == null)
+        {
+          simulator = SystemHeatEditor.Instance.Simulator;
+          if (simulator != null && SystemHeatSettings.DebugUI)
+            Utils.Log("[Debug UI]: Located Editor data");
+        }
       }
+    }
+
+    public static void SetVisible(bool state)
+    {
+      showWindow = state;
     }
 
     /// <summary>
@@ -159,55 +167,38 @@ namespace SystemHeat.UI
           loopView.Update();
         }
         ticker += 1;
-      }
 
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        // Handle refresh when switching ships
-        if (FlightGlobals.ActiveVessel != null)
+
+        if (HighLogic.LoadedSceneIsFlight)
         {
+          // Handle refresh when switching ships
+          if (FlightGlobals.ActiveVessel != null)
+          {
+            if (activeVessel != null)
+            {
+              if (partCount != activeVessel.parts.Count || activeVessel != FlightGlobals.ActiveVessel)
+              {
+                FindData();
+              }
+            }
+            else
+            {
+              FindData();
+            }
+          }
           if (activeVessel != null)
           {
             if (partCount != activeVessel.parts.Count || activeVessel != FlightGlobals.ActiveVessel)
             {
-                ResetAppLauncher();
+              FindData();
             }
           }
-          else
-          {
-            ResetAppLauncher();
-          }
-        }
-        if (activeVessel != null)
-        {
-          if (partCount != activeVessel.parts.Count || activeVessel != FlightGlobals.ActiveVessel)
-          {
-            ResetAppLauncher();
-          }
         }
       }
     }
 
 
-    void ResetAppLauncher()
-    {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Reset App Launcher");
-      FindData();
-      if (stockToolbarButton == null)
-      {
-        stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
-            (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
-      }
-
-    }
+   
 
   }
 
