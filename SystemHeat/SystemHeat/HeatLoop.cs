@@ -42,6 +42,7 @@ namespace SystemHeat
       ID = id;
       modules = new List<ModuleSystemHeat>();
       CoolantType = SystemHeatSettings.GetCoolantType("");
+      Temperature = GetEnvironmentTemperature();
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ namespace SystemHeat
       ID = id;
       modules = new List<ModuleSystemHeat>();
       modules = heatModules;
-
+      Temperature = heatModules.Average(x => x.LoopTemperature);
       // Get loop properties set up
       CoolantName = GetCoolantType();
       CoolantType = SystemHeatSettings.GetCoolantType(CoolantName);
@@ -73,6 +74,7 @@ namespace SystemHeat
       heatModule.coolantName = CoolantName;
       // Recalculate the nominal temperature
       NominalTemperature = CalculateNominalTemperature();
+      Temperature = heatModule.LoopTemperature;
     }
 
     /// <summary>
@@ -85,6 +87,15 @@ namespace SystemHeat
       modules.Remove(heatModule);
       // Recalculate the nominal temperature
       NominalTemperature = CalculateNominalTemperature();
+    }
+
+    public void ResetTemperatures()
+    {
+      Temperature = GetEnvironmentTemperature();
+      for (int i = 0; i < modules.Count; i++)
+      {
+        modules[i].currentLoopTemperature = GetEnvironmentTemperature();
+      }
     }
 
     /// <summary>
@@ -160,7 +171,7 @@ namespace SystemHeat
 
       // Determine the ideal change in temperature
       float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-
+     // Utils.Log($"Loop {ID} start temp {Temperature}, calculated delta {deltaTemperatureIdeal}");
       // Flux has be be higher than a tolerance threshold in order to do things
       if (absFlux > SystemHeatSettings.AbsFluxThreshold)
       {
@@ -194,7 +205,9 @@ namespace SystemHeat
         {
           // Unlikely case of perfectly stable flux
         }
+
       }
+      //Utils.Log($"Loop {ID} end temp {Temperature}, environment {GetEnvironmentTemperature()}");
       // Ensure temperature doesn't go super high or low
       Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), float.MaxValue);
       // Propagate to all modules
@@ -211,7 +224,7 @@ namespace SystemHeat
 
       if (modules.Count > 0 && modules[0] != null)
       {
-        return (float)modules[0].part.vessel.externalTemperature;
+        return modules[0].part.vessel.externalTemperature > 50000d ? SystemHeatSettings.SpaceTemperature: (float)modules[0].part.vessel.externalTemperature;
       }
       return SystemHeatSettings.SpaceTemperature;
     }

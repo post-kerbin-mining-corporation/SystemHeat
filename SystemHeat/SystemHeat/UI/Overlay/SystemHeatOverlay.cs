@@ -75,6 +75,7 @@ namespace SystemHeat.UI
     }
     protected void onEditorPartDeleted(Part part)
     {
+      if (overlayPanels != null)
       for (int i = overlayPanels.Count - 1; i >= 0; i--)
       {
         if (overlayPanels[i].heatModule.part == part)
@@ -95,8 +96,8 @@ namespace SystemHeat.UI
 
       for (int i = 0; i < overlayPanels.Count; i++)
       {
-   
-          Destroy(overlayPanels[i].gameObject);
+          if (overlayPanels[i] != null)
+            Destroy(overlayPanels[i].gameObject);
 
         
       }

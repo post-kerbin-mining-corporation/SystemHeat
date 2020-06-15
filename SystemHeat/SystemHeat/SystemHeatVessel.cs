@@ -33,6 +33,7 @@ namespace SystemHeat
       // These events need to trigger a refresh
       GameEvents.onVesselGoOnRails.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
       GameEvents.onVesselWasModified.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
+      GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
     }
 
     void OnDestroy()
@@ -40,6 +41,7 @@ namespace SystemHeat
       // Clean up events when the item is destroyed
       GameEvents.onVesselGoOnRails.Remove(RefreshVesselData);
       GameEvents.onVesselWasModified.Remove(RefreshVesselData);
+      GameEvents.OnVesselRollout.Remove(OnVesselRollout);
     }
 
     void FixedUpdate()
@@ -57,8 +59,8 @@ namespace SystemHeat
           vesselLoaded = false;
         }
       }
-
-      simulator.Simulate();
+      if (vesselLoaded)
+        simulator.Simulate();
     }
 
     /// <summary>
@@ -77,7 +79,7 @@ namespace SystemHeat
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name));
     }
-
+    
 
     /// <summary>
     /// Rebuild all the loops from scratch
@@ -92,6 +94,16 @@ namespace SystemHeat
 
       if (simulator != null)
         simulator.Reset(vessel.Parts);
+    }
+
+    /// <summary>
+    /// Referesh the data, given a ConfigNode event
+    /// </summary>
+    protected void OnVesselRollout(ShipConstruct node)
+    {
+      if (SystemHeatSettings.DebugSimulation)
+        Utils.Log(String.Format("[SystemHeatVessel]: OnVesselRollout", this.GetType().Name));
+      simulator.ResetTemperatures();
     }
   }
 }

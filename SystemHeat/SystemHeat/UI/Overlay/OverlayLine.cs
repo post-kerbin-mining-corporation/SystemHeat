@@ -22,8 +22,8 @@ namespace SystemHeat.UI
       line.layer = 0;
       line.material = new Material(Shader.Find("GUI/Text Shader"));
       line.material.renderQueue = 3000;
-      //if (HighLogic.LoadedSceneIsEditor)
-      //  VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
+      if (HighLogic.LoadedSceneIsEditor)
+        VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
 
       if (HighLogic.LoadedSceneIsFlight)
       {

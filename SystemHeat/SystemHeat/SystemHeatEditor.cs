@@ -56,6 +56,7 @@ namespace SystemHeat
         GameEvents.onEditorPartDeleted.Add(new EventData<Part>.OnEvent(onEditorPartDeleted));
         GameEvents.onEditorPodDeleted.Add(new EventVoid.OnEvent(onEditorVesselReset));
         GameEvents.onEditorLoad.Add(new EventData<ShipConstruct, KSP.UI.Screens.CraftBrowserDialog.LoadType>.OnEvent(onEditorVesselLoad));
+        
         GameEvents.onPartRemove.Add(new EventData<GameEvents.HostTargetAction<Part, Part>>.OnEvent(onEditorVesselPartRemoved));
       }
       else

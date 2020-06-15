@@ -197,5 +197,16 @@ namespace SystemHeat
           Utils.Log(String.Format("[SystemHeatSimulator]: Heat Loop {0} has no more members, removing", loopID));
       }
     }
+
+    public void ResetTemperatures()
+    {
+      if (HeatLoops != null)
+      {
+        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        {
+          kvp.Value.ResetTemperatures();
+        }
+      }
+    }
   }
 }

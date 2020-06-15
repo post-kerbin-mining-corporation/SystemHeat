@@ -53,8 +53,8 @@ namespace SystemHeat.UI
       pos3d.Add(pos3d[0]);
       for (int i=0;i < pos3d.Count  ; i++)
       {
-        //if (HighLogic.LoadedSceneIsEditor)
-        //  pos3d[i] = heatLoop.LoopModules[0].transform.parent.TransformPoint(pos3d[i]);
+        if (HighLogic.LoadedSceneIsEditor)
+          pos3d[i] = pos3d[i];
         if (HighLogic.LoadedSceneIsFlight)
           pos3d[i] = heatLoop.LoopModules[0].part.vessel.vesselTransform.TransformPoint(pos3d[i]);
       }
@@ -70,8 +70,9 @@ namespace SystemHeat.UI
       Vector3[] systemCoords = new Vector3[heatLoop.LoopModules.Count];
       for (int i = 0; i < heatLoop.LoopModules.Count; i++)
       {
-        // Utils.Log($"System Coords: {heatLoop.LoopModules[i].part.transform.position.ToString()}");
+        if (HighLogic.LoadedSceneIsEditor)
         systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
+
         if (HighLogic.LoadedSceneIsFlight)
           systemCoords[i] = heatLoop.LoopModules[i].part.vessel.vesselTransform.InverseTransformPoint(heatLoop.LoopModules[i].part.transform.position);
       }

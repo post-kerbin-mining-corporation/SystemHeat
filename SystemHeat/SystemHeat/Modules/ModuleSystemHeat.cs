@@ -113,6 +113,7 @@ namespace SystemHeat
       if (SystemHeatSettings.DebugModules)
         Utils.Log("[ModuleSystemHeat]: Setup complete");
 
+
       Fields["totalSystemTemperature"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["totalSystemTemperature"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
       Fields["totalSystemFlux"].guiActive = SystemHeatSettings.DebugPartUI;
@@ -243,5 +244,8 @@ namespace SystemHeat
       SystemFluxUI = String.Format("{0:F0} kW", totalSystemFlux);
       SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", LoopTemperature, totalSystemTemperature);
     }
+
+
+   
   }
 }
