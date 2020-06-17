@@ -59,7 +59,6 @@ namespace SystemHeat.UI
           pos3d[i] = heatLoop.LoopModules[0].part.vessel.vesselTransform.TransformPoint(pos3d[i]);
       }
       overlayLine.UpdatePositions(pos3d);
-      overlayLine.Draw();
     }
 
 
@@ -71,10 +70,14 @@ namespace SystemHeat.UI
       for (int i = 0; i < heatLoop.LoopModules.Count; i++)
       {
         if (HighLogic.LoadedSceneIsEditor)
-        systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
+        {
+          systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
+        }
 
         if (HighLogic.LoadedSceneIsFlight)
+        {
           systemCoords[i] = heatLoop.LoopModules[i].part.vessel.vesselTransform.InverseTransformPoint(heatLoop.LoopModules[i].part.transform.position);
+        }
       }
       
       float[] x0 = null;

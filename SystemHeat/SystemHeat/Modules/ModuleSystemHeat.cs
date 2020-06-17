@@ -99,15 +99,17 @@ namespace SystemHeat
     protected Dictionary<string, float> fluxes;
     protected Dictionary<string, float> temperatures;
     protected List<int> loopIDs;
-
+   
     public void Start()
     {
+
       loopIDs = new List<int>();
+      fluxes = new Dictionary<string, float>();
+      temperatures = new Dictionary<string, float>();
+
       for (int i = 0; i < SystemHeatSettings.maxLoopCount; i++)
         loopIDs.Add(i);
 
-      fluxes = new Dictionary<string, float>();
-      temperatures = new Dictionary<string, float>();
       SetupUI();
 
       if (SystemHeatSettings.DebugModules)
@@ -213,23 +215,27 @@ namespace SystemHeat
     /// <param name="flux">the flux of the source</param>
     public void AddFlux(string id, float sourceTemperature, float flux)
     {
-      fluxes[id] = flux;
-
-      int count = 0;
-      if (flux >= 0f)
+      if (fluxes != null && temperatures != null)
       {
-        count++;
-        temperatures[id] = sourceTemperature;
-      }
-      else
-      {
-        temperatures[id] = 0f;
-      }
 
-      totalSystemFlux = fluxes.Sum(x => x.Value);
-      totalSystemTemperature = temperatures.Sum(x => x.Value);
+        fluxes[id] = flux;
 
-      systemNominalTemperature = totalSystemTemperature / count;
+        int count = 0;
+        if (flux >= 0f)
+        {
+          count++;
+          temperatures[id] = sourceTemperature;
+        }
+        else
+        {
+          temperatures[id] = 0f;
+        }
+
+        totalSystemFlux = fluxes.Sum(x => x.Value);
+        totalSystemTemperature = temperatures.Sum(x => x.Value);
+
+        systemNominalTemperature = totalSystemTemperature / count;
+      }
     }
 
     public void UpdateSimulationValues(float nominalTemp, float currentTemp, float currentNetFlux)

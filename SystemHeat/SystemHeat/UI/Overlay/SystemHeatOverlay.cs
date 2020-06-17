@@ -30,28 +30,47 @@ namespace SystemHeat.UI
       Instance = this;
       overlayLoops = new Dictionary<int, OverlayLoop>();
       overlayPanels = new List<OverlayPanel>();
-    }
-    protected void Start()
-    {
       overlayRoot = (new GameObject("SHOverlayRoot")).GetComponent<Transform>();
 
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Subscribing to events");
       GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(onSceneChange));
+
       if (HighLogic.LoadedSceneIsEditor)
       {
         GameEvents.onEditorScreenChange.Add(new EventData<EditorScreen>.OnEvent(onEditorScreenChange));
-        
         GameEvents.onEditorPartDeleted.Add(new EventData<Part>.OnEvent(onEditorPartDeleted));
-        GameEvents.onEditorPartPicked.Add(new EventData<Part>.OnEvent(onEditorPartDeleted));
+        GameEvents.onEditorPartPicked.Add(new EventData<Part>.OnEvent(onEditorPartPicked));
+        GameEvents.onEditorRestart.Add(new EventVoid.OnEvent(onEditorReset));
+        GameEvents.onEditorLoad.Add(new EventData<ShipConstruct, KSP.UI.Screens.CraftBrowserDialog.LoadType>.OnEvent(onEditorLoad));
+        GameEvents.onEditorStarted.Add(new EventVoid.OnEvent(onEditorStart));
       }
       else
       {
-        
-        GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(onEnterMapView));
 
-        GameEvents.onEditorScreenChange.Remove(new EventData<EditorScreen>.OnEvent(onEditorScreenChange));
-        GameEvents.onEditorPartDeleted.Remove(new EventData<Part>.OnEvent(onEditorPartDeleted));
-        GameEvents.onEditorPartPicked.Remove(new EventData<Part>.OnEvent(onEditorPartDeleted));
+        GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(onEnterMapView));
       }
+    }
+    protected void OnDestroy()
+    {
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Unsubscribing to events");
+      GameEvents.onGameSceneLoadRequested.Remove(onSceneChange);
+
+      if (HighLogic.LoadedSceneIsEditor)
+      {
+        GameEvents.onEditorScreenChange.Remove(onEditorScreenChange);
+        GameEvents.onEditorPartDeleted.Remove(onEditorPartDeleted);
+        GameEvents.onEditorPartPicked.Remove(onEditorPartPicked);
+      }
+      else
+      {
+        GameEvents.OnMapEntered.Remove(onEnterMapView);
+      }
+    }
+    protected void Start()
+    {
+      
     }
     protected void onEnterMapView()
     {
@@ -67,12 +86,37 @@ namespace SystemHeat.UI
         Utils.Log("[SystemHeatOverlay]: Editor Screen Changed, clearing panels");
       ClearPanels();
     }
+    protected void onEditorLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType loadType)
+    {
+
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Editor Load");
+      ClearPanels();
+    }
+    protected void onEditorReset()
+    {
+
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Editor Reset");
+      ClearPanels();
+    }
+
+    protected void onEditorStart()
+    {
+
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Editor Start");
+      ClearPanels();
+    }
+
     protected void onSceneChange(GameScenes scene)
     {
       if (SystemHeatSettings.DebugOverlay)
         Utils.Log("[SystemHeatOverlay]: Changing Scenes, clearing panels");
+      SetVisible(false);
       ClearPanels();
     }
+
     protected void onEditorPartDeleted(Part part)
     {
       if (overlayPanels != null)
@@ -88,7 +132,21 @@ namespace SystemHeat.UI
         }
       }
     }
+    protected void onEditorPartPicked(Part part)
+    {
+      if (overlayPanels != null)
+        for (int i = overlayPanels.Count - 1; i >= 0; i--)
+        {
+          if (overlayPanels[i].heatModule.part == part)
+          {
+            if (SystemHeatSettings.DebugOverlay)
+              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"));
 
+            Destroy(overlayPanels[i].gameObject);
+            overlayPanels.RemoveAt(i);
+          }
+        }
+    }
     public void ClearPanels()
     {
       if (SystemHeatSettings.DebugOverlay)
@@ -103,27 +161,19 @@ namespace SystemHeat.UI
       }
       overlayPanels.Clear();
     }
-
-    public void SceneChanged()
-    {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Cleared all panels");
-
-      for (int i = 0; i < overlayPanels.Count; i++)
-      {
-
-        Destroy(overlayPanels[i].gameObject);
-
-
-      }
-      overlayPanels.Clear();
-    }
-
     protected void LateUpdate()
     {
       
       if (simulator != null && !(HighLogic.LoadedSceneIsFlight && MapView.MapIsEnabled))
       {
+        if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0)
+        {
+          foreach (KeyValuePair<int,OverlayLoop> kvp in overlayLoops)
+          {
+            kvp.Value.Destroy();
+          }
+          overlayLoops.Clear();
+        }
         // Update each loop, build a new loop when needed
         foreach (KeyValuePair<int, HeatLoop> kvp in simulator.HeatLoops)
         {
@@ -202,6 +252,13 @@ namespace SystemHeat.UI
             panel.SetVisibility(false);
           }
         }
+        else
+        {
+          foreach (KeyValuePair<int, OverlayLoop> kvp in overlayLoops)
+          {
+            kvp.Value.SetVisible(false);
+          }
+        }
       }
     }
     public void AssignSimulator(SystemHeatSimulator sim)
@@ -233,9 +290,19 @@ namespace SystemHeat.UI
 
     private void SetLoopVisiblity(bool visible)
     {
-      foreach (KeyValuePair<int, OverlayLoop> kvp in overlayLoops)
+      if (simulator != null)
       {
-        kvp.Value.SetVisible(visible);
+        foreach (KeyValuePair<int, OverlayLoop> kvp in overlayLoops)
+        {
+          kvp.Value.SetVisible(visible);
+        }
+      } 
+      else
+      {
+        foreach (KeyValuePair<int, OverlayLoop> kvp in overlayLoops)
+        {
+          kvp.Value.SetVisible(false);
+        }
       }
     }
   }

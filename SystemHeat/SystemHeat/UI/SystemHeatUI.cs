@@ -35,10 +35,13 @@ namespace SystemHeat.UI
     {
       if (SystemHeatSettings.DebugUI)
         Utils.Log("[SystemHeatUI]: Initializing toolbar");
+
       GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
       GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
-      GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(OnVesselChanged));
+      
       GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
+      GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(OnVesselChanged));
+
       Instance = this;
     }
 
@@ -152,7 +155,8 @@ namespace SystemHeat.UI
         }
         if (HighLogic.LoadedSceneIsEditor)
         {
-          toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL();
+          if (stockToolbarButton != null)
+            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL();
           
         }
       }
@@ -162,8 +166,10 @@ namespace SystemHeat.UI
       FindSimulator(v);
       if (SystemHeatSettings.DebugUI)
         Utils.Log($"[UI]: OnVesselChanged Fired to {v.vesselName}");
+
       SystemHeatOverlay.Instance.ClearPanels();
       SystemHeatOverlay.Instance.AssignSimulator(simulator);
+
       if (toolbarPanel)
         toolbarPanel.AssignSimulator(simulator);
       
@@ -193,6 +199,7 @@ namespace SystemHeat.UI
 
     protected void OnGUIAppLauncherReady()
     {
+      showWindow = false;
       if (SystemHeatSettings.DebugUI)
         Utils.Log("[UI]: App Launcher Ready");
       if (ApplicationLauncher.Ready && stockToolbarButton == null)

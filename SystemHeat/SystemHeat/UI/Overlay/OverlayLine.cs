@@ -28,29 +28,27 @@ namespace SystemHeat.UI
       if (HighLogic.LoadedSceneIsFlight)
       {
         VectorLine.SetCamera3D(FlightCamera.fetch.mainCamera);
-        //VectorLine.canvas.worldCamera = UIMasterController.Instance.vectorCamera;
       }
       
-      //VectorLine.canvas.renderMode = RenderMode.ScreenSpaceCamera;
-      //VectorLine.canvas.sortingLayerName = UIMasterController.Instance.appCanvas.sortingLayerName;
-      //VectorLine.canvas.sortingLayerID = UIMasterController.Instance.appCanvas.sortingLayerID;
-      //VectorLine.canvas.planeDistance = 200f;
-      //VectorLine.canvas.worldCamera = UIMasterController.Instance.uiCamera;
-      //VectorLine.canvas.gameObject.SetLayerRecursive(0);
-
       lineColor = SystemHeatSettings.GetLoopColor(loop.ID);
     }
     public void UpdatePositions(List<Vector3> positions)
     {
-      line.points3 = positions;
-      line.SetColor(lineColor);
-      line.Draw3D();
-    }
+      if (line != null)
+      {
+        
+        if (HighLogic.LoadedSceneIsEditor)
+        {
+          Utils.Log("Update posistions in editor");
+          VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
+        }
+        line.points3 = positions;
+        line.SetColor(lineColor);
 
-    public void Draw()
-    {
-      line.Draw3D();
+        line.Draw3D();
+      }
     }
+    
     public void UpdateGlow(float currentTemp, float nominalTemp)
     {
       if (currentTemp <= nominalTemp)
