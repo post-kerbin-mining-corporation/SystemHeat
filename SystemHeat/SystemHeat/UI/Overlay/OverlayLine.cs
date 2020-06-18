@@ -18,17 +18,19 @@ namespace SystemHeat.UI
     {
       Utils.Log($"[OverlayLine]: building line for loop ID {loop.ID}");
 
-      line = new VectorLine($"SystemHeat_Loop{loop.ID}_VectorLine", new List<Vector3>(), SystemHeatSettings.OverlayBaseLineWidth, LineType.Continuous, Joins.Weld);
-      line.layer = 0;
-      line.material = new Material(Shader.Find("GUI/Text Shader"));
-      line.material.renderQueue = 3000;
+     
+
       if (HighLogic.LoadedSceneIsEditor)
-        VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
+        VectorLine.SetCamera3D(EditorLogic.fetch.editorCamera);
 
       if (HighLogic.LoadedSceneIsFlight)
       {
         VectorLine.SetCamera3D(FlightCamera.fetch.mainCamera);
       }
+      line = new VectorLine($"SystemHeat_Loop{loop.ID}_VectorLine", new List<Vector3>(), SystemHeatSettings.OverlayBaseLineWidth, LineType.Continuous, Joins.Weld);
+      line.layer = 0;
+      line.material = new Material(Shader.Find("GUI/Text Shader"));
+      line.material.renderQueue = 3000;
       
       lineColor = SystemHeatSettings.GetLoopColor(loop.ID);
     }
@@ -36,15 +38,9 @@ namespace SystemHeat.UI
     {
       if (line != null)
       {
-        
-        if (HighLogic.LoadedSceneIsEditor)
-        {
-          Utils.Log("Update posistions in editor");
-          VectorLine.SetCanvasCamera(EditorLogic.fetch.editorCamera);
-        }
+        //Debug.Log($"Line Pos: {line.rectTransform.rotation}, Rot: {line.rectTransform.position}");
         line.points3 = positions;
         line.SetColor(lineColor);
-
         line.Draw3D();
       }
     }

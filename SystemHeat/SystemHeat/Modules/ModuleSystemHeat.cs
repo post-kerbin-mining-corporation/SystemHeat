@@ -234,7 +234,7 @@ namespace SystemHeat
         totalSystemFlux = fluxes.Sum(x => x.Value);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
-        systemNominalTemperature = totalSystemTemperature / count;
+        systemNominalTemperature = temperatures.Values.ToList().Where(x => x >= 0f).Average();
       }
     }
 
@@ -248,7 +248,7 @@ namespace SystemHeat
     protected void FixedUpdate()
     {
       SystemFluxUI = String.Format("{0:F0} kW", totalSystemFlux);
-      SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", LoopTemperature, totalSystemTemperature);
+      SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", LoopTemperature, nominalLoopTemperature);
     }
 
 

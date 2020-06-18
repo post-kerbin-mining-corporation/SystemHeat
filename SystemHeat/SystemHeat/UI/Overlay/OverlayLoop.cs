@@ -57,6 +57,7 @@ namespace SystemHeat.UI
           pos3d[i] = pos3d[i];
         if (HighLogic.LoadedSceneIsFlight)
           pos3d[i] = heatLoop.LoopModules[0].part.vessel.vesselTransform.TransformPoint(pos3d[i]);
+        
       }
       overlayLine.UpdatePositions(pos3d);
     }

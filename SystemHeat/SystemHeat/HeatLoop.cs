@@ -197,7 +197,8 @@ namespace SystemHeat
           {
             if (deltaTemperatureIdeal <= 0)
               Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-            Temperature += deltaTemperatureIdeal * scale;
+            else 
+              Temperature += deltaTemperatureIdeal * scale;
           }
 
         }

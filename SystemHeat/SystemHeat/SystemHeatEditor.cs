@@ -124,8 +124,8 @@ namespace SystemHeat
     }
     public void onEditorPartDeleted(Part part)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log($"[SystemHeatEditor]: Part {part.name }Deleted");
+      if (SystemHeatSettings.DebugSimulation && part != null)
+        Utils.Log($"[SystemHeatEditor]: Part {part.name} Deleted");
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       InitializeEditorConstruct(EditorLogic.fetch.ship, false);
