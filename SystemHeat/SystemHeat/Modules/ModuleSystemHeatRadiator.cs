@@ -21,15 +21,15 @@ namespace SystemHeat
     public string systemHeatModuleID;
 
     // This should map system temperature to heat radiated
-    [KSPField(isPersistant = true)]
+    [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve = new FloatCurve();
 
     // Current status GUI string
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Radiator Status")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Radiator Status")]
     public string RadiatorStatus = "Offline";
 
     // Current efficiency GUI string
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Radiator Efficiency")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Radiator Efficiency")]
     public string RadiatorEfficiency = "-1%";
 
 

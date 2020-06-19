@@ -82,7 +82,6 @@
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />
     <Compile Include="Modules\ModuleSystemHeatHarvester.cs" />
     <Compile Include="Modules\ModuleSystemHeatRadiator.cs" />
-    <Compile Include="Modules\ModuleSystemHeatReactor.cs" />
     <Compile Include="ModuleUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemHeat.cs" />

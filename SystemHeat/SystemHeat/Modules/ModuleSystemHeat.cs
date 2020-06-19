@@ -30,7 +30,7 @@ namespace SystemHeat
     public float totalSystemTemperature = 0f;
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = true)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
     public float totalSystemFlux = 0f;
 
     public float systemNominalTemperature = 0f;
@@ -59,11 +59,11 @@ namespace SystemHeat
 
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = true)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
     public string SystemFluxUI = "-";
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Temperature", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = true)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Temperature", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
     public int LoopID {
@@ -219,11 +219,9 @@ namespace SystemHeat
       {
 
         fluxes[id] = flux;
-
-        int count = 0;
+        
         if (flux >= 0f)
         {
-          count++;
           temperatures[id] = sourceTemperature;
         }
         else
@@ -234,7 +232,7 @@ namespace SystemHeat
         totalSystemFlux = fluxes.Sum(x => x.Value);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
-        systemNominalTemperature = temperatures.Values.ToList().Where(x => x >= 0f).Average();
+        systemNominalTemperature = totalSystemTemperature / (fluxes.Values.ToList().Where(x => x > 0f).Count());
       }
     }
 

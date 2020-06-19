@@ -23,7 +23,7 @@ namespace SystemHeat
 
     // The engine module to generate heat off of
     [KSPField(isPersistant = false)]
-    public string engineModuleID;
+    public string engineModuleID = "";
 
     // The current system temperature
     [KSPField(isPersistant = false)]
@@ -54,6 +54,7 @@ namespace SystemHeat
 
     protected ModuleSystemHeat heatModule;
     protected ModuleEngines engineModule;
+    protected MultiModeEngine multiModule;
 
     public override string GetModuleDisplayName()
     {
@@ -75,8 +76,15 @@ namespace SystemHeat
 
     public void Start()
     {
-      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
-      engineModule = ModuleUtils.FindNamedComponent<ModuleEngines>(this.part, engineModuleID);
+      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
+
+      if (engineModuleID != "")
+        engineModule = this.GetComponents<ModuleEngines>().ToList().Find(x => x.engineID == engineModuleID);
+      else
+        engineModule = this.GetComponent<ModuleEngines>();
+
+      multiModule = this.GetComponent<MultiModeEngine>();
+
       if (SystemHeatSettings.DebugModules)
       {
         Utils.Log("[ModuleSystemHeatEngine] Setup completed");
@@ -110,12 +118,33 @@ namespace SystemHeat
     {
 
       float engineFraction = 0f;
-      if (engineModule.isActiveAndEnabled)
+      if (multiModule != null)
+      {
+        if ((multiModule.runningPrimary && engineModuleID == multiModule.primaryEngineID) || (!multiModule.runningPrimary && engineModuleID == multiModule.secondaryEngineID))
+        {
           engineFraction = engineModule.thrustPercentage / 100f;
+          Fields["systemHeatGeneration"].guiActiveEditor = true;
+          Fields["systemTemperature"].guiActiveEditor = true;
+          heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+          systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+        } else
+        {
+          
+          systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+          heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
+          Fields["systemHeatGeneration"].guiActiveEditor = false;
+          Fields["systemTemperature"].guiActiveEditor = false;
 
-      systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
-      heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction* systemPower);
-
+        }
+      } else
+      {
+        engineFraction = engineModule.thrustPercentage / 100f;
+        Fields["systemHeatGeneration"].guiActiveEditor = true;
+        Fields["systemTemperature"].guiActiveEditor = true;
+        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+        systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
+      }
+      
     }
 
     /// <summary>
@@ -124,16 +153,23 @@ namespace SystemHeat
     protected void GenerateHeatFlight()
     {
       float engineFraction = 0f;
-      if (engineModule.isActiveAndEnabled)
+      if (engineModule.EngineIgnited)
       {
         engineFraction = engineModule.requestedThrottle;
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+        Fields["systemHeatGeneration"].guiActive = true;
+        Fields["systemTemperature"].guiActive = true;
+        systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+        systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
       } else
       {
         heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
+        Fields["systemHeatGeneration"].guiActive = false;
+        Fields["systemTemperature"].guiActive = false;
+        systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+        systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
       }
-      systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
-      systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
+      
 
     }
     protected void UpdateSystemHeatFlight()

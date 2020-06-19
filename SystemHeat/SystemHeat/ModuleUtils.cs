@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using KSP.Localization;
 
 namespace SystemHeat
 {
@@ -59,6 +60,19 @@ namespace SystemHeat
       return _recipe;
     }
 
+    // Check the current EVA engineer's level
+    public static bool CheckEVAEngineerLevel(int level)
+    {
+      ProtoCrewMember kerbal = FlightGlobals.ActiveVessel.GetVesselCrew()[0];
+      if (kerbal.experienceTrait.TypeName == Localizer.Format("#autoLOC_500103") && kerbal.experienceLevel >= level)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
 
 
 
