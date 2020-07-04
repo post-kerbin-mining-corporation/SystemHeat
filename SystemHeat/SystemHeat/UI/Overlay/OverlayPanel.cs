@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using KSP.Localization;
 
 namespace SystemHeat.UI
 {
@@ -15,7 +11,7 @@ namespace SystemHeat.UI
     public RectTransform rect;
     public GameObject infoPanel;
     public GameObject icon;
-
+    public RectTransform infoPanelTop;
     public Image colorRing;
     public Image colorRingAnimated;
     public Image systemIcon;
@@ -25,7 +21,7 @@ namespace SystemHeat.UI
     public Image heatIconGlow;
 
     public Button iconButton;
-
+    
     public Text infoPanelTitle;
     public Text infoPanelUpperText;
     public Text infoPanelLowerText;
@@ -55,6 +51,8 @@ namespace SystemHeat.UI
       systemIconBackground = transform.FindDeepChild("InfoIconBackground").GetComponent<Image>();
       iconButton = transform.FindDeepChild("InfoIconBackground").GetComponent<Button>();
 
+      infoPanelTop = transform.FindDeepChild("InfoPanelTop").GetComponent<RectTransform>();
+
       infoPanelTitle = transform.FindDeepChild("InfoPanelTitleText").GetComponent<Text>();
       infoPanelUpperText = transform.FindDeepChild("InfoPanelTopText").GetComponent<Text>();
       infoPanelLowerText = transform.FindDeepChild("InfoPanelBottomText").GetComponent<Text>();
@@ -79,8 +77,17 @@ namespace SystemHeat.UI
       {
         if (panelOpen)
         {
-          infoPanelUpperText.text = $"Temperature Output {heatModule.systemNominalTemperature.ToString("F0")} K \nHeat Output {heatModule.totalSystemFlux.ToString("F0")} kW";
-          infoPanelLowerText.text = $"<b>Loop Status</b>\n Temperature {loop.Temperature.ToString("F0")}/{loop.NominalTemperature.ToString("F0")} K \n Net Flux {loop.NetFlux.ToString("F0")} kW";
+          if (heatModule.totalSystemFlux < 0f)
+          {
+            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", heatModule.totalSystemFlux.ToString("F0"));
+            infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 26f);
+          } else
+          {
+            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", heatModule.systemNominalTemperature.ToString("F0"), heatModule.totalSystemFlux.ToString("F0"));
+            infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 48f);
+          }
+          
+          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), loop.NetFlux.ToString("F0"));
         }
 
         if ((loop.NominalTemperature > heatModule.systemNominalTemperature || loop.Temperature > heatModule.systemNominalTemperature) && !heatIconBackground.enabled)

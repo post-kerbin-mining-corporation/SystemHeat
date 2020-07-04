@@ -53,7 +53,7 @@ namespace SystemHeat
     // The minimum number of time steps to take in a simulation frame
     public static int MinSteps = 1;
     // The maximum number of time steps to take in a simulation frame
-    public static int MaxSteps = 25;
+    public static int MaxSteps = 30;
     // The standard timestep in the editor
     public static float SimulationRateEditor = 1f;
     
@@ -164,8 +164,8 @@ namespace SystemHeat
     {
       Name = node.GetValue("name");
       Title = Localizer.Format(node.GetValue("title"));
-      float density = 1f;
-      float heatCap = 1f;
+      float density = 1000f;
+      float heatCap = 4f;
       node.TryGetValue("density", ref density);
       node.TryGetValue("heatCapacity", ref heatCap);
 

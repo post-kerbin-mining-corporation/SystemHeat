@@ -88,9 +88,11 @@ namespace SystemHeat
         if (simulator != null && forceReset)
         {
           simulator.Reset(ship.Parts);
+          simulator.ResetTemperatures();
         } else
         {
           simulator.Refresh(ship.Parts);
+          simulator.ResetTemperatures();
         }
 
         dataReady = true;

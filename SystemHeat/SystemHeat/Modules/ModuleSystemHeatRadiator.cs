@@ -25,11 +25,11 @@ namespace SystemHeat
     public FloatCurve temperatureCurve = new FloatCurve();
 
     // Current status GUI string
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Radiator Status")]
+    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
     public string RadiatorStatus = "Offline";
 
     // Current efficiency GUI string
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Radiator Efficiency")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title")]
     public string RadiatorEfficiency = "-1%";
 
 
@@ -38,7 +38,9 @@ namespace SystemHeat
     public override void Start()
     {
       base.Start();
-      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
+      if (heatModule == null)
+        heatModule.GetComponent<ModuleSystemHeat>();
       if (SystemHeatSettings.DebugModules)
       {
         Utils.Log("[ModuleSystemHeatRadiator] Setup completed");
@@ -48,11 +50,11 @@ namespace SystemHeat
     {
       // Need to update this to strip the CoreHeat stuff from it
       string message = base.GetInfo();
-      message += String.Format("<b><color=>System Heat Radiation</color></b>\n - {1:F0} kW at {0:F0} K\n - {2:F0} kW at {3:F0} K", 
-        temperatureCurve.Curve.keys[0].time, 
-        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time),
-        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time),
-        temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time
+      message += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo", 
+        temperatureCurve.Curve.keys[0].time.ToString("F0"), 
+        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
+        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time).ToString("F0"),
+        temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
         );
       return message;
     }
@@ -60,36 +62,33 @@ namespace SystemHeat
     public override void FixedUpdate()
     {
       base.FixedUpdate();
+
       if (heatModule != null)
       {
+        //Utils.Log($"{0} {temperatureCurve.Evaluate(0f)}\n{350f} {temperatureCurve.Evaluate(350f)}\n{1000} {temperatureCurve.Evaluate(1000f)}\n");
         if (HighLogic.LoadedSceneIsFlight)
         {
           if (base.IsCooling)
           {
             float flux = -temperatureCurve.Evaluate(heatModule.currentLoopTemperature);
             heatModule.AddFlux(moduleID, 0f, flux);
-            RadiatorEfficiency = $"{(temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.maxTime)) * 100f}%";
+            RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running", (flux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
           }
           else
           {
 
             heatModule.AddFlux(moduleID, 0f, 0f);
-            RadiatorEfficiency = $"Radiator Offline";
+            RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
           }
         }
 
         if (HighLogic.LoadedSceneIsEditor)
         {
-          // We only cool if the loop is too hot.
-          if (heatModule.currentLoopTemperature > heatModule.nominalLoopTemperature)
-          {
-            heatModule.AddFlux(moduleID, temperatureCurve.maxTime, -temperatureCurve.Evaluate(temperatureCurve.maxTime));
-          }
-          else
-          {
-            heatModule.AddFlux(moduleID, temperatureCurve.maxTime, -temperatureCurve.Evaluate(temperatureCurve.maxTime));
-          }
-          RadiatorEfficiency = String.Format("{0}%",(temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.maxTime)) * 100f);
+          float flux = -1.0f * temperatureCurve.Evaluate(heatModule.currentLoopTemperature);
+          heatModule.AddFlux(moduleID, 0f, flux);
+
+          //Utils.Log($"BLAH {heatModule.LoopTemperature} {flux} {temperatureCurve.Evaluate(heatModule.LoopTemperature)}");
+          RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running", ((temperatureCurve.Evaluate(heatModule.currentLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
         }
       }
     }

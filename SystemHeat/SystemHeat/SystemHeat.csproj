@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayUtils.cs" />
+    <Compile Include="EngineerReport\SystemHeatTests.cs" />
     <Compile Include="HeatLoop.cs" />
     <Compile Include="Modules\ModuleSystemHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemHeat.cs" />
     <Compile Include="SystemHeatEditor.cs" />
+    <Compile Include="EngineerReport\SystemHeatEngineerReport.cs" />
     <Compile Include="SystemHeatSimulator.cs" />
     <Compile Include="SystemHeatVessel.cs" />
     <Compile Include="UI\DebugUI\SystemHeatDebugUI.cs" />

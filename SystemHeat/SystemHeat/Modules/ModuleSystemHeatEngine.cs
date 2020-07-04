@@ -77,10 +77,13 @@ namespace SystemHeat
     public void Start()
     {
       heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
+      if (heatModule == null)
+        heatModule.GetComponent<ModuleSystemHeat>();
 
       if (engineModuleID != "")
         engineModule = this.GetComponents<ModuleEngines>().ToList().Find(x => x.engineID == engineModuleID);
-      else
+      
+      if (engineModule == null)
         engineModule = this.GetComponent<ModuleEngines>();
 
       multiModule = this.GetComponent<MultiModeEngine>();
@@ -127,7 +130,8 @@ namespace SystemHeat
           Fields["systemTemperature"].guiActiveEditor = true;
           heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
           systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
-        } else
+        }
+        else
         {
           
           systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
@@ -136,8 +140,10 @@ namespace SystemHeat
           Fields["systemTemperature"].guiActiveEditor = false;
 
         }
-      } else
+      }
+      else
       {
+        
         engineFraction = engineModule.thrustPercentage / 100f;
         Fields["systemHeatGeneration"].guiActiveEditor = true;
         Fields["systemTemperature"].guiActiveEditor = true;
