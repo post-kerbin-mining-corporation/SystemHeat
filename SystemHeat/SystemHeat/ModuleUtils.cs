@@ -103,5 +103,93 @@ namespace SystemHeat
 
       return module;
     }
+
+    // Converts to a time string from a seconds, accounting for kerbal time
+    public static string FormatTimeString(double seconds)
+    {
+      double dayLength;
+      double yearLength;
+      double rem;
+      if (GameSettings.KERBIN_TIME)
+      {
+        dayLength = 6d;
+        yearLength = 426d;
+      }
+      else
+      {
+        dayLength = 24d;
+        yearLength = 365d;
+      }
+
+      int years = (int)(seconds / (3600.0d * dayLength * yearLength));
+      rem = seconds % (3600.0d * dayLength * yearLength);
+      int days = (int)(rem / (3600.0d * dayLength));
+      rem = rem % (3600.0d * dayLength);
+      int hours = (int)(rem / (3600.0d));
+      rem = rem % (3600.0d);
+      int minutes = (int)(rem / (60.0d));
+      rem = rem % (60.0d);
+      int secs = (int)rem;
+
+      string result = "";
+
+      // draw years + days
+      if (years > 0)
+      {
+        result += years.ToString() + "y ";
+        result += days.ToString() + "d ";
+        result += hours.ToString() + "h ";
+        result += minutes.ToString() + "m";
+      }
+      else if (days > 0)
+      {
+        result += days.ToString() + "d ";
+        result += hours.ToString() + "h ";
+        result += minutes.ToString() + "m ";
+        result += secs.ToString() + "s";
+      }
+      else if (hours > 0)
+      {
+        result += hours.ToString() + "h ";
+        result += minutes.ToString() + "m ";
+        result += secs.ToString() + "s";
+      }
+      else if (minutes > 0)
+      {
+        result += minutes.ToString() + "m ";
+        result += secs.ToString() + "s";
+      }
+      else if (seconds > 0)
+      {
+        result += secs.ToString() + "s";
+      }
+      else
+      {
+        result = "None";
+      }
+
+
+      return result;
+    }
+
+    public static double CalculateDecimalYears(double seconds)
+    {
+      double dayLength;
+      double yearLength;
+
+      if (GameSettings.KERBIN_TIME)
+      {
+        dayLength = 6d;
+        yearLength = 426d;
+      }
+      else
+      {
+        dayLength = 24d;
+        yearLength = 365d;
+      }
+      double decYears = seconds / 60d / 60d / dayLength / yearLength;
+
+      return decYears;
+    }
   }
 }

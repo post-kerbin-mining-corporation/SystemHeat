@@ -167,11 +167,14 @@ namespace SystemHeat
       float currentNetFlux = CalculateNetFlux();
       float currentPositiveFlux = CalculatePositiveFlux();
       float absFlux = Mathf.Abs(currentNetFlux);
+
+      AllocateFlux(currentPositiveFlux);
       NetFlux = currentNetFlux;
 
       // Determine the ideal change in temperature
       float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-     // Utils.Log($"Loop {ID} start temp {Temperature}, calculated delta {deltaTemperatureIdeal}");
+      
+
       // Flux has be be higher than a tolerance threshold in order to do things
       if (absFlux > SystemHeatSettings.AbsFluxThreshold)
       {
@@ -199,12 +202,14 @@ namespace SystemHeat
               Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
             else 
               Temperature += deltaTemperatureIdeal * scale;
+
+            Temperature = Mathf.Clamp(Temperature, 0f, NominalTemperature);
           }
 
         }
         else
         {
-          // Unlikely case of perfectly stable flux
+          // Unlikely case of perfectly stable flux, do nothing
         }
 
       }
@@ -217,7 +222,24 @@ namespace SystemHeat
         modules[i].UpdateSimulationValues(NominalTemperature, Temperature, NetFlux);
       }
     }
+    protected void AllocateFlux(float totalFlux)
+    {
+      // Get all consuming systems
+      List<ModuleSystemHeat> orderedConsumers = modules.Where(x => x.totalSystemFlux < 0f).OrderByDescending(x => x.priority).ToList();
+      for (int i=0; i< orderedConsumers.Count;  i++)
+      {
+        totalFlux += orderedConsumers[i].totalSystemFlux; 
+        if (totalFlux < 0f)
+        {
+          orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux - totalFlux;
+        } else
+        {
+          orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux;
+        }
+      }
 
+
+    }
     protected float GetEnvironmentTemperature()
     {
       if (HighLogic.LoadedSceneIsEditor)

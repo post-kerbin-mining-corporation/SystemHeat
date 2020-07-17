@@ -20,6 +20,10 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public string iconName = "Icon_Gears";
 
+    // Priority
+    [KSPField(isPersistant = false)]
+    public float priority = 1f;
+
     // Volume of coolant provided by this system in m3
     [KSPField(isPersistant = false)]
     public float volume = 10f;
@@ -32,6 +36,9 @@ namespace SystemHeat
     // Current total system flux of all associated modules
     [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
     public float totalSystemFlux = 0f;
+
+    public float consumedSystemFlux = 0f;
+
 
     public float systemNominalTemperature = 0f;
 
@@ -139,7 +146,6 @@ namespace SystemHeat
 
     private void ChangeLoop(BaseField field, object oldFieldValueObj)
     {
-
       if (HighLogic.LoadedSceneIsFlight)
       {
         if (SystemHeatSettings.DebugSimulation)
