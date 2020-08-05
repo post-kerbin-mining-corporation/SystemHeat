@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using KSP.Localization;
 using UnityEngine;
 
 namespace SystemHeat
@@ -20,13 +20,14 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public string iconName = "Icon_Gears";
 
-    // Priority
-    [KSPField(isPersistant = false)]
-    public float priority = 1f;
-
     // Volume of coolant provided by this system in m3
     [KSPField(isPersistant = false)]
     public float volume = 10f;
+
+
+    // 
+    [KSPField(isPersistant = false)]
+    public int priority = 1;
 
     //  -- System level data storage --
     // Current total system temperature of all associated modules
@@ -34,7 +35,7 @@ namespace SystemHeat
     public float totalSystemTemperature = 0f;
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public float totalSystemFlux = 0f;
 
     public float consumedSystemFlux = 0f;
@@ -44,7 +45,7 @@ namespace SystemHeat
 
     // -- Loop level data storage --
     // Loop that this system is part of
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Loop ID")]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_LoopID", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName")]
     [UI_ChooseOption(affectSymCounterparts = UI_Scene.Editor, options = new[] { "None" }, scene = UI_Scene.All, suppressEditorShipModified = false)]
     public int currentLoopID = 0;
 
@@ -66,11 +67,11 @@ namespace SystemHeat
 
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemFlux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemFluxUI = "-";
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Temperature", groupName = "sysheatinfo", groupDisplayName = "System Heat", groupStartCollapsed = false)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
     public int LoopID {
@@ -106,7 +107,20 @@ namespace SystemHeat
     protected Dictionary<string, float> fluxes;
     protected Dictionary<string, float> temperatures;
     protected List<int> loopIDs;
-   
+
+    public override string GetModuleDisplayName()
+    {
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeat_DisplayName");
+    }
+
+    public override string GetInfo()
+    {
+      string msg = "";
+
+      msg += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeat_PartInfo", volume.ToString("F2"));
+      return msg;
+    }
+
     public void Start()
     {
 

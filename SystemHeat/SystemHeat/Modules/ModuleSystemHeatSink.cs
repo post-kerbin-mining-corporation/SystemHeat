@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using UnityEngine;
-
+using KSP.Localization;
 
 namespace SystemHeat
 {
   /// <summary>
-  /// A module to generate SystemHeat from an engine module
+  /// A module to provide a heat sink
   /// </summary>
   public class ModuleSystemHeatSink : PartModule
   {
@@ -18,21 +18,19 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public string systemHeatModuleID;
 
+    // The max kW the heat sink can consume at once
+    [KSPField(isPersistant = false)]
+    public float maxHeatRate = 500f;
+    
+    /// Is the storage enabled?
     [KSPField(isPersistant = true)]
     public bool storageEnabled = true;
 
-    // The max kW to consume
-    [KSPField(isPersistant = false)]
-    public float maxHeatRate = 500f;
-
-    /// <summary>
-    ///  Heat storage params
-    /// </summary>
-    /// // The max heat stored by the part, in kJ
+    /// // The current  heat stored by the part, in kJ
     [KSPField(isPersistant = true)]
     public float heatStored = 0f;
 
-    /// // The max heat stored by the part, in kJ
+    /// // The temperature of the storage in the part, in K
     [KSPField(isPersistant = true)]
     public float storageTemperature = 0f;
 
@@ -49,46 +47,53 @@ namespace SystemHeat
     public float heatStorageSpecificHeat = 1.26f;
 
 
-    /// <summary>
-    /// Evaporator stuff
-    /// </summary>
-    /// 
-
-    [KSPField(isPersistant = false)]
-    public bool allowOpenCycle = false;
-
-    [KSPField(isPersistant = true)]
-    public bool OpenCycleEnabled = false;
-
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Resource")]
-    [UI_ChooseOption(affectSymCounterparts = UI_Scene.Editor, options = new[] { "None" }, scene = UI_Scene.All, suppressEditorShipModified = false)]
-    public int resourceID = 0;
-
+    // Safety override 
+    [KSPField(isPersistant = true, guiActive = false, guiName = "Dump rate", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 1500f, stepIncrement = 10f)]
+    public float heatStorageDumpRate = 500f;
 
     // UI Fields
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Storage Accepted")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Storage Accepted", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemHeatGeneration = "";
 
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Storage Temperature")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Storage Temperature", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemTemperature = "";
 
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Heat Stored")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Storage Capacity Used", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemHeatStored = "";
 
+
+    /// KSPEVENTS
+    /// ----------------------
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Store Heat", active = true, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
+    public void EnableStorage()
+    {
+      storageEnabled = true;
+    }
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Dispense Heat", active = false, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
+    public void DisableStorage()
+    {
+      storageEnabled = false;
+    }
+
+   
     protected ModuleSystemHeat heatModule;
 
     public override string GetModuleDisplayName()
     {
-      return "Heat Sink";
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_ModuleName");
     }
 
     public override string GetInfo()
     {
-      string msg = "";
-      return msg;
+      // Need to update this to strip the CoreHeat stuff from it
+      string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_PartInfo",
+        (heatStorageMaximum/1000f).ToString("F0"),
+        maxHeatRate.ToString("F0")
+        );
+      return message;
     }
 
     public void Start()
@@ -101,19 +106,37 @@ namespace SystemHeat
       {
         Utils.Log("[ModuleSystemHeatSink] Setup completed");
       }
+
+      SetupUI();
     }
     void SetupUI()
     {
-      BaseField chooseField = Fields["currentLoopID"];
-      UI_ChooseOption chooseOption = HighLogic.LoadedSceneIsFlight ? chooseField.uiControlFlight as UI_ChooseOption : chooseField.uiControlEditor as UI_ChooseOption;
-      chooseOption.options = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-      chooseOption.onFieldChanged = ChangeResource;
+   
+      var range = (UI_FloatRange)this.Fields["heatStorageDumpRate"].uiControlFlight;
+      range.minValue = 0f;
+      range.maxValue = maxHeatRate;
+
     }
 
     public void ChangeResource(BaseField field, object oldFieldValueObj)
     {
 
     }
+    public void Update()
+    {
+      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
+      {
+        if (Events["EnableStorage"].active == storageEnabled || Events["DisableStorage"].active != storageEnabled)
+        {
+          Fields["heatStorageDumpRate"].guiActive = !storageEnabled;
+          Events["DisableStorage"].active = storageEnabled;
+          Events["EnableStorage"].active = !storageEnabled;
+        }
+        
+       
+      }
+    }
+
 
     public void FixedUpdate()
     {
@@ -124,7 +147,7 @@ namespace SystemHeat
       {
         GenerateHeatFlight();
         systemTemperature = String.Format("{0} K", storageTemperature.ToString("F0"));
-        systemHeatStored = String.Format("{0}/{1} kJ", heatStored.ToString("F0"), heatStorageMaximum.ToString("F0"));
+        systemHeatStored = String.Format("{0}%", (heatStored/heatStorageMaximum *100f).ToString("F0"));
         systemHeatGeneration = String.Format("{0}/{1} kW", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
 
       }
@@ -147,17 +170,19 @@ namespace SystemHeat
       if (storageEnabled && heatStored < heatStorageMaximum)
       {
         heatModule.AddFlux(moduleID, 0f, -maxHeatRate);
+        Fields["systemHeatGeneration"].guiName = "Storage Accepted";
         if (heatModule.currentLoopTemperature >= heatModule.nominalLoopTemperature)
         {
-          storageTemperature = storageTemperature + (-heatModule.consumedSystemFlux) / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT
+          storageTemperature = Mathf.Clamp(storageTemperature + (-heatModule.consumedSystemFlux) / (heatStorageSpecificHeat * heatStorageMass), 0f, 5000f); // Q = mcT
           heatStored = Mathf.Clamp(heatStored + (-heatModule.consumedSystemFlux) * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
         }
       }
       else if (!storageEnabled && heatStored > 0f)
       {
-        heatModule.AddFlux(moduleID, storageTemperature, maxHeatRate);
-        heatStored = Mathf.Clamp(heatStored - maxHeatRate * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
-        storageTemperature = storageTemperature - maxHeatRate * TimeWarp.fixedDeltaTime / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT
+        Fields["systemHeatGeneration"].guiName = "Storage Dumping";
+        heatModule.AddFlux(moduleID, storageTemperature, heatStorageDumpRate);
+        heatStored = Mathf.Clamp(heatStored - heatStorageDumpRate * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
+        storageTemperature = storageTemperature - heatStorageDumpRate * TimeWarp.fixedDeltaTime / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT
       }
 
       else

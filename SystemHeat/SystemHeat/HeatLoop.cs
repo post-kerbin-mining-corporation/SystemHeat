@@ -228,14 +228,29 @@ namespace SystemHeat
       List<ModuleSystemHeat> orderedConsumers = modules.Where(x => x.totalSystemFlux < 0f).OrderByDescending(x => x.priority).ToList();
       for (int i=0; i< orderedConsumers.Count;  i++)
       {
-        totalFlux += orderedConsumers[i].totalSystemFlux; 
-        if (totalFlux < 0f)
+        if (totalFlux <= 0f)
         {
-          orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux - totalFlux;
-        } else
-        {
-          orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux;
+          orderedConsumers[i].consumedSystemFlux = 0f;
         }
+        else
+        {
+          if (totalFlux + orderedConsumers[i].totalSystemFlux >= 0f)
+          {
+            totalFlux += orderedConsumers[i].totalSystemFlux;
+            orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux;
+          }
+          if (totalFlux + orderedConsumers[i].totalSystemFlux == 0f)
+          {
+            orderedConsumers[i].consumedSystemFlux = 0f;
+            totalFlux = 0f;
+          }
+          if (totalFlux + orderedConsumers[i].totalSystemFlux < 0f)
+          {
+            orderedConsumers[i].consumedSystemFlux = - totalFlux;
+            totalFlux = 0f;
+          }
+        }
+        
       }
 
 

@@ -46,16 +46,21 @@ namespace SystemHeat
         Utils.Log("[ModuleSystemHeatRadiator] Setup completed");
       }
     }
+
+    public override string GetModuleDisplayName()
+    {
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_DisplayName");
+    }
     public override string GetInfo()
     {
       // Need to update this to strip the CoreHeat stuff from it
-      string message = base.GetInfo();
-      message += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo", 
+      string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo", 
         temperatureCurve.Curve.keys[0].time.ToString("F0"), 
         temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
         temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time).ToString("F0"),
         temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
         );
+      message += base.GetInfo();
       return message;
     }
 

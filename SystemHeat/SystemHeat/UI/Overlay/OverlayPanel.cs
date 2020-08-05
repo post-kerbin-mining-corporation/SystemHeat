@@ -83,11 +83,11 @@ namespace SystemHeat.UI
             infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 26f);
           } else
           {
-            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", heatModule.systemNominalTemperature.ToString("F0"), heatModule.totalSystemFlux.ToString("F0"));
+            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperText", heatModule.systemNominalTemperature.ToString("F0"), heatModule.totalSystemFlux.ToString("F0"));
             infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 48f);
           }
           
-          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), loop.NetFlux.ToString("F0"));
+          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), loop.NetFlux.ToString("F0"), loop.Volume.ToString("F2"));
         }
 
         if ((loop.NominalTemperature > heatModule.systemNominalTemperature || loop.Temperature > heatModule.systemNominalTemperature) && !heatIconBackground.enabled)
