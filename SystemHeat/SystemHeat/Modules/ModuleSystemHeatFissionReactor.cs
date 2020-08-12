@@ -362,6 +362,9 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsEditor)
       {
         HandleHeatGenerationEditor();
+        if (GeneratesElectricity)
+          CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
+          
       }
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -503,6 +506,8 @@ namespace SystemHeat
 
       if (GeneratesElectricity)
       {
+        if (HighLogic.LoadedSceneIsEditor)
+          CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentReactorThrottle);
         if (fuelCheckPassed)
         {
           foreach (ResourceRatio ratio in outputs)

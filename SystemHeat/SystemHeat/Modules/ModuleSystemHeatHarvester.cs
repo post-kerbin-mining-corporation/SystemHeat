@@ -92,7 +92,7 @@ namespace SystemHeat
       {
         GenerateHeatEditor();
 
-        Fields["ConverterEfficiency"].guiActiveEditor = editorThermalSim;
+        Fields["HarvesterEfficiency"].guiActiveEditor = editorThermalSim;
 
       }
       HarvesterEfficiency = String.Format("{0}%", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));

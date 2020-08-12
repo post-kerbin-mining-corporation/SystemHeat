@@ -35,6 +35,11 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureDeltaCostCurve = new FloatCurve();
 
+    // This should correspond to the related ModuleSystemHeat
+    [KSPField(isPersistant = false)]
+    public float CurrentPowerConsumption;
+
+
     // UI Fields
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Status", groupName = "heatadjuster", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string Status = "";
@@ -42,7 +47,7 @@ namespace SystemHeat
 
     /// KSPEVENTS
     /// ----------------------
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Enable Compressor", active = true, groupName = "heatadjuster", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Enable Compressor", active = true, groupName = "heatadjuster", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
     public void EnableAdjuster()
     {
       Enabled = true;
@@ -120,10 +125,12 @@ namespace SystemHeat
         float tDelta = LoopGoalTemperature - CalculateNominalTemperature();
         float heatToAdd = temperatureDeltaHeatCurve.Evaluate(tDelta);
         heatModule.AddFlux(moduleID, tDelta, heatToAdd);
+        CurrentPowerConsumption = -temperatureDeltaCostCurve.Evaluate(tDelta);
       }
       else
       {
         heatModule.AddFlux(moduleID, 0f, 0f);
+        CurrentPowerConsumption = 0f;
       }
     }
     protected float CalculateNominalTemperature()
@@ -174,7 +181,8 @@ namespace SystemHeat
         float heatToAdd = temperatureDeltaHeatCurve.Evaluate(tDelta);
         float powerCost = temperatureDeltaCostCurve.Evaluate(tDelta);
 
-        double amt = this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, -powerCost * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL);
+        double amt = this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, powerCost * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL);
+        CurrentPowerConsumption = -powerCost;
 
         if (amt > 0.0000000001)
         {
@@ -196,6 +204,7 @@ namespace SystemHeat
       }
       else
       {
+        CurrentPowerConsumption = 0f;
         heatModule.AddFlux(moduleID, 0f, 0f);
         Status = String.Format("Disabled");
       }
