@@ -24,7 +24,7 @@ namespace SystemHeat
     public bool Enabled = false;
 
     // Current reactor power setting (0-100, tweakable)
-    [KSPField(isPersistant = true, guiActive = true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
+    [KSPField(isPersistant = true, guiActive = false, guiActiveEditor =true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
     public float CurrentReactorThrottle = 100f;
 
     // Current power generation
@@ -62,6 +62,11 @@ namespace SystemHeat
     // Heat generation at full power
     [KSPField(isPersistant = false)]
     public float HeatGeneration;
+
+    // Heat generation at full power
+    [KSPField(isPersistant = false)]
+    public float CurrentHeatGeneration;
+
 
     // Nominal reactor temperature (where the reactor should live)
     [KSPField(isPersistant = false)]
@@ -423,8 +428,8 @@ namespace SystemHeat
     protected virtual void HandleHeatGeneration()
     {
       // Determine heat to be generated
-      float heatGeneration = CalculateHeatGeneration();
-      heatModule.AddFlux(moduleID, NominalTemperature, heatGeneration);
+      CurrentHeatGeneration = CalculateHeatGeneration();
+      heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration);
 
       if (CoreIntegrity <= 0f)
       {
@@ -433,13 +438,13 @@ namespace SystemHeat
       }
       else
       {
-        ReactorOutput = String.Format("{0:F1} {1}", heatGeneration, Localizer.Format("#LOC_SystemHeat_Units_kW"));
+        ReactorOutput = String.Format("{0:F1} {1}", CurrentHeatGeneration, Localizer.Format("#LOC_SystemHeat_Units_kW"));
       }
     }
     private void HandleHeatGenerationEditor()
     {
-      float heatGeneration = (CurrentReactorThrottle / 100f * HeatGeneration);
-      heatModule.AddFlux(moduleID, NominalTemperature, heatGeneration);
+      CurrentHeatGeneration = (CurrentReactorThrottle / 100f * HeatGeneration);
+      heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration);
     }
 
 

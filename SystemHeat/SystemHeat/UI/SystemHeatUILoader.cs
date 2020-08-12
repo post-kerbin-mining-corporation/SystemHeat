@@ -11,20 +11,29 @@ namespace SystemHeat.UI
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class SystemHeatUILoader : MonoBehaviour
   {
-    public static GameObject OverlayPanelPrefab { get; private set; }
-    public static GameObject ToolbarPanelPrefab { get; private set; }
+    public static GameObject OverlayPanelPrefab { get { return overlayPanelPrefab; } }
+    public static GameObject ToolbarPanelPrefab { get { return toolbarPanelPrefab; } }
 
-    public static GameObject ReactorWidgetPrefab { get; private set; }
-    public static GameObject ReactorToolbarPanelPrefab { get; private set; }
+    public static GameObject ReactorDataFieldPrefab { get { return reactorDataFieldPrefab; } }
+    public static GameObject ReactorWidgetPrefab { get { return reactorWidgetPrefab; } }
+    public static GameObject ReactorToolbarPanelPrefab { get { return reactorToolbarPanelPrefab; } }
+
+    private static GameObject overlayPanelPrefab;
+    private static GameObject toolbarPanelPrefab;
+
+    private static GameObject reactorDataFieldPrefab;
+    private static GameObject reactorWidgetPrefab;
+    private static GameObject reactorToolbarPanelPrefab;
 
     private void Awake()
     {
       Utils.Log("[SystemHeatUILoader]: Loading UI Prefabs");
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SystemHeat/UI/systemheatui.dat"));
-      OverlayPanelPrefab = prefabs.LoadAsset("SystemInfo") as GameObject;
-      OverlayPanelPrefab = prefabs.LoadAsset("ToolbarWindow") as GameObject;
-      ReactorToolbarPanelPrefab = prefabs.LoadAsset("ReactorToolbarWindow") as GameObject;
-      ReactorWidgetPrefab = prefabs.LoadAsset("ReactorWidget") as GameObject;
+      overlayPanelPrefab = prefabs.LoadAsset("SystemInfo") as GameObject;
+      toolbarPanelPrefab = prefabs.LoadAsset("ToolbarWindow") as GameObject;
+      reactorToolbarPanelPrefab = prefabs.LoadAsset("ReactorWindow") as GameObject;
+      reactorWidgetPrefab = prefabs.LoadAsset("ReactorWidget") as GameObject;
+      reactorDataFieldPrefab = prefabs.LoadAsset("ReactorDataField") as GameObject;
       Utils.Log("[SystemHeatUILoader]: Loaded UI Prefabs");
     }
   }
