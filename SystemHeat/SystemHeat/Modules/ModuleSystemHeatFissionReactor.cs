@@ -24,7 +24,7 @@ namespace SystemHeat
     public bool Enabled = false;
 
     // Current reactor power setting (0-100, tweakable)
-    [KSPField(isPersistant = true, guiActive = false, guiActiveEditor =true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
+    [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
     public float CurrentReactorThrottle = 100f;
 
     // Current power generation
@@ -221,7 +221,7 @@ namespace SystemHeat
           MaximumTemperature.ToString("F0"),
           ThrottleIncreaseRate.ToString("F0"),
           MinimumThrottle.ToString("F0"));
-          
+
     }
 
 
@@ -246,7 +246,7 @@ namespace SystemHeat
               GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
           OnLoad(node);
         }
-        
+
         heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
         if (heatModule == null)
           heatModule.GetComponent<ModuleSystemHeat>();
@@ -264,7 +264,7 @@ namespace SystemHeat
           if (!string.IsNullOrEmpty(field.group.name)) continue;
 
           if (field.group.name == uiGroupName)
-          field.group.displayName = Localizer.Format(uiGroupDisplayName);
+            field.group.displayName = Localizer.Format(uiGroupDisplayName);
         }
 
         foreach (BaseEvent baseEvent in this.Events)
@@ -272,7 +272,7 @@ namespace SystemHeat
           if (!string.IsNullOrEmpty(baseEvent.group.name)) continue;
 
           if (baseEvent.group.name == uiGroupName)
-          baseEvent.group.displayName = Localizer.Format(uiGroupDisplayName);
+            baseEvent.group.displayName = Localizer.Format(uiGroupDisplayName);
         }
 
         if (!GeneratesElectricity)
@@ -289,9 +289,23 @@ namespace SystemHeat
       }
       if (HighLogic.LoadedSceneIsFlight)
       {
+        GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
         DoCatchup();
       }
 
+    }
+    void OnDestroy()
+    {
+      // Clean up events when the item is destroyed
+      GameEvents.OnVesselRollout.Remove(OnVesselRollout);
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    protected void OnVesselRollout(ShipConstruct node)
+    {
+      CoreIntegrity = 100f;
+      CurrentHeatGeneration = 0f;
     }
 
     public void DoCatchup()
@@ -305,12 +319,12 @@ namespace SystemHeat
           {
             Utils.Log($"[SystemHeatFissionReactor] Catching up {elapsedTime} s of time on load");
             float fuelThrottle = CurrentReactorThrottle / 100f;
-            
+
             foreach (ResourceRatio ratio in inputs)
             {
               Utils.Log($"[SystemHeatFissionReactor] Consuming {fuelThrottle * ratio.Ratio * elapsedTime} u of {ratio.ResourceName} on load");
               double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * elapsedTime, ratio.FlowMode);
-              
+
             }
 
           }
@@ -364,20 +378,20 @@ namespace SystemHeat
         HandleHeatGenerationEditor();
         if (GeneratesElectricity)
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
-          
+
       }
       if (HighLogic.LoadedSceneIsFlight)
       {
         if (part.vessel.missionTime > 0.0)
         {
-          LastUpdateTime = Planetarium.GetUniversalTime() ;
+          LastUpdateTime = Planetarium.GetUniversalTime();
         }
         // Update reactor core integrity readout
         if (CoreIntegrity > 0)
           CoreStatus = String.Format("{0:F2} %", CoreIntegrity);
         else
           CoreStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreStatus_Meltdown");
-        
+
         HandleCoreDamage();
         HandleThrottle();
         HandleHeatGeneration();
@@ -412,7 +426,7 @@ namespace SystemHeat
     }
 
     protected virtual void HandleThrottle()
-    { 
+    {
       if (!Enabled)
       {
         CurrentThrottle = Mathf.MoveTowards(CurrentThrottle, 0f, TimeWarp.fixedDeltaTime * ThrottleIncreaseRate);
@@ -485,7 +499,7 @@ namespace SystemHeat
 
     private void HandleResourceActivities(float timeStep)
     {
- 
+
       CurrentReactorThrottle = CalculateGoalThrottle(timeStep);
 
       double burnRate = 0d;

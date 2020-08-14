@@ -173,7 +173,7 @@ namespace SystemHeat
         Fields["systemHeatGeneration"].guiName = "Storage Accepted";
         if (heatModule.currentLoopTemperature >= heatModule.nominalLoopTemperature)
         {
-          storageTemperature = Mathf.Clamp(storageTemperature + (-heatModule.consumedSystemFlux) / (heatStorageSpecificHeat * heatStorageMass), 0f, 5000f); // Q = mcT
+          storageTemperature = Mathf.Clamp(storageTemperature + (-heatModule.consumedSystemFlux * TimeWarp.fixedDeltaTime) / (heatStorageSpecificHeat * heatStorageMass), 0f, 5000f); // Q = mcT
           heatStored = Mathf.Clamp(heatStored + (-heatModule.consumedSystemFlux) * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
         }
       }

@@ -262,7 +262,7 @@ namespace SystemHeat
 
       if (modules.Count > 0 && modules[0] != null)
       {
-        return modules[0].part.vessel.externalTemperature > 50000d ? SystemHeatSettings.SpaceTemperature: (float)modules[0].part.vessel.externalTemperature;
+        return modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude) > 50000d ? SystemHeatSettings.SpaceTemperature: (float)modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude);
       }
       return SystemHeatSettings.SpaceTemperature;
     }
