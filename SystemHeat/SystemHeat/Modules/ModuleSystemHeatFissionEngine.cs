@@ -241,7 +241,24 @@ namespace SystemHeat
         }
       }
     }
-    
+
+    public override void ReactorActivated()
+    {
+      base.ReactorActivated();
+      for (int engineIndex = 0; engineIndex < engines.Count; engineIndex++)
+      {
+        if (multiEngine && multiEngine.runningPrimary && 
+          engines[engineIndex].engineModule == multiEngine.PrimaryEngine)
+        {
+          HandleActivateEngine(engineIndex);
+        }
+        if (multiEngine && !multiEngine.runningPrimary &&
+          engines[engineIndex].engineModule == multiEngine.SecondaryEngine)
+        {
+          HandleActivateEngine(engineIndex);
+        }
+      }
+    }
 
     public override void ReactorDeactivated()
     {
@@ -253,7 +270,7 @@ namespace SystemHeat
     }
     void KillEngine(int engineIndex)
     {
-      if (engines[engineIndex].engineModule != null)
+      if (engines[engineIndex].engineModule != null || engines[engineIndex].engineModule.EngineIgnited)
       {
         engineOnStates[engineIndex] = false;
         engines[engineIndex].engineModule.Events["Shutdown"].Invoke();
