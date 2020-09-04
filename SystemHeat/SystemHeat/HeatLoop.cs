@@ -234,19 +234,19 @@ namespace SystemHeat
         }
         else
         {
-          if (totalFlux + orderedConsumers[i].totalSystemFlux >= 0f)
+          if (totalFlux + orderedConsumers[i].totalSystemFlux > 0f)
           {
             totalFlux += orderedConsumers[i].totalSystemFlux;
             orderedConsumers[i].consumedSystemFlux = orderedConsumers[i].totalSystemFlux;
           }
-          if (totalFlux + orderedConsumers[i].totalSystemFlux == 0f)
+          else if (totalFlux + orderedConsumers[i].totalSystemFlux == 0f)
           {
             orderedConsumers[i].consumedSystemFlux = 0f;
             totalFlux = 0f;
           }
-          if (totalFlux + orderedConsumers[i].totalSystemFlux < 0f)
+          else //(totalFlux + orderedConsumers[i].totalSystemFlux < 0f)
           {
-            orderedConsumers[i].consumedSystemFlux = - totalFlux;
+            orderedConsumers[i].consumedSystemFlux = -totalFlux;
             totalFlux = 0f;
           }
         }

@@ -18,7 +18,10 @@ namespace SystemHeat.UI
     public RectTransform rect;
     public Toggle overlayToggle;
     public Toggle debugToggle;
-
+    public Slider simRateSlider;
+    public Text simRateLabel;
+    public GameObject simRateHeader;
+    public GameObject simRateSliderObject;
 
     protected Text totalIncomingFluxTitle;
     protected Text totalOutgoingFluxTitle;
@@ -28,6 +31,7 @@ namespace SystemHeat.UI
     protected Text totalOutgoingFluxValue;
     protected Text totalLoopsValue;
 
+    protected int[] rates = new int[] { 1, 5, 10, 40, 100, 1000, 10000 };
 
     protected SystemHeatSimulator simulator;
 
@@ -47,10 +51,32 @@ namespace SystemHeat.UI
       debugToggle = transform.FindDeepChild("DebugToggle").GetComponent<Toggle>();
       overlayToggle = transform.FindDeepChild("OverlayToggle").GetComponent<Toggle>();
 
+      simRateHeader = transform.FindDeepChild("SimRateTitle").gameObject;
+      simRateSlider = transform.FindDeepChild("Slider").GetComponent<Slider>();
+      simRateSliderObject = transform.FindDeepChild("SimRateSlider").gameObject;
+      simRateLabel = transform.FindDeepChild("SimRateLabel").GetComponent<Text>();
 
       debugToggle.onValueChanged.AddListener(delegate { ToggleDebug(); });
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
+      debugToggle.gameObject.SetActive(false);
+      if (HighLogic.LoadedSceneIsEditor)
+      {
+        simRateHeader.SetActive(true);
+        simRateSliderObject.gameObject.SetActive(true);
+        simRateLabel.text = "100x";
+        simRateSlider.maxValue = 6;
+        simRateSlider.value = 4;
+
+        simRateSlider.onValueChanged.AddListener(delegate { OnSliderChange(); });
+      }
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        simRateHeader.SetActive(false);
+     
+        simRateSliderObject.gameObject.SetActive(false);
+        
+      }
     }
 
     protected void Update()
@@ -61,6 +87,12 @@ namespace SystemHeat.UI
         totalOutgoingFluxValue.text = String.Format("{0:F0} kW", simulator.TotalHeatRejection);
         totalIncomingFluxValue.text = String.Format("{0:F0} kW",simulator.TotalHeatGeneration);
       }
+    }
+
+    public void OnSliderChange()
+    {
+      SystemHeatSettings.SimulationRateEditor = TimeWarp.fixedDeltaTime * rates[(int)simRateSlider.value];
+      simRateLabel.text = String.Format("{0}x", rates[(int)simRateSlider.value]);
     }
     public void SetVisible(bool state)
     {
