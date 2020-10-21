@@ -235,6 +235,7 @@ namespace SystemHeat
     /// <param name="flux">the flux of the source</param>
     public void AddFlux(string id, float sourceTemperature, float flux)
     {
+      
       if (fluxes != null && temperatures != null)
       {
 
@@ -249,7 +250,7 @@ namespace SystemHeat
           temperatures[id] = 0f;
         }
 
-        totalSystemFlux = fluxes.Sum(x => x.Value);
+        totalSystemFlux = fluxes.Sum(x => x.Value) * (float)PhysicsGlobals.InternalHeatProductionFactor;
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
         systemNominalTemperature = totalSystemTemperature / (fluxes.Values.ToList().Where(x => x > 0f).Count());
