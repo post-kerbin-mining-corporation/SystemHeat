@@ -21,7 +21,7 @@ namespace SystemHeat
     // The max kW the heat sink can consume at once
     [KSPField(isPersistant = false)]
     public float maxHeatRate = 500f;
-    
+
     /// Is the storage enabled?
     [KSPField(isPersistant = true)]
     public bool storageEnabled = true;
@@ -65,6 +65,14 @@ namespace SystemHeat
     public string systemHeatStored = "";
 
 
+
+    [KSPField(isPersistant = false)]
+    public string OnLightTransformName;
+
+    [KSPField(isPersistant = false)]
+    public string HeatLightTransformName;
+
+
     /// KSPEVENTS
     /// ----------------------
     [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Store Heat", active = true, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
@@ -78,7 +86,9 @@ namespace SystemHeat
       storageEnabled = false;
     }
 
-   
+    protected Gradient ramp;
+    protected Renderer onLight;
+    protected Renderer rampLight;
     protected ModuleSystemHeat heatModule;
 
     public override string GetModuleDisplayName()
@@ -90,7 +100,7 @@ namespace SystemHeat
     {
       // Need to update this to strip the CoreHeat stuff from it
       string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_PartInfo",
-        (heatStorageMaximum/1000f).ToString("F0"),
+        (heatStorageMaximum / 1000f).ToString("F0"),
         maxHeatRate.ToString("F0")
         );
       return message;
@@ -107,11 +117,36 @@ namespace SystemHeat
         Utils.Log("[ModuleSystemHeatSink] Setup completed");
       }
 
+      if (HeatLightTransformName != "")
+      {
+        rampLight = part.FindModelTransform(HeatLightTransformName).GetComponent<Renderer>();
+        ramp = new Gradient();
+        GradientColorKey[] keys = new GradientColorKey[]
+        {
+          new GradientColorKey(Color.black, 0f),
+          new GradientColorKey(Color.red, 0.33f),
+          new GradientColorKey(Color.yellow, 0.75f),
+          new GradientColorKey(Color.white, 1f)
+      };
+        GradientAlphaKey[] keysAlpha = new GradientAlphaKey[]
+        {
+          new GradientAlphaKey(1f,0f),
+          new GradientAlphaKey(1f,.33f),
+          new GradientAlphaKey(1f,.66f),
+          new GradientAlphaKey(1f,1f)
+        };
+        ramp.SetKeys(keys, keysAlpha);
+
+      }
+      if (OnLightTransformName != "")
+      {
+        onLight = part.FindModelTransform(OnLightTransformName).GetComponent<Renderer>();
+      }
       SetupUI();
     }
     void SetupUI()
     {
-   
+
       var range = (UI_FloatRange)this.Fields["heatStorageDumpRate"].uiControlFlight;
       range.minValue = 0f;
       range.maxValue = maxHeatRate;
@@ -132,8 +167,18 @@ namespace SystemHeat
           Events["DisableStorage"].active = storageEnabled;
           Events["EnableStorage"].active = !storageEnabled;
         }
-        
-       
+        if (onLight)
+        {
+          if (storageEnabled)
+            onLight.material.SetColor("_TintColor", XKCDColors.Green);
+          else
+            onLight.material.SetColor("_TintColor", XKCDColors.Red);
+        }
+        if (rampLight)
+        {
+          rampLight.material.SetColor("_TintColor", ramp.Evaluate(heatStored / heatStorageMaximum));
+        }
+
       }
     }
 
@@ -147,7 +192,7 @@ namespace SystemHeat
       {
         GenerateHeatFlight();
         systemTemperature = String.Format("{0} K", storageTemperature.ToString("F0"));
-        systemHeatStored = String.Format("{0}%", (heatStored/heatStorageMaximum *100f).ToString("F0"));
+        systemHeatStored = String.Format("{0}%", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
         systemHeatGeneration = String.Format("{0}/{1} kW", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
 
       }
@@ -155,7 +200,7 @@ namespace SystemHeat
       {
         GenerateHeatEditor();
         systemTemperature = String.Format("{0} K", storageTemperature.ToString("F0"));
-        systemHeatStored = String.Format("{0}/{1} kJ", heatStored.ToString("F0"), heatStorageMaximum.ToString("F0"));
+        systemHeatStored = String.Format("{0}%", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
         systemHeatGeneration = String.Format("{0}/{1} kW", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
       }
     }

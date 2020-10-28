@@ -92,6 +92,7 @@
     <Compile Include="Modules\ModuleSystemHeatFissionReactor.cs" />
     <Compile Include="Modules\ModuleSystemHeatSink.cs" />
     <Compile Include="Modules\ModuleSystemHeatTemperatureAdjuster.cs" />
+    <Compile Include="Modules\ModuleSystemHeatColorAnimator.cs" />
     <Compile Include="ModuleUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemHeat.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="UI\SystemHeatUI.cs" />
     <Compile Include="UI\SystemHeatUILoader.cs" />
     <Compile Include="UI\ToolbarPanel.cs" />
+    <Compile Include="UI\ToolbarPanelLoopWidget.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -61,7 +61,7 @@ namespace SystemHeat
     public static float AbsFluxThreshold = 0.5f;
 
 
-    public static float OverlayBaseLineWidth = 8f;
+    public static float OverlayBaseLineWidth = 4f;
     
     public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;
@@ -97,9 +97,27 @@ namespace SystemHeat
       {
         Utils.Log("[Settings]: Located settings file");
 
-        settingsNode = GameDatabase.Instance.GetConfigNodes("SYSTEMHEAT")[0];
+        settingsNode = GameDatabase.Instance.GetConfigNodes("SYSTEMHEAT").First();
 
-        settingsNode.TryGetValue("MinimumWarpFactor", ref TimeWarpLimit);
+        settingsNode.TryGetValue("DebugOverlay", ref DebugOverlay);
+        settingsNode.TryGetValue("DebugUI", ref DebugUI);
+        settingsNode.TryGetValue("DebugModules", ref DebugModules);
+        settingsNode.TryGetValue("DebugPartUI", ref DebugPartUI);
+        settingsNode.TryGetValue("DebugSimulation", ref DebugSimulation);
+        settingsNode.TryGetValue("maxLoopCount", ref maxLoopCount);
+        settingsNode.TryGetValue("SpaceTemperature", ref SpaceTemperature);
+
+        settingsNode.TryGetValue("UIUpdateInterval", ref UIUpdateInterval);
+        settingsNode.TryGetValue("TimeWarpLimit", ref TimeWarpLimit);
+        settingsNode.TryGetValue("MaxDeltaTPerStep", ref MaxDeltaTPerStep);
+        settingsNode.TryGetValue("MinSteps", ref MinSteps);
+        settingsNode.TryGetValue("MaxSteps", ref MaxSteps);
+
+        settingsNode.TryGetValue("SimulationRateEditor", ref SimulationRateEditor);
+        settingsNode.TryGetValue("AbsFluxThreshold", ref AbsFluxThreshold);
+        settingsNode.TryGetValue("OverlayBaseLineWidth", ref OverlayBaseLineWidth);
+        settingsNode.TryGetValue("OverlayPadding", ref OverlayPadding);
+        settingsNode.TryGetValue("OverlayBoundsPadding", ref OverlayBoundsPadding);
       }
       else
       {

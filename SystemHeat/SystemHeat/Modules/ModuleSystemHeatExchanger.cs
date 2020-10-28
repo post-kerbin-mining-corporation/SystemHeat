@@ -53,6 +53,12 @@ namespace SystemHeat
     public float CurrentPowerConsumption;
 
 
+    [KSPField(isPersistant = false)]
+    public string OnLightTransformName;
+
+    [KSPField(isPersistant = false)]
+    public string DirectionLightTransformName;
+
     // UI Fields
 
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status", groupName = "heatExchanger", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_UIGroup_Title")]
@@ -73,6 +79,8 @@ namespace SystemHeat
       Enabled = false;
     }
 
+    protected Renderer onLight;
+    protected Renderer dirLight;
 
     protected ModuleSystemHeat heatModule1;
     protected ModuleSystemHeat heatModule2;
@@ -120,6 +128,22 @@ namespace SystemHeat
       toggle.disabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);
       toggle.enabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);
 
+      if (DirectionLightTransformName != "")
+      {
+        dirLight = part.FindModelTransform(DirectionLightTransformName).GetComponent<Renderer>();
+        if (ToggleSource)
+        {
+          dirLight.material.SetColor("_TintColor", XKCDColors.BlueGrey);
+        }
+        else
+        {
+          dirLight.material.SetColor("_TintColor", XKCDColors.Orange);
+        }
+      }
+      if (OnLightTransformName != "")
+      {
+        onLight = part.FindModelTransform(OnLightTransformName).GetComponent<Renderer>();
+      }
 
       if (SystemHeatSettings.DebugModules)
       {
@@ -135,6 +159,14 @@ namespace SystemHeat
           Events["DisableExchanger"].active = Enabled;
           Events["EnableExchanger"].active = !Enabled;
         }
+        if (onLight)
+        {
+          if (Enabled)
+            onLight.material.SetColor("_TintColor", XKCDColors.Green);
+          else
+            onLight.material.SetColor("_TintColor", XKCDColors.Red);
+        }
+        
       }
     }
     public void FixedUpdate()
@@ -159,7 +191,14 @@ namespace SystemHeat
       UI_Toggle toggle = (HighLogic.LoadedSceneIsEditor) ? (UI_Toggle)Fields[nameof(ToggleSource)].uiControlEditor : (UI_Toggle)Fields[nameof(ToggleSource)].uiControlFlight;
       toggle.disabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);
       toggle.enabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);
-
+      if (ToggleSource)
+      {
+        dirLight.material.SetColor("_TintColor", XKCDColors.BlueGrey);
+      }
+      else
+      {
+        dirLight.material.SetColor("_TintColor", XKCDColors.Orange);
+      }
     }
 
     /// <summary>
@@ -222,6 +261,7 @@ namespace SystemHeat
 
       if (Enabled)
       {
+        
         Fields["PowerStatus"].guiActive = true;
         Fields["PowerStatus"].guiActiveEditor = true;
         float outputHeat = HeatRate;

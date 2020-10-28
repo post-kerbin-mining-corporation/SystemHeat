@@ -151,6 +151,8 @@ namespace SystemHeat.UI
               thisVessel = FlightGlobals.ActiveVessel; 
             }
           }
+          if (toolbarPanel.loopPanel.activeSelf)
+            toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
           toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
         }
         if (HighLogic.LoadedSceneIsEditor)

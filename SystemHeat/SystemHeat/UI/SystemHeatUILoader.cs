@@ -13,6 +13,7 @@ namespace SystemHeat.UI
   {
     public static GameObject OverlayPanelPrefab { get { return overlayPanelPrefab; } }
     public static GameObject ToolbarPanelPrefab { get { return toolbarPanelPrefab; } }
+    public static GameObject ToolbarPanelLoopPrefab { get { return toolbarPanelLoopPrefab; } }
 
     public static GameObject ReactorDataFieldPrefab { get { return reactorDataFieldPrefab; } }
     public static GameObject ReactorWidgetPrefab { get { return reactorWidgetPrefab; } }
@@ -20,6 +21,7 @@ namespace SystemHeat.UI
 
     private static GameObject overlayPanelPrefab;
     private static GameObject toolbarPanelPrefab;
+    private static GameObject toolbarPanelLoopPrefab;
 
     private static GameObject reactorDataFieldPrefab;
     private static GameObject reactorWidgetPrefab;
@@ -30,7 +32,8 @@ namespace SystemHeat.UI
       Utils.Log("[SystemHeatUILoader]: Loading UI Prefabs");
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SystemHeat/UI/systemheatui.dat"));
       overlayPanelPrefab = prefabs.LoadAsset("SystemInfo") as GameObject;
-      toolbarPanelPrefab = prefabs.LoadAsset("ToolbarWindow") as GameObject;
+      toolbarPanelPrefab = prefabs.LoadAsset("SystemHeatToolbar") as GameObject;
+      toolbarPanelLoopPrefab = prefabs.LoadAsset("SystemHeatLoopData") as GameObject;
       reactorToolbarPanelPrefab = prefabs.LoadAsset("ReactorWindow") as GameObject;
       reactorWidgetPrefab = prefabs.LoadAsset("ReactorWidget") as GameObject;
       reactorDataFieldPrefab = prefabs.LoadAsset("ReactorDataField") as GameObject;
