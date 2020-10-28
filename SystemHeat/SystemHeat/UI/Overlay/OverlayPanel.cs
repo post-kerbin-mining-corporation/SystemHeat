@@ -28,7 +28,7 @@ namespace SystemHeat.UI
 
     public ModuleSystemHeat heatModule;
     public Canvas parentCanvas;
-    protected HeatLoop loop;
+    public HeatLoop loop;
 
     public void SetupComponents()
     {

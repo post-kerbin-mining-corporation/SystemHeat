@@ -119,6 +119,7 @@
     <Compile Include="UI\SystemHeatUI.cs" />
     <Compile Include="UI\SystemHeatUILoader.cs" />
     <Compile Include="UI\ToolbarPanel.cs" />
+    <Compile Include="UI\ToolbarPanelLoopWidget.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
