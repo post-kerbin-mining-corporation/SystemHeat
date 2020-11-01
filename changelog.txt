@@ -1,3 +1,7 @@
+v0.1.1
+------
+- Fixed issue with map vector camera not being reset when entering map view (messing up orbit lines)
+
 v0.1.0
 ------
 - Initial version controlled release
