@@ -159,7 +159,8 @@ namespace SystemHeat
     protected void GenerateHeatFlight()
     {
       float engineFraction = 0f;
-      if (engineModule.EngineIgnited)
+      
+      if (engineModule.EngineIgnited || engineModule.requestedThrottle > 0f)
       {
         engineFraction = engineModule.requestedThrottle;
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
@@ -167,9 +168,10 @@ namespace SystemHeat
         Fields["systemTemperature"].guiActive = true;
         systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
         systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
-      } else
+      } 
+      else
       {
-        heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
+        heatModule.AddFlux(moduleID, 0f,0f);
         Fields["systemHeatGeneration"].guiActive = false;
         Fields["systemTemperature"].guiActive = false;
         systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);

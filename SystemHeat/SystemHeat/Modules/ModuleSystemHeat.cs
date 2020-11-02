@@ -241,7 +241,7 @@ namespace SystemHeat
 
         fluxes[id] = flux;
         
-        if (flux >= 0f)
+        if (flux > 0f)
         {
           temperatures[id] = sourceTemperature;
         }
@@ -250,7 +250,7 @@ namespace SystemHeat
           temperatures[id] = 0f;
         }
 
-        totalSystemFlux = fluxes.Sum(x => x.Value) * (float)PhysicsGlobals.InternalHeatProductionFactor;
+        totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor/0.025d);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
         systemNominalTemperature = totalSystemTemperature / (fluxes.Values.ToList().Where(x => x > 0f).Count());
