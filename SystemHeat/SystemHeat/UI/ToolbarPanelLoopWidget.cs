@@ -76,6 +76,32 @@ namespace SystemHeat.UI
         temperatureTextValue.text = String.Format("{0}/{1} K", simulator.HeatLoops[trackedLoopID].Temperature.ToString("F0"), simulator.HeatLoops[trackedLoopID].NominalTemperature.ToString("F0"));
         
         fluxTextValue.text = String.Format("{0} kW", simulator.HeatLoops[trackedLoopID].NetFlux.ToString("F1"));
+
+        if (simulator.HeatLoops[trackedLoopID].Temperature > simulator.HeatLoops[trackedLoopID].NominalTemperature)
+        {
+          Color32 c;
+          HexColorField.HexToColor("fe8401", out c);
+          temperatureTextValue.color = c;
+        } 
+        else
+        {
+          Color32 c;
+          HexColorField.HexToColor("B4D455", out c);
+          temperatureTextValue.color = c;
+        }
+
+        if (simulator.HeatLoops[trackedLoopID].NetFlux > 0)
+        {
+          Color32 c;
+          HexColorField.HexToColor("fe8401", out c);
+          fluxTextValue.color = c;
+        }
+        else
+        {
+          Color32 c;
+          HexColorField.HexToColor("B4D455", out c);
+          fluxTextValue.color = c;
+        }
       }
     }
     public void ToggleOverlay()

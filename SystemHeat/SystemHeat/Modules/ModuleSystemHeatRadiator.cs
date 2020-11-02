@@ -75,7 +75,7 @@ namespace SystemHeat
         {
           if (base.IsCooling)
           {
-            float flux = -temperatureCurve.Evaluate(heatModule.nominalLoopTemperature);
+            float flux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
             heatModule.AddFlux(moduleID, 0f, flux);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running", 
               (-flux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
@@ -90,12 +90,12 @@ namespace SystemHeat
 
         if (HighLogic.LoadedSceneIsEditor)
         {
-          float flux = -1.0f * temperatureCurve.Evaluate(heatModule.nominalLoopTemperature);
+          float flux = -1.0f * temperatureCurve.Evaluate(heatModule.LoopTemperature);
           heatModule.AddFlux(moduleID, 0f, flux);
 
           //Utils.Log($"BLAH {heatModule.LoopTemperature} {flux} {temperatureCurve.Evaluate(heatModule.LoopTemperature)}");
           RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running", 
-            ((-temperatureCurve.Evaluate(heatModule.nominalLoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
+            ((-temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
         }
       }
     }

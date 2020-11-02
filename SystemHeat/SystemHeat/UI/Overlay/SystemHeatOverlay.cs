@@ -5,6 +5,8 @@ using System.Linq;
 using SystemHeat;
 using KSP.Localization;
 using KSP.UI;
+using Vectrosity;
+
 
 namespace SystemHeat.UI
 {
@@ -51,6 +53,7 @@ namespace SystemHeat.UI
       {
 
         GameEvents.OnMapEntered.Add(new EventVoid.OnEvent(onEnterMapView));
+        GameEvents.OnMapExited.Add(new EventVoid.OnEvent(onExitMapView));
       }
     }
     protected void OnDestroy()
@@ -68,6 +71,7 @@ namespace SystemHeat.UI
       else
       {
         GameEvents.OnMapEntered.Remove(onEnterMapView);
+        GameEvents.OnMapExited.Remove(onExitMapView);
       }
     }
     protected void Start()
@@ -79,8 +83,18 @@ namespace SystemHeat.UI
       if (SystemHeatSettings.DebugOverlay)
         Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels");
 
+      VectorLine.SetCamera3D(PlanetariumCamera.Camera);
       ClearPanels();
     }
+    protected void onExitMapView()
+    {
+      if (SystemHeatSettings.DebugOverlay)
+        Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels");
+
+      VectorLine.SetCamera3D(FlightCamera.fetch.mainCamera);
+
+    }
+
     protected void onEditorScreenChange(EditorScreen screen)
     {
 

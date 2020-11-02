@@ -1,3 +1,13 @@
+v0.1.1
+------
+- Fixed issue with map vector camera not being reset when entering map view (messing up orbit lines)
+- Fixed some issues with ModuleSystemHeatEngine contributing to loop max temperatures despite being off
+- Fixed global thermal scaling being set to 0.025x what was intended, causing UI confusion 
+- Fixed some cases of NREs where parts were destroyed
+- Tweaked behaviour of radiators to allow cooling when nominal temperatures are low but actual temperatures are high
+- Thermal summary in toolbar window now turns orange when a value is bad
+- Turned off PAW debug by default
+
 v0.1.0
 ------
 - Initial version controlled release

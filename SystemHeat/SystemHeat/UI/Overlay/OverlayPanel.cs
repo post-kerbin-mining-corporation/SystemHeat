@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using KSP.Localization;
+using System.Data;
 
 namespace SystemHeat.UI
 {
@@ -147,14 +148,20 @@ namespace SystemHeat.UI
     {
       loop = lp;
       heatModule = sh;
-
-      infoPanelTitle.text = heatModule.part.partInfo.title;
-      colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
-      Transform xform = transform.FindDeepChild(heatModule.iconName);
-      if (xform != null)
+      Transform xform;
+      if (heatModule != null && heatModule.part != null)
       {
-        systemIcon.sprite = xform.GetComponent<Image>().sprite;
+        infoPanelTitle.text = heatModule.part.partInfo.title;
+        xform = transform.FindDeepChild(heatModule.iconName);
+
+        if (xform != null)
+        {
+          systemIcon.sprite = xform.GetComponent<Image>().sprite;
+        }
       }
+      
+      colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
+      
       SetVisibility(visible);
     }
 

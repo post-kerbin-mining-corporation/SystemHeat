@@ -304,7 +304,7 @@ namespace SystemHeat
           totalPower += modules[i].totalSystemFlux;
         }
       }
-      return Mathf.Clamp(GetEnvironmentTemperature(), temp/totalPower,float.MaxValue);
+      return Mathf.Clamp(temp/totalPower, GetEnvironmentTemperature(), float.MaxValue);
     }
   }
 }
