@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine.UI;
 using UnityEngine;
-using JetBrains.Annotations;
+using KSP.Localization;
 
 namespace SystemHeat.UI
 {
@@ -43,8 +43,14 @@ namespace SystemHeat.UI
       fluxTextValue = transform.FindDeepChild("FluxDataText").GetComponent<Text>();
 
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
+
+      Localize();
     }
-      public void SetVisible(bool state)
+    void Localize()
+    {
+
+    }
+    public void SetVisible(bool state)
     {
       active = state;
       rect.gameObject.SetActive(state);
@@ -57,10 +63,10 @@ namespace SystemHeat.UI
       trackedLoopID = loopID;
       if (simulator != null)
       {
-        overlayToggleText.text = String.Format("Loop {0}", trackedLoopID.ToString());
+        overlayToggleText.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopTitle", trackedLoopID.ToString());
         swatch.color = SystemHeatSettings.GetLoopColor(trackedLoopID);
-        fluxTextHeader.text = String.Format("  Net Flux");
-        temperatureTextHeader.text = String.Format("  Temperature");
+        fluxTextHeader.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxTitle");
+        temperatureTextHeader.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopTemperatureTitle");
       }
     }
     public void AssignSimulator(SystemHeatSimulator sim)
@@ -72,17 +78,28 @@ namespace SystemHeat.UI
     {
       if (trackedLoopID != -1 && simulator != null && simulator.HeatLoops.ContainsKey(trackedLoopID))
       {
-        
-        temperatureTextValue.text = String.Format("{0}/{1} K", simulator.HeatLoops[trackedLoopID].Temperature.ToString("F0"), simulator.HeatLoops[trackedLoopID].NominalTemperature.ToString("F0"));
-        
-        fluxTextValue.text = String.Format("{0} kW", simulator.HeatLoops[trackedLoopID].NetFlux.ToString("F1"));
+
+        temperatureTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopTemperatureValue",
+          simulator.HeatLoops[trackedLoopID].Temperature.ToString("F0"),
+          simulator.HeatLoops[trackedLoopID].NominalTemperature.ToString("F0"));
+
+        string prefix = "";
+        if (simulator.HeatLoops[trackedLoopID].NetFlux == 0f)
+          prefix = "";
+        if (simulator.HeatLoops[trackedLoopID].NetFlux > 0f)
+          prefix = "+";
+        if (simulator.HeatLoops[trackedLoopID].NetFlux < 0f)
+          prefix = "";
+
+        fluxTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxValue", prefix,
+        simulator.HeatLoops[trackedLoopID].NetFlux.ToString("F1"));
 
         if (simulator.HeatLoops[trackedLoopID].Temperature > simulator.HeatLoops[trackedLoopID].NominalTemperature)
         {
           Color32 c;
           HexColorField.HexToColor("fe8401", out c);
           temperatureTextValue.color = c;
-        } 
+        }
         else
         {
           Color32 c;
@@ -106,7 +123,7 @@ namespace SystemHeat.UI
     }
     public void ToggleOverlay()
     {
-        SystemHeatOverlay.Instance.SetVisible(overlayToggle.isOn, trackedLoopID);
+      SystemHeatOverlay.Instance.SetVisible(overlayToggle.isOn, trackedLoopID);
     }
   }
 }
