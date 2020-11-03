@@ -1,3 +1,10 @@
+v0.1.3
+------
+- Worked on localization of things not previously localized (reactor panel, toolbar panel, ModuleHeatSink)
+- Added a UI button to charge fusion reactors in the reactor panel
+- Reactor/Heat toolbar buttons should now hide when looking at a vessel without reactors or heat modules
+- More random bugfixes
+
 v0.1.1
 ------
 - Fixed issue with map vector camera not being reset when entering map view (messing up orbit lines)

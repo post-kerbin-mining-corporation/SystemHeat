@@ -48,20 +48,20 @@ namespace SystemHeat
 
 
     // Safety override 
-    [KSPField(isPersistant = true, guiActive = false, guiName = "Dump rate", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 1500f, stepIncrement = 10f)]
+    [KSPField(isPersistant = true, guiActive = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Field_HeatStorageDumpRate", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 1500f, stepIncrement = 10f)]
     public float heatStorageDumpRate = 500f;
 
     // UI Fields
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Storage Accepted", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemHeatGeneration = "";
 
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Storage Temperature", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemTemperature = "";
 
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "Storage Capacity Used", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored", groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title")]
     public string systemHeatStored = "";
 
 
@@ -75,12 +75,12 @@ namespace SystemHeat
 
     /// KSPEVENTS
     /// ----------------------
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Store Heat", active = true, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Event_StoreHeat", active = true, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
     public void EnableStorage()
     {
       storageEnabled = true;
     }
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "Dispense Heat", active = false, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatSink_Event_DispenseHeat", active = false, groupName = "heatsink", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatSink_UIGroup_Title", groupStartCollapsed = false)]
     public void DisableStorage()
     {
       storageEnabled = false;
@@ -191,17 +191,17 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsFlight)
       {
         GenerateHeatFlight();
-        systemTemperature = String.Format("{0} K", storageTemperature.ToString("F0"));
-        systemHeatStored = String.Format("{0}%", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = String.Format("{0}/{1} kW", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
+        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
+        systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
 
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
         GenerateHeatEditor();
-        systemTemperature = String.Format("{0} K", storageTemperature.ToString("F0"));
-        systemHeatStored = String.Format("{0}%", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = String.Format("{0}/{1} kW", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
+        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
+        systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
       }
     }
 
@@ -215,7 +215,7 @@ namespace SystemHeat
       if (storageEnabled && heatStored < heatStorageMaximum)
       {
         heatModule.AddFlux(moduleID, 0f, -maxHeatRate);
-        Fields["systemHeatGeneration"].guiName = "Storage Accepted";
+        Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration");
         if (heatModule.currentLoopTemperature >= heatModule.nominalLoopTemperature)
         {
           storageTemperature = Mathf.Clamp(storageTemperature + (-heatModule.consumedSystemFlux * TimeWarp.fixedDeltaTime) / (heatStorageSpecificHeat * heatStorageMass), 0f, 5000f); // Q = mcT
@@ -224,7 +224,7 @@ namespace SystemHeat
       }
       else if (!storageEnabled && heatStored > 0f)
       {
-        Fields["systemHeatGeneration"].guiName = "Storage Dumping";
+        Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Dump");
         heatModule.AddFlux(moduleID, storageTemperature, heatStorageDumpRate);
         heatStored = Mathf.Clamp(heatStored - heatStorageDumpRate * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
         storageTemperature = storageTemperature - heatStorageDumpRate * TimeWarp.fixedDeltaTime / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT

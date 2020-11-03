@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using KSP.UI;
+using KSP.Localization;
 
 namespace SystemHeat.UI
 {
@@ -25,6 +26,13 @@ namespace SystemHeat.UI
 
     public GameObject simRateHeader;
     public GameObject simRateSliderObject;
+
+    protected Text simRateTitle;
+    protected Text overlayToggleTitle;
+    protected Text craftStatsTitle;
+    protected Text panelTitle;
+    protected Text loopsTitle;
+    protected Text settingsTitle;
 
     protected Text totalIncomingFluxTitle;
     protected Text totalOutgoingFluxTitle;
@@ -52,7 +60,14 @@ namespace SystemHeat.UI
       
       totalIncomingFluxTitle = transform.FindDeepChild("HeatGenerationTitle").GetComponent<Text>();
       totalOutgoingFluxTitle = transform.FindDeepChild("HeatRejectionTitle").GetComponent<Text>();
+
       totalLoopsTitle = transform.FindDeepChild("LoopCountTitle").GetComponent<Text>();
+      simRateTitle = transform.FindDeepChild("SimRateLabel").GetComponent<Text>();
+      overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
+      craftStatsTitle = transform.FindDeepChild("StatsHeaderText").GetComponent<Text>();
+      panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
+      loopsTitle = transform.FindDeepChild("LoopsHeaderText").GetComponent<Text>();
+      settingsTitle = transform.FindDeepChild("SettingsHeaderText").GetComponent<Text>();
 
       noLoopsText = transform.FindDeepChild("NoLoopText").GetComponent<Text>();
       loopPanel = transform.FindDeepChild("PanelColumn2").gameObject;
@@ -91,8 +106,25 @@ namespace SystemHeat.UI
         simRateSliderObject.gameObject.SetActive(false);
         
       }
+      Localize();
     }
+    void Localize()
+    {
 
+      totalIncomingFluxTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxTitle");
+      totalOutgoingFluxTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxTile");
+      totalLoopsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopCountTitle");
+
+      loopsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopsTitle");
+      settingsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SettingsTitle");
+      craftStatsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_CraftStatsTitle");
+      panelTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_Title");
+
+      simRateTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SimulationRateTitle");
+      overlayToggleTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OverlayToggle");
+     
+
+    }
     protected void Update()
     {
       if (simulator != null)
@@ -127,8 +159,8 @@ namespace SystemHeat.UI
           
         }
         totalLoopsValue.text = simulator.HeatLoops.Count.ToString();
-        totalOutgoingFluxValue.text = String.Format("{0:F0} kW", simulator.TotalHeatRejection);
-        totalIncomingFluxValue.text = String.Format("{0:F0} kW",simulator.TotalHeatGeneration);
+        totalOutgoingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxValue", simulator.TotalHeatRejection.ToString("F0"));
+        totalIncomingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxValue", simulator.TotalHeatGeneration.ToString("F0"));
       }
     }
     void DestroyLoopWidgets()
@@ -176,7 +208,7 @@ namespace SystemHeat.UI
     public void OnSliderChange()
     {
       SystemHeatSettings.SimulationRateEditor = TimeWarp.fixedDeltaTime * rates[(int)simRateSlider.value];
-      simRateLabel.text = String.Format("{0}x", rates[(int)simRateSlider.value]);
+      simRateLabel.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SimulationRateValue", rates[(int)simRateSlider.value]);
     }
     public void SetVisible(bool state)
     {

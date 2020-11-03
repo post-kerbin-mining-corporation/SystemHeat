@@ -104,6 +104,27 @@ namespace SystemHeat.UI
           Utils.Log($"[SystemHeatOverlay]: Located Flight data on vessel {FlightGlobals.ActiveVessel.vesselName}");
       }
     }
+    protected bool HasHeatModules(Vessel ves)
+    {
+
+      if (SystemHeatSettings.DebugUI)
+        Utils.Log($"[SystemHeatToolbar]: Detecting modules on {ves}");
+
+
+      // Get all parts
+      List<Part> allParts = ves.parts;
+      for (int i = 0; i < allParts.Count; i++)
+      {
+        for (int j = 0; j < allParts[i].Modules.Count; j++)
+        {
+          if (allParts[i].Modules[j].moduleName == "ModuleSystemHeat")
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
     protected void FindSimulator(Vessel v)
     {
       if (HighLogic.LoadedSceneIsEditor)
@@ -153,6 +174,7 @@ namespace SystemHeat.UI
           }
           if (toolbarPanel.loopPanel.activeSelf)
             toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+
           toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
         }
         if (HighLogic.LoadedSceneIsEditor)
@@ -172,9 +194,50 @@ namespace SystemHeat.UI
       SystemHeatOverlay.Instance.ClearPanels();
       SystemHeatOverlay.Instance.AssignSimulator(simulator);
 
+      
+
       if (toolbarPanel)
         toolbarPanel.AssignSimulator(simulator);
-      
+
+      ResetToolbarPanel();
+    }
+
+
+    void ResetToolbarPanel()
+    {
+      // Refresh reactors
+     
+      if (HasHeatModules(FlightGlobals.ActiveVessel))
+      {
+        if (SystemHeatSettings.DebugUI)
+          Utils.Log($"[SystemHeatToolbar]: Found modules");
+        if (stockToolbarButton == null)
+        {
+          Utils.Log($"[SystemHeatToolbar]: Creating toolbar button");
+          stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
+              OnToolbarButtonToggle,
+              OnToolbarButtonToggle,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              ApplicationLauncher.AppScenes.FLIGHT,
+              (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+        }
+      }
+      else
+      {
+        Utils.Log($"[SystemHeatToolbar]: No modules");
+        if (stockToolbarButton != null)
+        {
+          Utils.Log($"[SystemHeatToolbar]: Removing toolbar button");
+          ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
+          stockToolbarButton = null;
+        }
+        if (toolbarPanel != null)
+          toolbarPanel.SetVisible(false);
+      }
+
     }
     #region Stock Toolbar Methods
     public void OnDestroy()
@@ -204,17 +267,18 @@ namespace SystemHeat.UI
       showWindow = false;
       if (SystemHeatSettings.DebugUI)
         Utils.Log("[UI]: App Launcher Ready");
-      if (ApplicationLauncher.Ready && stockToolbarButton == null)
+      if (ApplicationLauncher.Ready &&  stockToolbarButton == null)
       {
-        stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            DummyVoid,
-            ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
-            (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+        if (HighLogic.LoadedSceneIsFlight && HasHeatModules(FlightGlobals.ActiveVessel) || HighLogic.LoadedSceneIsEditor)
+          stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
+              OnToolbarButtonToggle,
+              OnToolbarButtonToggle,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
+              (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
       }
       CreateToolbarPanel();
     }

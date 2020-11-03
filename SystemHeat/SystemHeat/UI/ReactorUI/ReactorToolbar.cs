@@ -48,13 +48,17 @@ namespace SystemHeat.UI
     }
     protected void CreateToolbarPanel()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[ReactorToolbar]: Creating toolbar panel");
-      GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ReactorToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
-      newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
-      newUIPanel.transform.localPosition = Vector3.zero;
-      reactorPanel = newUIPanel.AddComponent<ReactorPanel>();
-      reactorPanel.SetVisible(false);
+      if (reactorPanel == null)
+
+      {
+        if (SystemHeatSettings.DebugUI)
+          Utils.Log("[ReactorToolbar]: Creating toolbar panel");
+        GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ReactorToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
+        newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
+        newUIPanel.transform.localPosition = Vector3.zero;
+        reactorPanel = newUIPanel.AddComponent<ReactorPanel>();
+        reactorPanel.SetVisible(false);
+      }
     }
     protected void DestroyToolbarPanel()
     {
@@ -79,8 +83,8 @@ namespace SystemHeat.UI
 
         if (HighLogic.LoadedSceneIsFlight)
         {
-
-          reactorPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(reactorPanel.rect.rect.width, reactorPanel.rect.rect.height, 0f);
+          if (reactorPanel && stockToolbarButton)
+            reactorPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(reactorPanel.rect.rect.width, reactorPanel.rect.rect.height, 0f);
         }
         if (HighLogic.LoadedSceneIsEditor)
         {
@@ -92,18 +96,57 @@ namespace SystemHeat.UI
     }
     public void OnVesselChanged(Vessel v)
     {
-      // Refresh reactors
-      ClearReactors();
-      FindReactors(v);
+      Utils.Log($"[ReactorToolbar]: Changed to vessel {v}");
+      ResetToolbarPanel();
 
     }
 
     public void ClearReactors()
     {
+
       if (reactorPanel != null)
         reactorPanel.ClearReactors();
     }
-    public void FindReactors(Vessel ves)
+
+    void ResetToolbarPanel()
+    {
+      // Refresh reactors
+      ClearReactors();
+      if (FindAllReactors(FlightGlobals.ActiveVessel).Count > 0)
+      {
+        Utils.Log($"[ReactorToolbar]: Found reactors");
+        if (stockToolbarButton == null)
+        {
+          Utils.Log($"[ReactorToolbar]: Creating toolbar for reactors");
+          stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
+              OnToolbarButtonToggle,
+              OnToolbarButtonToggle,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              DummyVoid,
+              ApplicationLauncher.AppScenes.FLIGHT,
+              (Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
+        }
+        CreateToolbarPanel();
+        FindReactors(FlightGlobals.ActiveVessel);
+      }
+      else
+      {
+        Utils.Log($"[ReactorToolbar]: No reactors");
+        if (stockToolbarButton != null)
+        {
+          Utils.Log($"[ReactorToolbar]: Removing toolbar for reactors");
+          ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
+          stockToolbarButton = null;
+        }
+        if (reactorPanel != null)
+          reactorPanel.SetVisible(false);
+      }
+      
+    }
+
+    List<PartModule> FindAllReactors(Vessel ves)
     {
       if (SystemHeatSettings.DebugUI)
         Utils.Log($"[ReactorToolbar]: Detecting reactors on {ves}");
@@ -128,14 +171,24 @@ namespace SystemHeat.UI
           }
         }
       }
+      return unsortedReactorList;
+    }
+    public void FindReactors(Vessel ves)
+    {
+
+      List<PartModule> foundReactors = FindAllReactors(ves);
       if (SystemHeatSettings.DebugUI)
-        Utils.Log($"[ReactorToolbar]: found {unsortedReactorList.Count} reactors");
+        Utils.Log($"[ReactorToolbar]: found {foundReactors.Count} reactors");
 
       if (reactorPanel)
-        foreach (PartModule reactor in unsortedReactorList)
+      {
+        foreach (PartModule reactor in foundReactors)
         {
           reactorPanel.AddReactor(reactor);
         }
+
+      }
+      
     }
 
     #region Stock Toolbar Methods
@@ -166,8 +219,11 @@ namespace SystemHeat.UI
     {
       showWindow = false;
       if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UIReactorToolbar App Launcher Ready");
-      if (ApplicationLauncher.Ready && stockToolbarButton == null)
+        Utils.Log("[ReactorToolbar]: App Launcher Ready");
+
+      
+
+      if (ApplicationLauncher.Ready && FindAllReactors(FlightGlobals.ActiveVessel).Count > 0 && stockToolbarButton == null)
       {
         stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
             OnToolbarButtonToggle,
