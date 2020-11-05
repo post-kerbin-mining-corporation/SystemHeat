@@ -240,12 +240,16 @@ namespace SystemHeat.UI
 
         bool isOn = false;
         bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
-        onToggle.isOn = isOn;
+        if (isOn != onToggle.isOn)
+          onToggle.SetIsOnWithoutNotify(isOn);
+
+        //onToggle.isOn = isOn;
 
 
         bool isCharge = false;
         bool.TryParse(module.Fields.GetValue("Charging").ToString(), out isCharge);
-        chargeToggle.isOn = isCharge;
+        chargeToggle.SetIsOnWithoutNotify(isCharge);
+        //chargeToggle.isOn = isCharge;
         float chargeVal = (float)module.Fields.GetValue("CurrentCharge") / (float)module.Fields.GetValue("ChargeGoal");
         chargeSlider.value = chargeVal;
         Color32 fillColor;
