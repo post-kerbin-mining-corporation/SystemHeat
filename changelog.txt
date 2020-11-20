@@ -1,7 +1,15 @@
+v0.1.5
+------
+- Added manual control mode to Fission Reactors
+- Added Heat Control wraparound radiators to radiator patch
+- Added some background improvements to Converter and Harvester adapter modules
+- Fixed wrong target temperature for some radiators
+
 v0.1.4
 ------
 - Fixed Generation and Rejection values in the overlay being reversed
 - Fixed Reactor control panel on/off toggle firing events when on/off toggle in the PAW was fired
+- Localized ModuleSystemHeatHarvester and ModuleSystemHeatConverter
 
 v0.1.3
 ------

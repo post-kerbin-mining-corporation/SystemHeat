@@ -58,7 +58,8 @@ namespace SystemHeat
 
     public void Start()
     {
-      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      
+      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
 
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -77,8 +78,8 @@ namespace SystemHeat
         Utils.Log("[ModuleSystemHeatConverter] Setup completed");
       }
 
-      Events["ToggleEditorThermalSim"].guiName = String.Format("Toggle Simulate {0}", base.ConverterName);
-      Fields["HarvesterEfficiency"].guiName = String.Format("{0} Converter Efficiency", base.ConverterName);
+      Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);
+      Fields["HarvesterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency", base.ConverterName);
     }
     public override void FixedUpdate()
     {
@@ -95,7 +96,7 @@ namespace SystemHeat
         Fields["HarvesterEfficiency"].guiActiveEditor = editorThermalSim;
 
       }
-      HarvesterEfficiency = String.Format("{0}%", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
+      HarvesterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
     }
 
     protected void GenerateHeatEditor()
@@ -125,7 +126,7 @@ namespace SystemHeat
         {
           ScreenMessages.PostScreenMessage(
             new ScreenMessage(
-              String.Format("Harvester overheated on {0}! Emergency shutdown!",
+              String.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Message_Shutdown",
                                                              part.partInfo.title),
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));

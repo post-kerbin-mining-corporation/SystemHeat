@@ -19,7 +19,7 @@ namespace SystemHeat
 
     // This should correspond to the related ModuleSystemHeat
     [KSPField(isPersistant = false)]
-    public string systemHeatModuleID ;
+    public string systemHeatModuleID ="";
 
     // Map loop temperature to system efficiency (0-1.0)
     [KSPField(isPersistant = false)]
@@ -49,7 +49,7 @@ namespace SystemHeat
     }
 
     // Current efficiency GUI string
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Converter Efficiency")]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency")]
     public string ConverterEfficiency = "-1%";
 
     // base paramters
@@ -57,9 +57,10 @@ namespace SystemHeat
     private List<ResourceBaseRatio> outputs;
     protected ModuleSystemHeat heatModule;
 
-    public void Start()
+    public override void OnStart(StartState state)
     {
-      heatModule = ModuleUtils.FindNamedComponent<ModuleSystemHeat>(this.part, systemHeatModuleID);
+      base.OnStart(state);
+      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
 
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -78,15 +79,19 @@ namespace SystemHeat
         Utils.Log("[ModuleSystemHeatConverter] Setup completed");
       }
 
-      Events["ToggleEditorThermalSim"].guiName = String.Format("Toggle Simulate {0}", base.ConverterName);
-      Fields["ConverterEfficiency"].guiName = String.Format("{0} Converter Efficiency", base.ConverterName);
+      Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Field_SimulateEditor", base.ConverterName);
+      Fields["ConverterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency", base.ConverterName);
     }
+
     public override void FixedUpdate() {
       base.FixedUpdate();
+
       if (HighLogic.LoadedSceneIsFlight)
       {
         GenerateHeatFlight();
         UpdateSystemHeatFlight();
+
+        Fields["ConverterEfficiency"].guiActive = base.ModuleIsActive();
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
@@ -95,7 +100,7 @@ namespace SystemHeat
         Fields["ConverterEfficiency"].guiActiveEditor = editorThermalSim;
         
       }
-      ConverterEfficiency = String.Format("{0}%", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature)*100f).ToString("F1"));
+      ConverterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature)*100f).ToString("F1"));
     }
     
     protected void GenerateHeatEditor()
@@ -125,7 +130,7 @@ namespace SystemHeat
         {
           ScreenMessages.PostScreenMessage(
             new ScreenMessage(
-              String.Format("Converter overhead on {0}! Emergency shutdown!",
+              Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Message_Shutdown",
                                                              part.partInfo.title),
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));

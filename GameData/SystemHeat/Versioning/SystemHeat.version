@@ -1,7 +1,7 @@
 {
     "NAME":"SystemHeat",
-    "URL":"https://raw.githubusercontent.com/ChrisAdderley/SystemHeat/master/GameData/SystemHeat/Versioning/SystemHeat.version",
-    "DOWNLOAD":"https://github.com/ChrisAdderley/SystemHeat",
+    "URL":"https://raw.githubusercontent.com/post-kerbin-mining-corporation/SystemHeat/master/GameData/SystemHeat/Versioning/SystemHeat.version",
+    "DOWNLOAD":"https://github.com/post-kerbin-mining-corporation/SystemHeat",
     "VERSION":
     {
         "MAJOR":0,
