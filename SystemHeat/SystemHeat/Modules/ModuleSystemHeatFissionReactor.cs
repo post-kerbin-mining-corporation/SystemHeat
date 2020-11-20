@@ -23,9 +23,14 @@ namespace SystemHeat
     [KSPField(isPersistant = true)]
     public bool Enabled = false;
 
+    // Sets user control to manual
+    [KSPField(isPersistant = true)]
+    public bool ManualControl = false;
+
     // Current reactor power setting (0-100, tweakable)
     [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
     public float CurrentReactorThrottle = 100f;
+
 
     // Current power generation
     [KSPField(isPersistant = true)]
@@ -149,6 +154,16 @@ namespace SystemHeat
     {
       ReactorDeactivated();
     }
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_EnableManual_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
+    public void EnableManual()
+    {
+      SetManualControl(true);
+    }
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_DisableManual_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
+    public void DisableManual()
+    {
+      SetManualControl(false);
+    }
     /// Toggle control panel
     [KSPEvent(guiActive = false, guiName = "Toggle Reactor Control", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public void ShowReactorControl()
@@ -224,7 +239,14 @@ namespace SystemHeat
 
     }
 
+    public virtual void SetManualControl(bool state)
+    {
+      ManualControl = state;
+      Events["EnableManual"].guiActive = !ManualControl;
+      Events["DisableManual"].guiActive = ManualControl;
+      Fields["CurrentReactorThrottle"].guiActive = ManualControl;
 
+    }
     public virtual void ReactorActivated()
     {
       Enabled = true;
@@ -291,6 +313,8 @@ namespace SystemHeat
       {
         GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
         DoCatchup();
+        SetManualControl(ManualControl);
+
       }
 
     }
@@ -500,7 +524,8 @@ namespace SystemHeat
     private void HandleResourceActivities(float timeStep)
     {
 
-      CurrentReactorThrottle = CalculateGoalThrottle(timeStep);
+      if (!ManualControl)
+        CurrentReactorThrottle = CalculateGoalThrottle(timeStep);
 
       double burnRate = 0d;
       float fuelThrottle = CurrentReactorThrottle / 100f;
