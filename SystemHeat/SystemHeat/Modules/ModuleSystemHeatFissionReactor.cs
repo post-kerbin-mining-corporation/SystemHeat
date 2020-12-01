@@ -263,9 +263,8 @@ namespace SystemHeat
       {
         if (inputs == null || inputs.Count == 0)
         {
-          ConfigNode node = GameDatabase.Instance.GetConfigs("PART").
-              Single(c => part.partInfo.name == c.name).config.
-              GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+          ConfigNode node = ModuleUtils.GetModuleConfigNode(part, moduleName);
+          if (node != null)
           OnLoad(node);
         }
 
