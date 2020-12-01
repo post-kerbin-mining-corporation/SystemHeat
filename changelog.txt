@@ -1,3 +1,14 @@
+v0.2.0
+------
+- Added Chinese localization (TerrestrisYE)
+- Added additional converter patches, including NF Electrical, NF Propulsion, CryoTanks (TerrestrisYE)
+- Halved the radiating capacity of all high temperature and microchannel radiators BUT halved their mass.
+- Added some better handling for parts that have underscores in their part internal names
+- Localized ModuleSystemHeatEngine
+- Injected system heat parameters into PartInfo blocks for ModuleResourceConverter and ModuleResourceHarvester
+- Worked on normalizing PartInfo blocks for System Heat modules in terminology and look and feel
+- Increased the amount of coolant in the coolant tank part by 5x
+
 v0.1.5
 ------
 - Added manual control mode to Fission Reactors

@@ -55,7 +55,22 @@ namespace SystemHeat
     private List<ResourceBaseRatio> inputs;
     private List<ResourceBaseRatio> outputs;
     protected ModuleSystemHeat heatModule;
+    public override string GetInfo()
+    {
+      string info = base.GetInfo();
 
+      int pos = info.IndexOf("\n\n");
+      if (pos < 0)
+        return info;
+      else
+        return info.Substring(0, pos) + Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_PartInfoAdd",
+          systemPower.Evaluate(0f).ToString("F0"),
+          systemOutletTemperature.ToString("F0"),
+          shutdownTemperature.ToString("F0")
+          ) + info.Substring(pos);
+
+
+    }
     public void Start()
     {
       
