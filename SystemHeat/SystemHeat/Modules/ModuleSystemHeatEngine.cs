@@ -44,11 +44,11 @@ namespace SystemHeat
 
     // UI Fields
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Engine Heat Generation")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration")]
     public string systemHeatGeneration = "";
 
     // UI field for showing heat
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Engine System Temperature")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature")]
     public string systemTemperature = "";
 
 
@@ -58,14 +58,14 @@ namespace SystemHeat
 
     public override string GetModuleDisplayName()
     {
-        return "Engine Heat" ;
+        return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_DisplayName") ;
     }
 
     public override string GetInfo()
     {
         string msg = "";
         ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
-        msg += String.Format("<b>Thermal Output:</b> {0} kW\n<b>System Temperature:</b> {1} K\n<b>Maximum Temperature</b> {2} K",
+        msg += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_PartInfo",
           systemPower.ToString("F0"),
           systemOutletTemperature.ToString("F0"),
           temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
@@ -129,12 +129,12 @@ namespace SystemHeat
           Fields["systemHeatGeneration"].guiActiveEditor = true;
           Fields["systemTemperature"].guiActiveEditor = true;
           heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
-          systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
         }
         else
         {
           
-          systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
+          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
           heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
           Fields["systemHeatGeneration"].guiActiveEditor = false;
           Fields["systemTemperature"].guiActiveEditor = false;
@@ -148,7 +148,7 @@ namespace SystemHeat
         Fields["systemHeatGeneration"].guiActiveEditor = true;
         Fields["systemTemperature"].guiActiveEditor = true;
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
-        systemHeatGeneration = String.Format("{0:F1} kW", engineFraction * systemPower);
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
       }
       
     }
@@ -166,16 +166,16 @@ namespace SystemHeat
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
         Fields["systemHeatGeneration"].guiActive = true;
         Fields["systemTemperature"].guiActive = true;
-        systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
-        systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
       } 
       else
       {
         heatModule.AddFlux(moduleID, 0f,0f);
         Fields["systemHeatGeneration"].guiActive = false;
         Fields["systemTemperature"].guiActive = false;
-        systemHeatGeneration = String.Format("{0:F0} kW", engineFraction * systemPower);
-        systemTemperature = String.Format("{0:F0}/{1:F0} K", heatModule.currentLoopTemperature, systemOutletTemperature);
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
       }
       
 
@@ -188,7 +188,7 @@ namespace SystemHeat
         {
           ScreenMessages.PostScreenMessage(
             new ScreenMessage(
-              String.Format("Engine system maximum temperature of {0} K was exceeded on {1}! Emergency shutdown!",
+              Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Message_Overheat",
                                                              shutdownTemperature.ToString("F0"),
                                                              part.partInfo.title),
                                                              3.0f,
