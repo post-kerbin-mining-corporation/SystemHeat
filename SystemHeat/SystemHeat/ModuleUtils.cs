@@ -75,7 +75,21 @@ namespace SystemHeat
     }
 
 
+    public static ConfigNode GetModuleConfigNode(Part part, string moduleName)
+    {
+      try
+      {
+        return GameDatabase.Instance.GetConfigs("PART").
+                Single(c => part.partInfo.name.Replace('_', '.') == c.name.Replace('_', '.')).config.
+                GetNodes("MODULE").Single(n => n.GetValue("name") == moduleName);
+      }
+      catch (Exception)
+      {
+        Utils.LogError($"Couldn't get module config for {moduleName} on {part.partInfo.name}");
+        return null;
+      }
 
+    }
     public static T FindNamedComponent<T>(Part part, string moduleID)
     {
       T module = default(T);
