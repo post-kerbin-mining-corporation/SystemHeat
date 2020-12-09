@@ -26,7 +26,7 @@ namespace SystemHeat
 
     // Map system outlet temperature (K) to heat generation (kW)
     [KSPField(isPersistant = false)]
-    public FloatCurve systemPower = new FloatCurve();
+    public float systemPower = 0f;
 
 
     // 
@@ -64,7 +64,7 @@ namespace SystemHeat
         return info;
       else
         return info.Substring(0, pos) + Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_PartInfoAdd",
-          systemPower.Evaluate(0f).ToString("F0"),
+          systemPower.ToString("F0"),
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0")
           ) + info.Substring(pos);
@@ -74,7 +74,7 @@ namespace SystemHeat
     public void Start()
     {
       
-      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
+      heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -117,7 +117,7 @@ namespace SystemHeat
     protected void GenerateHeatEditor()
     {
       if (editorThermalSim)
-        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower.Evaluate(systemOutletTemperature));
+        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);
       else
         heatModule.AddFlux(moduleID, 0f, 0f);
     }
@@ -126,7 +126,7 @@ namespace SystemHeat
     {
       if (base.ModuleIsActive())
       {
-        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower.Evaluate(systemOutletTemperature));
+        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);
       }
       else
       {
@@ -141,7 +141,7 @@ namespace SystemHeat
         {
           ScreenMessages.PostScreenMessage(
             new ScreenMessage(
-              String.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Message_Shutdown",
+              Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Message_Shutdown",
                                                              part.partInfo.title),
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
