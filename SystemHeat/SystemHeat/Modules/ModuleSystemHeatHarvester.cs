@@ -27,8 +27,6 @@ namespace SystemHeat
     // Map system outlet temperature (K) to heat generation (kW)
     [KSPField(isPersistant = false)]
     public float systemPower = 0f;
-
-
     // 
     [KSPField(isPersistant = false)]
     public float shutdownTemperature = 1000f;
