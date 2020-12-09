@@ -1,3 +1,10 @@
+v0.2.2
+------
+- Corrected NFE Nuclear Recycler Uranium Extractor patch not working
+- Fixed production ratios not working correctly overall
+- Changed systemPower key in ModuleSystemHeatHarvester and ModuleSystemHeatConverter to a float
+- Improved exception handling and debugging overall
+
 v0.2.0
 ------
 - Added Chinese localization (TerrestrisYE)

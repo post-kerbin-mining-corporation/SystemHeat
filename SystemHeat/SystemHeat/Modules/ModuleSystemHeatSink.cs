@@ -108,9 +108,7 @@ namespace SystemHeat
 
     public void Start()
     {
-      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
-      if (heatModule == null)
-        heatModule.GetComponent<ModuleSystemHeat>();
+      heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
       if (SystemHeatSettings.DebugModules)
       {

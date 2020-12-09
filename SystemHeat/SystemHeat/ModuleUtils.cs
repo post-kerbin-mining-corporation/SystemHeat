@@ -52,7 +52,7 @@ namespace SystemHeat
         {
           if (outputs[j].ResourceName == outputList[i].ResourceName)
           {
-            _recipe.Outputs[i] = new ResourceRatio(outputList[i].ResourceName, inputs[j].ResourceRatio * fraction, outputList[i].DumpExcess);
+            _recipe.Outputs[i] = new ResourceRatio(outputList[i].ResourceName, outputs[j].ResourceRatio * fraction, outputList[i].DumpExcess);
           }
         }
       }
@@ -74,7 +74,21 @@ namespace SystemHeat
       }
     }
 
+    public static ModuleSystemHeat FindHeatModule(Part part, string moduleName)
+    {
+      ModuleSystemHeat heatModule = part.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == moduleName);
+      
+      if (heatModule == null)
+      {
+        Utils.LogError($"[{part}] No ModuleSystemHeat named {moduleName} was found, using first instance");
+        return part.GetComponents<ModuleSystemHeat>().ToList().First();
+      } 
+       
+      if (heatModule == null)
+        Utils.LogError($"[{part}] No ModuleSystemHeat was found.");
 
+      return heatModule;
+    }
     public static ConfigNode GetModuleConfigNode(Part part, string moduleName)
     {
       try
