@@ -38,9 +38,7 @@ namespace SystemHeat
     public override void Start()
     {
       base.Start();
-      heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
-      if (heatModule == null)
-        heatModule.GetComponent<ModuleSystemHeat>();
+      heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
       if (SystemHeatSettings.DebugModules)
       {
         Utils.Log("[ModuleSystemHeatRadiator] Setup completed");

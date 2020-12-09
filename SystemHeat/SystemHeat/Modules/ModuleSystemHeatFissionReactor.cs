@@ -268,9 +268,7 @@ namespace SystemHeat
           OnLoad(node);
         }
 
-        heatModule = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID);
-        if (heatModule == null)
-          heatModule.GetComponent<ModuleSystemHeat>();
+        heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
         var range = (UI_FloatRange)this.Fields["CurrentSafetyOverride"].uiControlEditor;
         range.minValue = 0f;
