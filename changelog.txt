@@ -1,3 +1,11 @@
+v0.2.3
+------
+- Updates to Chinese localization (TerrestrisYE)
+- Fixed a number of changes from last update not actually being included :|
+- Added generic harvester, converter patches from toric5
+- Normalized drill thermal efficiencies
+- Hid heat sink part. 
+
 v0.2.2
 ------
 - Corrected NFE Nuclear Recycler Uranium Extractor patch not working
