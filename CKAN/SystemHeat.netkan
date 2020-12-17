@@ -1,0 +1,27 @@
+{
+    "spec_version": "v1.4",
+    "identifier":   "SystemHeat",
+    "name":         "System Heat",
+    "$kref":        "#/ckan/github/post-kerbin-mining-corporation/SystemHeat",
+    "$vref":        "#/ckan/ksp-avc",
+    "abstract": "System Heat revamps the Core Heat system used in stock KSP to drive drills and harvesters with a new, more powerful system. This core package does not make changes to the base game - install other SystemHeat packs to change drill, converters and the like to use Systemheat",
+    "author": "Chris Adderley (Nertea)",
+    "license":      "CC-BY-NC-SA-4",
+    "resources": {
+        "homepage":   "https://forum.kerbalspaceprogram.com/index.php?/topic/193909",
+        "repository": "https://github.com/post-kerbin-mining-corporation/SystemHeat"
+    },
+    "depends": [
+        { "name": "ModuleManager"   }
+    ],
+    "suggests": [
+        { "name": "SystemHeatConverters"   },
+        { "name": "SystemHeatFissionReactors"   },
+        { "name": "SystemHeatFissionEngines"   },
+        { "name": "SystemHeatHarvesters"   }
+    ],
+    "install": [ {
+        "find":       "SystemHeat",
+        "install_to": "GameData"
+    } ]
+}
