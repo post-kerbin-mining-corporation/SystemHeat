@@ -1,3 +1,10 @@
+v0.3.0
+------
+- Pushed to KSP 1.11
+- Improved Repair feature for fission reactors: now requires EVA repair kits. More kits needed for larger reactors
+- Improved Refuel feature for fission reactors: now needs Kerbals to equip the Nuclear Fuel Container EVA part, and for them to collect fuel from containers to store in reactors
+- Added Nuclear fuel container cargo part for working with fission engines/reactors
+
 v0.2.3
 ------
 - Updates to Chinese localization (TerrestrisYE)

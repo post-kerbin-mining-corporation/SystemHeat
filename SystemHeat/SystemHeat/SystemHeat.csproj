@@ -87,6 +87,7 @@
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />
     <Compile Include="Modules\ModuleSystemHeatExchanger.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionEngine.cs" />
+    <Compile Include="Modules\ModuleSystemHeatFissionFuelHandler.cs" />
     <Compile Include="Modules\ModuleSystemHeatHarvester.cs" />
     <Compile Include="Modules\ModuleSystemHeatRadiator.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionReactor.cs" />
