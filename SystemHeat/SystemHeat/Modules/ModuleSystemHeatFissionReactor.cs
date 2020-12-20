@@ -98,7 +98,7 @@ namespace SystemHeat
     // REPAIR VARIABLES
     // integrity of the core
     [KSPField(isPersistant = true)]
-    public float CoreIntegrity = 100f;
+    public float CoreIntegrity = 50f;
 
     // Rate the core is damaged, in % per S per K
     [KSPField(isPersistant = false)]
@@ -107,6 +107,10 @@ namespace SystemHeat
     // Engineer level to repair the core
     [KSPField(isPersistant = false)]
     public int EngineerLevelForRepair = 5;
+
+
+    [KSPField(isPersistant = false)]
+    public float RepairAmountPerKit = 25;
 
     [KSPField(isPersistant = false)]
     public float MaxRepairPercent = 75;
@@ -573,14 +577,20 @@ namespace SystemHeat
     #region Repair
     public bool TryRepairReactor()
     {
+
       if (CoreIntegrity <= MinRepairPercent)
       {
         ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreTooDamaged"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
         return false;
       }
-      if (!ModuleUtils.CheckEVAEngineerLevel(EngineerLevelForRepair))
+      if (FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < EngineerLevelForRepair)
       {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreTooDamaged", EngineerLevelForRepair.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
+        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_EngineerLevelTooLow", EngineerLevelForRepair.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
+        return false;
+      }
+      if (FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.TotalAmountOfPartStored("evaRepairKit") < 1)
+      {
+        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_NoKits"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
         return false;
       }
       if (Enabled)
@@ -594,21 +604,24 @@ namespace SystemHeat
         ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreTooHot", MaxTempForRepair.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
         return false;
       }
-      if (CoreIntegrity >= MaxRepairPercent)
-      {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreAlreadyRepaired", MaxRepairPercent.ToString("F0")),
-            5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
-      }
+
+      //if (CoreIntegrity >= MaxRepairPercent)
+      //{
+      //  ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreAlreadyRepaired", MaxRepairPercent.ToString("F0")),
+      //      5.0f, ScreenMessageStyle.UPPER_CENTER));
+      //  return false;
+      //}
       return true;
     }
 
     // Repair the reactor to max Repair percent
     public void DoReactorRepair()
     {
-      this.CoreIntegrity = MaxRepairPercent;
+      FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.RemoveNPartsFromInventory("evaRepairKit", 1, playSound: true);
+
+      this.CoreIntegrity = Mathf.Clamp(this.CoreIntegrity + RepairAmountPerKit, 0f, 100f);
       ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_RepairSuccess",
-        MaxRepairPercent.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
+        this.CoreIntegrity.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
     }
 
     #endregion
