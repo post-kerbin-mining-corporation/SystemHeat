@@ -1,3 +1,9 @@
+v0.3.1
+------
+- Adjusted radiator masses (some errors before)
+- Tweaks to the Refuel system
+- Fixes to the Fission Engine patches
+
 v0.3.0
 ------
 - Pushed to KSP 1.11
