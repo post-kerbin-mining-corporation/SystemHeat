@@ -149,8 +149,10 @@ namespace SystemHeat.UI
       }
       if (simulator != null)
       {
+        
         SystemHeatOverlay.Instance.AssignSimulator(simulator);
-        toolbarPanel.AssignSimulator(simulator);
+        if (toolbarPanel != null)
+          toolbarPanel.AssignSimulator(simulator);
       }
     }
     void Update()

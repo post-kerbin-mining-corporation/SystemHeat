@@ -1,6 +1,6 @@
 # System Heat
 
-A mod for Kerbal Space Program, intended to proovide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
+A mod for Kerbal Space Program, intended to provide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
 
 * [Features](#features)
 * [Dependencies](#dependencies)
@@ -38,6 +38,18 @@ Your job, as the spacecraft engineer, is to construct Heat Loops such that they 
 To install, place the GameData folder inside your Kerbal Space Program folder. If asked to overwrite files, please do so.
 
 NOTE: Do NOT rename or move folders within the GameData folder - this mod uses absolute paths to assets and will break if this happens.
+
+## Optional Patches
+
+Some extra patches are bundled that you can use to tweak your installation. To install them, drop the correct folder from the **Extras** folder into your KSP GameData Folder.
+
+Please note that these extras may break your ships in flight as they will make existing parts run on the SystemHeat system
+
+* **SystemHeatHarvesters**: Converts harvesters to use SystemHeat
+* **SystemHeatConverters**: Converts converters to use SystemHeat
+* **SystemHeatFissionReactors**: Converts nuclear reactors to use SystemHeat
+* **SystemHeatFissionEngines**: When installed, nuclear engines will have integrated reactors
+
 
 ## Contributing
 

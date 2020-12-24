@@ -62,7 +62,7 @@ namespace SystemHeat.UI
       totalOutgoingFluxTitle = transform.FindDeepChild("HeatRejectionTitle").GetComponent<Text>();
 
       totalLoopsTitle = transform.FindDeepChild("LoopCountTitle").GetComponent<Text>();
-      simRateTitle = transform.FindDeepChild("SimRateLabel").GetComponent<Text>();
+      simRateTitle = transform.FindDeepChild("SimRateTitle").GetChild(0).GetComponent<Text>();
       overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
       craftStatsTitle = transform.FindDeepChild("StatsHeaderText").GetComponent<Text>();
       panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
@@ -83,7 +83,7 @@ namespace SystemHeat.UI
       simRateHeader = transform.FindDeepChild("SimRateTitle").gameObject;
       simRateSlider = transform.FindDeepChild("Slider").GetComponent<Slider>();
       simRateSliderObject = transform.FindDeepChild("SimRateSlider").gameObject;
-      simRateLabel = transform.FindDeepChild("SimRateLabel").GetComponent<Text>();
+      simRateLabel = transform.FindDeepChild("SimRateSlider").GetChild(1).GetComponent<Text>();
 
       debugToggle.onValueChanged.AddListener(delegate { ToggleDebug(); });
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });

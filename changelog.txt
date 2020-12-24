@@ -1,3 +1,10 @@
+v0.3.2
+------
+- Heat Control radiator names are now adjusted when installed to match their SystemHeat capacities
+- Couple of UI text fixes
+- Fixed Heat Exchanger PartInfo being blank
+- Fixed a couple of harmless but annoying NREs
+
 v0.3.1
 ------
 - Adjusted radiator masses (some errors before)

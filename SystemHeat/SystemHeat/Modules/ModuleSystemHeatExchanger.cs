@@ -95,7 +95,7 @@ namespace SystemHeat
 
     public override string GetInfo()
     {
-      string msg = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_UIGroup_Title",
+      string msg = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_PartInfo",
         0f.ToString("F0"), temperatureDeltaCostCurve.Evaluate(0f).ToString("F0"),
         1000f.ToString("F0"), temperatureDeltaCostCurve.Evaluate(1000f).ToString("F0"),
         temperatureDeltaHeatCurve.Evaluate(0).ToString("F0"),
