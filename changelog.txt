@@ -1,8 +1,9 @@
 v0.3.2
 ------
 - Heat Control radiator names are now adjusted when installed to match their SystemHeat capacities
-- 1 or 2 UI fixes
-- Fixed Heat Exchanger PartInfo
+- Couple of UI text fixes
+- Fixed Heat Exchanger PartInfo being blank
+- Fixed a couple of harmless but annoying NREs
 
 v0.3.1
 ------
