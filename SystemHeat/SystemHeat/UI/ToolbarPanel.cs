@@ -62,7 +62,7 @@ namespace SystemHeat.UI
       totalOutgoingFluxTitle = transform.FindDeepChild("HeatRejectionTitle").GetComponent<Text>();
 
       totalLoopsTitle = transform.FindDeepChild("LoopCountTitle").GetComponent<Text>();
-      simRateTitle = transform.FindDeepChild("SimRateLabel").GetComponent<Text>();
+      simRateTitle = transform.FindDeepChild("SimRateTitle").GetComponent<Text>();
       overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
       craftStatsTitle = transform.FindDeepChild("StatsHeaderText").GetComponent<Text>();
       panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();

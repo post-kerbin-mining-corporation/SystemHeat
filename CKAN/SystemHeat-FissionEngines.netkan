@@ -21,6 +21,9 @@
         { "name": "SystemHeatHarvesters"   },
         { "name": "KerbalAtomics"   }
     ],
+    "conflicts": [
+        {"name": "KerbalAtomics-NFECompatibility"}
+    ],
     "install": [ {
         "find":       "SystemHeatFissionEngines",
         "install_to": "GameData"

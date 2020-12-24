@@ -15,11 +15,14 @@
         { "name": "ModuleManager"   },
         { "name": "SystemHeat"   }
     ],
+    "recommends" : [
+        { "name": "NearFutureElectrical"   }
+    ],
     "suggests": [
         { "name": "SystemHeatConverters"   },
         { "name": "SystemHeatFissionEngines"   },
-        { "name": "SystemHeatHarvesters"   },
-        { "name": "NearFutureElectrical"   }
+        { "name": "SystemHeatHarvesters"   }
+        
     ],
     "install": [ {
         "find":       "SystemHeatFissionReactors",
