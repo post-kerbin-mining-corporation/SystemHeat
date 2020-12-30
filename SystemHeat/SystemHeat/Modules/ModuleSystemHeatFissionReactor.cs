@@ -480,6 +480,9 @@ namespace SystemHeat
           HandleResourceActivities(TimeWarp.fixedDeltaTime);
           if (heatModule.currentLoopTemperature > CurrentSafetyOverride)
           {
+            ScreenMessages.PostScreenMessage(new ScreenMessage(
+              Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_EmergencyShutdown", CurrentSafetyOverride.ToString("F0"), part.partInfo.title
+              ), 5.0f, ScreenMessageStyle.UPPER_CENTER));
             ReactorDeactivated();
           }
         }

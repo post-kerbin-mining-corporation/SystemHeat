@@ -1,7 +1,9 @@
 v0.3.3
 ------
+- Fixed fission reactor Manual mode showing both on and off buttons at game start
 - Fixed fission reactors still generating power/working when they were full of waste
 - Fixed fission reactors that didn't generate electricity not generating waste
+- Added emergency shutdown message to fission reactors when safety temp is exceeded.
 - Added Hibernate On Warp control to fission reactors: if activated, an enabled reactor will turn off when the ship goes on rails. It will reactivate when the ship goes off rails. 
 - Fixed a bug in loop integration that could cause strange behaviour below norminal temperatures
 
