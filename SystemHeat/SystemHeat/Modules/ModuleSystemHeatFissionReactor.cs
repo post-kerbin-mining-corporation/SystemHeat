@@ -23,6 +23,13 @@ namespace SystemHeat
     [KSPField(isPersistant = true)]
     public bool Enabled = false;
 
+    [KSPField(isPersistant = true)]
+    public bool HibernateOnWarp = false;
+
+    [KSPField(isPersistant = true)]
+    public bool Hibernating = false;
+
+
     // Sets user control to manual
     [KSPField(isPersistant = true)]
     public bool ManualControl = false;
@@ -163,18 +170,26 @@ namespace SystemHeat
     {
       SetManualControl(true);
     }
-    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_DisableManual_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
+    [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_DisableManual_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
     public void DisableManual()
     {
       SetManualControl(false);
     }
-    /// Toggle control panel
-    [KSPEvent(guiActive = false, guiName = "Toggle Reactor Control", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
-    public void ShowReactorControl()
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_EnableHibernate_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
+    public void EnableHibernate()
     {
-      /// TODO: UI DAMN
-      //ReactorUI.ToggleReactorWindow();
+      HibernateOnWarp = true;
+      GameEvents.onPartPack.Add(new EventData<Part>.OnEvent(GoOnRails));
+      GameEvents.onPartUnpack.Add(new EventData<Part>.OnEvent(GoOffRails));
     }
+    [KSPEvent(guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Event_DisableHibernate_Title", active = true, groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title", groupStartCollapsed = false)]
+    public void DisableHibernate()
+    {
+      HibernateOnWarp = false;
+      GameEvents.onPartPack.Remove(GoOnRails);
+      GameEvents.onPartUnpack.Remove(GoOffRails);
+    }
+
     // Try to fix the reactor
     [KSPEvent(externalToEVAOnly = true, guiActiveUnfocused = true, unfocusedRange = 3.5f, guiName = "Repair Reactor")]
     public void RepairReactor()
@@ -186,6 +201,11 @@ namespace SystemHeat
     }
     /// KSPACTIONS
     /// ----------------------
+    
+    [KSPAction("Toggle Hibernate")]
+    public void ToggleHibernateAction(KSPActionParam param)
+    {
+    }
 
     [KSPAction("Enable Reactor")]
     public void EnableAction(KSPActionParam param)
@@ -206,11 +226,6 @@ namespace SystemHeat
       else DisableReactor();
     }
 
-    [KSPAction("Toggle Reactor Panel")]
-    public void TogglePanelAction(KSPActionParam param)
-    {
-      ShowReactorControl();
-    }
 
     protected ModuleSystemHeat heatModule;
     protected List<ResourceRatio> inputs;
@@ -243,6 +258,29 @@ namespace SystemHeat
 
     }
 
+    public virtual void GoOnRails(Part p)
+    {
+      
+      if (HibernateOnWarp && Enabled)
+      {
+        Hibernating = true;
+        ReactorDeactivated();
+        Utils.Log($"[ModuleSystemHeatFissionReactor] Reactor was on: Going on rails and hibernating reactor");
+      }
+    }
+    public virtual void GoOffRails(Part p)
+    {
+
+      if (HibernateOnWarp)
+      {
+        if (Hibernating)
+        {
+          ReactorActivated();
+          Hibernating = false;
+          Utils.Log($"[ModuleSystemHeatFissionReactor] Going off rails and resuming reactor");
+        }
+      }
+    }
     public virtual void SetManualControl(bool state)
     {
       ManualControl = state;
@@ -269,7 +307,7 @@ namespace SystemHeat
         {
           ConfigNode node = ModuleUtils.GetModuleConfigNode(part, moduleName);
           if (node != null)
-          OnLoad(node);
+            OnLoad(node);
         }
 
         heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
@@ -313,6 +351,12 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsFlight)
       {
         GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
+        if (HibernateOnWarp)
+        {
+          GameEvents.onPartPack.Add(new EventData<Part>.OnEvent(GoOnRails));
+          GameEvents.onPartUnpack.Add(new EventData<Part>.OnEvent(GoOffRails));
+        }
+
         DoCatchup();
         SetManualControl(ManualControl);
 
@@ -323,6 +367,9 @@ namespace SystemHeat
     {
       // Clean up events when the item is destroyed
       GameEvents.OnVesselRollout.Remove(OnVesselRollout);
+      
+      GameEvents.onPartPack.Remove(GoOnRails);
+      GameEvents.onPartUnpack.Remove(GoOffRails);
     }
     /// <summary>
     /// 
@@ -392,6 +439,11 @@ namespace SystemHeat
         {
           Events["DisableReactor"].active = Enabled;
           Events["EnableReactor"].active = !Enabled;
+        }
+        if (Events["EnableHibernate"].active == HibernateOnWarp || Events["DisableHibernate"].active != HibernateOnWarp)
+        {
+          Events["DisableHibernate"].active = HibernateOnWarp;
+          Events["EnableHibernate"].active = !HibernateOnWarp;
         }
       }
     }
@@ -532,6 +584,18 @@ namespace SystemHeat
       float fuelThrottle = CurrentReactorThrottle / 100f;
 
       bool fuelCheckPassed = true;
+
+      // Check for full-ness
+      foreach (ResourceRatio ratio in outputs)
+      {
+        if (CheckFull(ratio.ResourceName, fuelThrottle * ratio.Ratio * timeStep))
+        {
+          ReactorDeactivated();
+          return;
+        }
+        
+      }
+      // CHeck for fuel and consume
       foreach (ResourceRatio ratio in inputs)
       {
         double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * timeStep, ratio.FlowMode);
@@ -543,6 +607,14 @@ namespace SystemHeat
         if (ratio.ResourceName == FuelName)
           burnRate = ratio.Ratio;
       }
+      // If fuel consumed, add waste
+      if (fuelCheckPassed)
+      {
+        foreach (ResourceRatio ratio in outputs)
+        {
+          double amt = this.part.RequestResource(ratio.ResourceName, -fuelThrottle * ratio.Ratio * timeStep, ratio.FlowMode);
+        }
+      }
 
       if (GeneratesElectricity)
       {
@@ -550,11 +622,6 @@ namespace SystemHeat
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentReactorThrottle);
         if (fuelCheckPassed)
         {
-          foreach (ResourceRatio ratio in outputs)
-          {
-            double amt = this.part.RequestResource(ratio.ResourceName, -fuelThrottle * ratio.Ratio * timeStep, ratio.FlowMode);
-          }
-
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
           this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, -CurrentElectricalGeneration * timeStep, ResourceFlowMode.ALL_VESSEL);
 
@@ -572,7 +639,19 @@ namespace SystemHeat
         burnRate);
 
     }
+    public bool CheckFull(string nm, double eps)
+    {
 
+      if (this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id) != null)
+        if (this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id).amount + eps >=
+          this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id).maxAmount)
+          return true;
+        else
+          return false;
+
+
+      return false;
+    }
 
     #region Repair
     public bool TryRepairReactor()
