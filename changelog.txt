@@ -1,3 +1,9 @@
+v0.3.4
+------
+- Fixed fission reactors always starting at 50% health
+- Fixed uncooled fission reactors always instantly melting down during first load sequence
+- Fixed EVA kerbals storing all their carried fuel in containers when storing, no matter what capacity is remaining in the target container
+
 v0.3.3
 ------
 - Fixed fission reactor Manual mode showing both on and off buttons at game start

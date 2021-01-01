@@ -1,5 +1,5 @@
 ================
-SystemHeat 0.3.3
+SystemHeat 0.3.4
 ================
 
 A mod for Kerbal Space Program, intended to provide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
@@ -18,10 +18,10 @@ Some extra patches are bundled that you can use to tweak your installation. To i
 
 WARNING: Please note that these extras may break your ships in flight as they will make existing parts run on the SystemHeat system
 
-SystemHeatHarvesters: Converts harvesters to use SystemHeat
-SystemHeatConverters: Converts converters to use SystemHeat
-SystemHeatFissionReactors: Converts nuclear reactors to use SystemHeat
-SystemHeatFissionEngines: When installed, nuclear engines will have integrated reactors
+- SystemHeatHarvesters: Converts harvesters to use SystemHeat
+- SystemHeatConverters: Converts converters to use SystemHeat
+- SystemHeatFissionReactors: Converts nuclear reactors to use SystemHeat
+- SystemHeatFissionEngines: When installed, nuclear engines will have integrated reactors
 
 =======
 KSP-AVC

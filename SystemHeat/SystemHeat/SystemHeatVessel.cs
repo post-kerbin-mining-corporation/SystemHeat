@@ -25,6 +25,11 @@ namespace SystemHeat
     bool dataReady = false;
     #endregion
 
+    protected override void OnAwake()
+    {
+      base.OnAwake();
+      GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
+    }
     protected override void OnStart()
     {
       base.OnStart();
@@ -33,7 +38,7 @@ namespace SystemHeat
       // These events need to trigger a refresh
       GameEvents.onVesselGoOnRails.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
       GameEvents.onVesselWasModified.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
-      GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
+      
     }
 
     void OnDestroy()
@@ -101,6 +106,7 @@ namespace SystemHeat
     /// </summary>
     protected void OnVesselRollout(ShipConstruct node)
     {
+      
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatVessel]: OnVesselRollout", this.GetType().Name));
       simulator.ResetTemperatures();
