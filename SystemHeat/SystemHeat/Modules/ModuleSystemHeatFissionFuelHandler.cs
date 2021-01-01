@@ -226,7 +226,7 @@ namespace SystemHeat.Modules
 
     protected void TransferResourceFromEVA(string resourceName)
     {
-      double availableSpace = GetResourceAmount(resourceName, true);
+      double availableSpace = GetResourceAmount(resourceName, true) - GetResourceAmount(resourceName);
       double toAdd = 0d;
       for (int i=0;i< FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.InventorySlots; i++)
       {

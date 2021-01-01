@@ -105,7 +105,7 @@ namespace SystemHeat
     // REPAIR VARIABLES
     // integrity of the core
     [KSPField(isPersistant = true)]
-    public float CoreIntegrity = 50f;
+    public float CoreIntegrity = 100f;
 
     // Rate the core is damaged, in % per S per K
     [KSPField(isPersistant = false)]
@@ -345,9 +345,23 @@ namespace SystemHeat
 
       if (FirstLoad)
       {
+        
         this.CurrentSafetyOverride = this.CriticalTemperature;
         FirstLoad = false;
       }
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+       
+
+        DoCatchup();
+        SetManualControl(ManualControl);
+
+      }
+
+    }
+    public override void OnAwake()
+    {
+      base.OnAwake();
       if (HighLogic.LoadedSceneIsFlight)
       {
         GameEvents.OnVesselRollout.Add(new EventData<ShipConstruct>.OnEvent(OnVesselRollout));
@@ -356,12 +370,7 @@ namespace SystemHeat
           GameEvents.onPartPack.Add(new EventData<Part>.OnEvent(GoOnRails));
           GameEvents.onPartUnpack.Add(new EventData<Part>.OnEvent(GoOffRails));
         }
-
-        DoCatchup();
-        SetManualControl(ManualControl);
-
       }
-
     }
     void OnDestroy()
     {
@@ -384,6 +393,7 @@ namespace SystemHeat
     {
       if (part.vessel.missionTime > 0.0)
       {
+        
         if (Enabled)
         {
           double elapsedTime = Planetarium.GetUniversalTime() - LastUpdateTime;
@@ -548,6 +558,7 @@ namespace SystemHeat
     // track and set core damage
     private void HandleCoreDamage()
     {
+     
       // Update reactor damage
       float critExceedance = heatModule.LoopTemperature - CriticalTemperature;
 
