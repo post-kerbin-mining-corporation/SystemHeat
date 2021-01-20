@@ -39,9 +39,9 @@ namespace SystemHeat
       bool everythingOk = true;
       if (SystemHeatEditor.Instance.Simulator != null)
       {
-        foreach (var kvp in SystemHeatEditor.Instance.Simulator.HeatLoops)
+        foreach (HeatLoop loop in SystemHeatEditor.Instance.Simulator.HeatLoops)
         {
-          float tDelta = kvp.Value.Temperature - kvp.Value.NominalTemperature;
+          float tDelta = loop.Temperature - loop.NominalTemperature;
           if (tDelta >= criticalThreshold)
           {
             severity = DesignConcernSeverity.CRITICAL;
@@ -93,20 +93,20 @@ namespace SystemHeat
       bool everythingOk = true;
       if (SystemHeatEditor.Instance.Simulator != null)
       {
-        foreach (var kvp in SystemHeatEditor.Instance.Simulator.HeatLoops)
+        foreach (HeatLoop loop in SystemHeatEditor.Instance.Simulator.HeatLoops)
         {
-          float fDelta = kvp.Value.NetFlux;
+          float fDelta = loop.NetFlux;
           if (fDelta >= criticalThreshold)
           {
             severity = DesignConcernSeverity.CRITICAL;
             everythingOk = false;
-            concernText += Localizer.Format("#LOC_SystemHeat_EngineerReport_LoopFluxTest_ConcernDescription", kvp.Key.ToString(), fDelta.ToString("F0"), Environment.NewLine);
+            concernText += Localizer.Format("#LOC_SystemHeat_EngineerReport_LoopFluxTest_ConcernDescription", loop.ID.ToString(), fDelta.ToString("F0"), Environment.NewLine);
           }
           else if (fDelta >= warningThreshold)
           {
             severity = DesignConcernSeverity.WARNING;
             everythingOk = false;
-            concernText += Localizer.Format("#LOC_SystemHeat_EngineerReport_LoopFluxTest_ConcernDescription", kvp.Key.ToString(), fDelta.ToString("F0"), Environment.NewLine);
+            concernText += Localizer.Format("#LOC_SystemHeat_EngineerReport_LoopFluxTest_ConcernDescription", loop.ID.ToString(), fDelta.ToString("F0"), Environment.NewLine);
           }
         }
       }

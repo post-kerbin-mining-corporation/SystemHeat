@@ -263,7 +263,10 @@ namespace SystemHeat
 
       if (modules.Count > 0 && modules[0] != null)
       {
-        return modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude) > 50000d ? SystemHeatSettings.SpaceTemperature: (float)modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude);
+        if (modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude) > 50000d)
+          return SystemHeatSettings.SpaceTemperature;
+        
+        return  Mathf.Clamp( (float)modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
       }
       return SystemHeatSettings.SpaceTemperature;
     }

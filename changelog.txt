@@ -1,3 +1,16 @@
+v0.3.5
+------
+- Fixed an issue where the Overlay panels were not reporting radiator performance properly
+- Fixed an issue with fission reactors firing a harmless NRE on launch
+- Fixed an issue where loop temperature could trend below local space temperature sometimes
+- Adjusted radiator patches for HeatControl 0.6.0 
+- Rewrote signficiant pieces of the UI backend
+- Improved behaviour of in-flight loop incrementing, should handle more edge cases, handle reducing the loop number, correctly update the UI
+- Merging loops when docking now works again
+- UI no longer violently explodes when undocking
+- Fixed missing storage container on Scylla
+- Tuned heat generation of NTR patches to be more aligned with FFT-style heat balance
+
 v0.3.4
 ------
 - Fixed fission reactors always starting at 50% health

@@ -19,13 +19,13 @@ namespace SystemHeat.UI
     protected OverlayLine overlayLine;
     protected List<OverlayPoint> overlayPoints;
     protected List<OverlayPanel> overlaPanels;
-    protected HeatLoop heatLoop;
+    public HeatLoop heatLoop;
 
     public OverlayLoop(HeatLoop loop, Transform overlayRoot, bool startVisible)
     {
       root = overlayRoot;
       heatLoop = loop;
-      overlayLine = new OverlayLine(root, loop);
+      overlayLine = new OverlayLine(root, loop.ID);
 
       SetVisible(startVisible);
     }
@@ -42,6 +42,7 @@ namespace SystemHeat.UI
 
     protected void UpdateLoopProperties()
     {
+      overlayLine.UpdateColor(heatLoop.ID);
       overlayLine.UpdateGlow(heatLoop.Temperature, heatLoop.NominalTemperature);
     }
 

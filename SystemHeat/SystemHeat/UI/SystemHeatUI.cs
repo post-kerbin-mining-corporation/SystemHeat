@@ -11,16 +11,21 @@ using KSP.Localization;
 namespace SystemHeat.UI
 {
   [KSPAddon(KSPAddon.Startup.FlightAndEditor, false)]
-  public class SystemHeatUI: MonoBehaviour
+  public class SystemHeatUI : MonoBehaviour
   {
 
     public static SystemHeatUI Instance { get; private set; }
+
+
+    public bool WindowState {get {return showWindow;} }
+    public bool OverlayMasterState { get { return showWindow && toolbarPanel.OverlayMasterState; } }
+
+    public bool OverlayLoopState(int loopID) { return toolbarPanel.OverlayLoopState(loopID); }
     // Control Vars
     protected static bool showWindow = false;
 
-
     // Panel
-    protected ToolbarPanel toolbarPanel;
+    public ToolbarPanel toolbarPanel;
 
     // Stock toolbar button
     protected string toolbarUIIconURLOff = "SystemHeat/UI/toolbar_off";
@@ -80,11 +85,9 @@ namespace SystemHeat.UI
       if (showWindow)
       {
         SystemHeatOverlay.Instance.SetVisible(toolbarPanel.overlayToggle.isOn);
-        SystemHeatDebugUI.SetVisible(toolbarPanel.debugToggle.isOn);
       } else
       {
         SystemHeatOverlay.Instance.SetVisible(false);
-        SystemHeatDebugUI.SetVisible(false);
       }
 
     }
