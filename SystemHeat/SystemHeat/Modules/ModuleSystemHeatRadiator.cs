@@ -32,13 +32,33 @@ namespace SystemHeat
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title")]
     public string RadiatorEfficiency = "-1%";
 
+    [KSPField(isPersistant = false)]
+    public string scalarModuleID;
+
+    [KSPField(isPersistant = false)]
+    public float draperPoint = 300f;
+
+    [KSPField(isPersistant = false)]
+    public float heatAnimationRate = 0.1f;
+
+    [KSPField(isPersistant = false)]
+    public float maxTempAnimation = -1f;
 
     protected ModuleSystemHeat heatModule;
+    protected ModuleSystemHeatColorAnimator scalarModule;
 
     public override void Start()
     {
       base.Start();
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
+
+      if (scalarModuleID != "")
+        scalarModule = part.GetComponents<ModuleSystemHeatColorAnimator>().ToList().Find(x => x.moduleID == scalarModuleID);
+
+      if (maxTempAnimation == -1f)
+        maxTempAnimation = (float)part.maxTemp;
+
+      maxTempAnimation -= draperPoint;
       if (SystemHeatSettings.DebugModules)
       {
         Utils.Log("[ModuleSystemHeatRadiator] Setup completed");
@@ -74,19 +94,30 @@ namespace SystemHeat
           if (base.IsCooling)
           {
             float flux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
+
             if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
               heatModule.AddFlux(moduleID, 0f, flux);
             else
               heatModule.AddFlux(moduleID, 0f, 0f);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
               (-flux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
+
+            if (scalarModule != null)
+            {
+              
+              scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, Mathf.Clamp01((heatModule.currentLoopTemperature - draperPoint) / maxTempAnimation), TimeWarp.fixedDeltaTime * heatAnimationRate));
+            }
           }
           else
           {
 
             heatModule.AddFlux(moduleID, 0f, 0f);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
+            if (scalarModule != null)
+            scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, 0f, TimeWarp.fixedDeltaTime * heatAnimationRate));
           }
+
+
         }
 
         if (HighLogic.LoadedSceneIsEditor)

@@ -340,15 +340,17 @@ namespace SystemHeat
         {
           Fields["GeneratorStatus"].guiActive = false;
         }
-        Actions["TogglePanelAction"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Action_TogglePanelAction");
+        //Actions["TogglePanelAction"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Action_TogglePanelAction");
+        if (FirstLoad)
+        {
+
+          this.CurrentSafetyOverride = this.CriticalTemperature;
+          FirstLoad = false;
+        }
+
       }
 
-      if (FirstLoad)
-      {
-        
-        this.CurrentSafetyOverride = this.CriticalTemperature;
-        FirstLoad = false;
-      }
+      
       if (HighLogic.LoadedSceneIsFlight)
       {
        

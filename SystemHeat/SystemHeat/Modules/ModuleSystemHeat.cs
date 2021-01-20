@@ -104,6 +104,7 @@ namespace SystemHeat
       }
     }
 
+    protected SystemHeatSimulator simulator;
     protected Dictionary<string, float> fluxes;
     protected Dictionary<string, float> temperatures;
     protected List<int> loopIDs;
@@ -147,6 +148,11 @@ namespace SystemHeat
       Fields["currentLoopTemperature"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
       Fields["currentLoopFlux"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["currentLoopFlux"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
+
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
+      }
     }
 
     void SetupUI()
@@ -194,7 +200,8 @@ namespace SystemHeat
         }
 
         bool unused = false;
-        int newID = (int)oldFieldValueObj +1;
+        
+        int newID = currentLoopID;
         while (!unused)
         {
 
@@ -215,14 +222,22 @@ namespace SystemHeat
         for (int i = 0; i < allHeatModules.Count; i++)
         {
           if (allHeatModules[i] == this)
+          {
             allHeatModules[i].currentLoopID = newID;
+
+            UIPartActionWindow window = UIPartActionController.Instance?.GetItem(part, false);
+            if (window == null ) return;
+            window.displayDirty = true;
+          }
           if (allHeatModules[i].currentLoopID == (int)oldFieldValueObj)
           {
             if (SystemHeatSettings.DebugSimulation)
               Utils.Log($"[ModuleSystemHeat] Changing module with loop ID {allHeatModules[i].currentLoopID } to new {newID}");
             allHeatModules[i].currentLoopID = newID;
+
           }
         }
+        simulator.ChangeLoopID((int)oldFieldValueObj, newID);
       }
       
     }

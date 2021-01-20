@@ -8,7 +8,7 @@ namespace SystemHeat
 {
   public class SystemHeatSimulator
   {
-    public Dictionary<int,HeatLoop> HeatLoops { get; private set;}
+    public List<HeatLoop> HeatLoops { get; private set;}
 
     /// <summary>
     /// Returns the total heat generation of the vessel in question
@@ -18,11 +18,11 @@ namespace SystemHeat
       get
       {
         float total = 0;
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
-          for (int i = 0; i < kvp.Value.LoopModules.Count; i++)
+          for (int i = 0; i < loop.LoopModules.Count; i++)
           {
-            total = kvp.Value.LoopModules[i].totalSystemFlux > 0f ? total + kvp.Value.LoopModules[i].totalSystemFlux : total;
+            total = loop.LoopModules[i].totalSystemFlux > 0f ? total + loop.LoopModules[i].totalSystemFlux : total;
           }
         }
         return total;
@@ -38,11 +38,11 @@ namespace SystemHeat
       get
       {
         float total = 0;
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
-          for (int i = 0; i < kvp.Value.LoopModules.Count; i++)
+          for (int i = 0; i < loop.LoopModules.Count; i++)
           {
-            total = kvp.Value.LoopModules[i].totalSystemFlux < 0f ? total + kvp.Value.LoopModules[i].totalSystemFlux : total;
+            total = loop.LoopModules[i].totalSystemFlux < 0f ? total + loop.LoopModules[i].totalSystemFlux : total;
           }
         }
         return total;
@@ -57,10 +57,10 @@ namespace SystemHeat
       get
       {
         float total = 0;
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
 
-          total = total + kvp.Value.Volume;
+          total = total + loop.Volume;
         }
         return total;
       }
@@ -78,7 +78,7 @@ namespace SystemHeat
     }
     public void Reset(List<Part> parts)
     {
-      HeatLoops = new Dictionary<int, HeatLoop>();
+      HeatLoops = new List<HeatLoop>();
       List<ModuleSystemHeat> heatModules = new List<ModuleSystemHeat>();
 
       for (int i = parts.Count - 1; i >= 0; --i)
@@ -105,9 +105,9 @@ namespace SystemHeat
 
       if ( HeatLoops != null)
       {
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
-          kvp.Value.Simulate(TimeWarp.fixedDeltaTime);
+          loop.Simulate(TimeWarp.fixedDeltaTime);
         }
       }
     }
@@ -120,9 +120,9 @@ namespace SystemHeat
 
       if (HeatLoops != null)
       {
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
-          kvp.Value.Simulate(SystemHeatSettings.SimulationRateEditor);
+          loop.Simulate(SystemHeatSettings.SimulationRateEditor);
         }
       }
     }
@@ -144,13 +144,18 @@ namespace SystemHeat
     public void AddHeatModuleToLoop(int loopID, ModuleSystemHeat module)
     {
       // Build a new heat loop as needed
-      if (!HeatLoops.ContainsKey(loopID))
+      if (!HasLoop(loopID))
       {
-        HeatLoops.Add(loopID, new HeatLoop(loopID));
+        HeatLoops.Add(new HeatLoop(loopID));
         if (SystemHeatSettings.DebugSimulation)
           Utils.Log(String.Format("[SystemHeatSimulator]: Created new Heat Loop {0}", loopID));
       }
-      HeatLoops[loopID].AddHeatModule(module);
+      foreach (HeatLoop loop in HeatLoops)
+      {
+        if (loop.ID == loopID)
+          loop.AddHeatModule(module);
+      }
+      
 
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatSimulator]: Added module {0} to Heat Loop {1}", module.moduleID, loopID));
@@ -190,21 +195,45 @@ namespace SystemHeat
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatSimulator]: Removed module {0} from Heat Loop {1}", module.moduleID, loopID));
 
-      if (HeatLoops[loopID].LoopModules.Count == 0)
+      if (Loop(loopID).LoopModules.Count == 0)
       {
-        HeatLoops.Remove(loopID);
+        HeatLoops.Remove(Loop(loopID));
         if (SystemHeatSettings.DebugSimulation)
           Utils.Log(String.Format("[SystemHeatSimulator]: Heat Loop {0} has no more members, removing", loopID));
       }
     }
+    public bool HasLoop(int id)
+    {
 
+      if (HeatLoops != null)
+      {
+        foreach (HeatLoop loop in HeatLoops)
+        {
+          if (loop.ID == id)
+            return true;
+        }
+      }
+      return false;
+    }
+    public void ChangeLoopID(int oldID, int newID)
+    {
+      Loop(oldID).ID = newID;
+    }
+    public HeatLoop Loop(int id)
+    {
+      if (HeatLoops != null)
+      {
+        return HeatLoops.Find(x => x.ID == id);
+      }
+      return null;
+    }
     public void ResetTemperatures()
     {
       if (HeatLoops != null)
       {
-        foreach (KeyValuePair<int, HeatLoop> kvp in HeatLoops)
+        foreach (HeatLoop loop in HeatLoops)
         {
-          kvp.Value.ResetTemperatures();
+          loop.ResetTemperatures();
         }
       }
     }

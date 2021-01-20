@@ -78,7 +78,7 @@ namespace SystemHeat.UI
       {
         if (panelOpen)
         {
-          if (heatModule.totalSystemFlux < 0f)
+          if (heatModule.totalSystemFlux <= 0f)
           {
             infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", heatModule.totalSystemFlux.ToString("F0"));
             infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 26f);

@@ -82,6 +82,7 @@
     <Compile Include="EngineerReport\SystemHeatTests.cs" />
     <Compile Include="HeatLoop.cs" />
     <Compile Include="Modules\ModuleSystemHeat.cs" />
+    <Compile Include="Modules\ModuleSystemHeatAnimateHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatConvector.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />

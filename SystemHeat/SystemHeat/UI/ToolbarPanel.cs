@@ -12,8 +12,21 @@ namespace SystemHeat.UI
 {
   public class ToolbarPanel: MonoBehaviour
   {
+    public bool OverlayMasterState
+    {
+      get { return overlayToggle.isOn; }
+    }
+    public bool OverlayLoopState(int id)
+    {
+      foreach (ToolbarPanelLoopWidget toolbar in loopPanelWidgets)
+      {
+        if (toolbar.trackedLoopID == id)
+          return toolbar.overlayToggle.isOn;
+      }
+      return false;
+    }
 
-     
+
     public bool active = true;
     public bool panelOpen = false;
     public RectTransform rect;
@@ -21,6 +34,7 @@ namespace SystemHeat.UI
     public Toggle debugToggle;
     public Slider simRateSlider;
     public Text simRateLabel;
+
     public GameObject loopPanel;
     public GameObject loopPanelScrollRoot;
 
@@ -176,18 +190,19 @@ namespace SystemHeat.UI
     {
       for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
       {
-        if (!simulator.HeatLoops.ContainsKey(loopPanelWidgets[i].trackedLoopID))
+        if (!simulator.HasLoop(loopPanelWidgets[i].trackedLoopID))
+         // if (!simulator.HeatLoops.ContainsKey(loopPanelWidgets[i].trackedLoopID))
         {
           Destroy(loopPanelWidgets[i].gameObject);
           loopPanelWidgets.RemoveAt(i);
         }
       }
-      foreach (KeyValuePair<int, HeatLoop> keyValuePair in simulator.HeatLoops)
+      foreach (HeatLoop loop in simulator.HeatLoops)
       {
         bool generateWidget = true;
         for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
         {
-          if (loopPanelWidgets[i].trackedLoopID == keyValuePair.Key)
+          if (loopPanelWidgets[i].trackedLoopID == loop.ID)
             generateWidget = false;
         }
 
@@ -198,7 +213,7 @@ namespace SystemHeat.UI
           //newWidget.transform.localPosition = Vector3.zero;
           ToolbarPanelLoopWidget newWidget = newObj.AddComponent<ToolbarPanelLoopWidget>();
           newWidget.AssignSimulator(simulator);
-          newWidget.SetLoop(keyValuePair.Value.ID);
+          newWidget.SetLoop(loop.ID);
           newWidget.SetVisible(true);
           loopPanelWidgets.Add(newWidget);
         }
@@ -235,5 +250,7 @@ namespace SystemHeat.UI
         }
       }
     }
+
+     
   }
 }

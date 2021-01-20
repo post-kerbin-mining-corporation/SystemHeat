@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using SystemHeat.UI;
 
 namespace SystemHeat
 {
@@ -38,7 +39,8 @@ namespace SystemHeat
       // These events need to trigger a refresh
       GameEvents.onVesselGoOnRails.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
       GameEvents.onVesselWasModified.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
-      
+      GameEvents.onVesselDocking.Add(new EventData<uint, uint>.OnEvent(OnVesselsDocked));
+      GameEvents.onVesselsUndocking.Add(new EventData<Vessel, Vessel>.OnEvent(OnVesselsUndocked));
     }
 
     void OnDestroy()
@@ -47,6 +49,8 @@ namespace SystemHeat
       GameEvents.onVesselGoOnRails.Remove(RefreshVesselData);
       GameEvents.onVesselWasModified.Remove(RefreshVesselData);
       GameEvents.OnVesselRollout.Remove(OnVesselRollout);
+      GameEvents.onVesselDocking.Remove(OnVesselsDocked);
+      GameEvents.onVesselsUndocking.Remove(OnVesselsUndocked);
     }
 
     void FixedUpdate()
@@ -75,6 +79,8 @@ namespace SystemHeat
     {
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from Vessel event"));
+
+      ResetSimulation();
     }
     /// <summary>
     /// Referesh the data, given a ConfigNode event
@@ -84,8 +90,30 @@ namespace SystemHeat
       if (SystemHeatSettings.DebugSimulation)
         Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name));
     }
-    
+    protected void OnVesselsDocked(uint v1, uint v2)
+    {
+      Utils.Log(String.Format("[SystemHeatVessel]: Vessel docked", this.GetType().Name));
+      ResetSimulation();
 
+      SystemHeatOverlay.Instance.ResetOverlay();
+      if (FlightGlobals.ActiveVessel == this.vessel)
+      { 
+        SystemHeatOverlay.Instance.AssignSimulator(simulator);
+        SystemHeatUI.Instance.toolbarPanel.AssignSimulator(simulator);
+      }
+    }
+    protected void OnVesselsUndocked(Vessel v1, Vessel v2)
+    {
+      Utils.Log(String.Format("[SystemHeatVessel]: Vessels undocked", this.GetType().Name));
+      ResetSimulation();
+      
+      SystemHeatOverlay.Instance.ResetOverlay();
+      if (FlightGlobals.ActiveVessel == this.vessel)
+      {
+        SystemHeatOverlay.Instance.AssignSimulator(simulator);
+        SystemHeatUI.Instance.toolbarPanel.AssignSimulator(simulator);
+      }
+    }
     /// <summary>
     /// Rebuild all the loops from scratch
     /// </summary>

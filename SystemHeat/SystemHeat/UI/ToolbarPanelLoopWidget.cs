@@ -42,6 +42,7 @@ namespace SystemHeat.UI
       fluxTextHeader = transform.FindDeepChild("FluxText").GetComponent<Text>();
       fluxTextValue = transform.FindDeepChild("FluxDataText").GetComponent<Text>();
 
+      
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
       Localize();
@@ -63,6 +64,7 @@ namespace SystemHeat.UI
       trackedLoopID = loopID;
       if (simulator != null)
       {
+        //overlayToggle.SetIsOnWithoutNotify(SystemHeatOverlay.Instance.CheckLoopVisibility(trackedLoopID));
         overlayToggleText.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopTitle", trackedLoopID.ToString());
         swatch.color = SystemHeatSettings.GetLoopColor(trackedLoopID);
         fluxTextHeader.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxTitle");
@@ -76,25 +78,26 @@ namespace SystemHeat.UI
 
     void Update()
     {
-      if (trackedLoopID != -1 && simulator != null && simulator.HeatLoops.ContainsKey(trackedLoopID))
+      if (trackedLoopID != -1 && simulator != null && simulator.HasLoop(trackedLoopID))
       {
+        HeatLoop lp = simulator.Loop(trackedLoopID);
 
         temperatureTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopTemperatureValue",
-          simulator.HeatLoops[trackedLoopID].Temperature.ToString("F0"),
-          simulator.HeatLoops[trackedLoopID].NominalTemperature.ToString("F0"));
+          lp.Temperature.ToString("F0"),
+          lp.NominalTemperature.ToString("F0"));
 
         string prefix = "";
-        if (simulator.HeatLoops[trackedLoopID].NetFlux == 0f)
+        if (lp.NetFlux == 0f)
           prefix = "";
-        if (simulator.HeatLoops[trackedLoopID].NetFlux > 0f)
+        if (lp.NetFlux > 0f)
           prefix = "+";
-        if (simulator.HeatLoops[trackedLoopID].NetFlux < 0f)
+        if (lp.NetFlux < 0f)
           prefix = "";
 
         fluxTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxValue", prefix,
-        simulator.HeatLoops[trackedLoopID].NetFlux.ToString("F1"));
+        lp.NetFlux.ToString("F1"));
 
-        if (simulator.HeatLoops[trackedLoopID].Temperature > simulator.HeatLoops[trackedLoopID].NominalTemperature)
+        if (lp.Temperature >= lp.NominalTemperature)
         {
           Color32 c;
           HexColorField.HexToColor("fe8401", out c);
@@ -107,7 +110,7 @@ namespace SystemHeat.UI
           temperatureTextValue.color = c;
         }
 
-        if (simulator.HeatLoops[trackedLoopID].NetFlux > 0)
+        if (lp.NetFlux > 0)
         {
           Color32 c;
           HexColorField.HexToColor("fe8401", out c);
