@@ -110,10 +110,7 @@ namespace SystemHeat
     {
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatSink] Setup completed");
-      }
+      Utils.Log("[ModuleSystemHeatSink] Setup completed", LogType.Modules);
 
       if (HeatLightTransformName != "")
       {

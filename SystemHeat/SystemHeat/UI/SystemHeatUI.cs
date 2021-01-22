@@ -17,7 +17,7 @@ namespace SystemHeat.UI
     public static SystemHeatUI Instance { get; private set; }
 
 
-    public bool WindowState {get {return showWindow;} }
+    public bool WindowState { get { return showWindow; } }
     public bool OverlayMasterState { get { return showWindow && toolbarPanel.OverlayMasterState; } }
 
     public bool OverlayLoopState(int loopID) { return toolbarPanel.OverlayLoopState(loopID); }
@@ -38,12 +38,11 @@ namespace SystemHeat.UI
 
     protected virtual void Awake()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[SystemHeatUI]: Initializing toolbar");
+      Utils.Log("[SystemHeatUI]: Initializing toolbar", LogType.UI);
 
       GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
       GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
-      
+
       GameEvents.onGUIApplicationLauncherUnreadifying.Add(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
       GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(OnVesselChanged));
 
@@ -54,14 +53,13 @@ namespace SystemHeat.UI
     {
       if (ApplicationLauncher.Ready)
         OnGUIAppLauncherReady();
-      
-      
+
+
     }
 
     protected void CreateToolbarPanel()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[SystemHeatUI]: Creating toolbar panel");
+      Utils.Log("[SystemHeatUI]: Creating toolbar panel", LogType.UI);
       GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
       newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
       newUIPanel.transform.localPosition = Vector3.zero;
@@ -70,8 +68,7 @@ namespace SystemHeat.UI
     }
     protected void DestroyToolbarPanel()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[SystemHeatUI]: Destroying toolbar panel");
+      Utils.Log("[SystemHeatUI]: Destroying toolbar panel", LogType.UI);
       if (toolbarPanel != null)
       {
         Destroy(toolbarPanel.gameObject);
@@ -85,7 +82,8 @@ namespace SystemHeat.UI
       if (showWindow)
       {
         SystemHeatOverlay.Instance.SetVisible(toolbarPanel.overlayToggle.isOn);
-      } else
+      }
+      else
       {
         SystemHeatOverlay.Instance.SetVisible(false);
       }
@@ -103,15 +101,15 @@ namespace SystemHeat.UI
         SystemHeatVessel heatVessel = FlightGlobals.ActiveVessel.GetComponent<SystemHeatVessel>();
         if (heatVessel != null)
           simulator = heatVessel.Simulator;
-        if (SystemHeatSettings.DebugUI)
-          Utils.Log($"[SystemHeatOverlay]: Located Flight data on vessel {FlightGlobals.ActiveVessel.vesselName}");
+
+        Utils.Log($"[SystemHeatOverlay]: Located Flight data on vessel {FlightGlobals.ActiveVessel.vesselName}", LogType.UI);
       }
     }
     protected bool HasHeatModules(Vessel ves)
     {
 
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log($"[SystemHeatToolbar]: Detecting modules on {ves}");
+
+      Utils.Log($"[SystemHeatToolbar]: Detecting modules on {ves}", LogType.UI);
 
 
       // Get all parts
@@ -139,8 +137,8 @@ namespace SystemHeat.UI
         SystemHeatVessel heatVessel = v.GetComponent<SystemHeatVessel>();
         if (heatVessel != null)
           simulator = heatVessel.Simulator;
-        if (SystemHeatSettings.DebugUI)
-          Utils.Log($"[SystemHeatOverlay]: Located Flight data on vessel {v.vesselName}");
+
+        Utils.Log($"[SystemHeatOverlay]: Located Flight data on vessel {v.vesselName}", LogType.UI);
       }
     }
     void FixedUpdate()
@@ -148,11 +146,11 @@ namespace SystemHeat.UI
       if (simulator == null)
       {
         FindSimulator();
-       
+
       }
       if (simulator != null)
       {
-        
+
         SystemHeatOverlay.Instance.AssignSimulator(simulator);
         if (toolbarPanel != null)
           toolbarPanel.AssignSimulator(simulator);
@@ -174,7 +172,7 @@ namespace SystemHeat.UI
             }
             if (thisVessel != FlightGlobals.ActiveVessel)
             {
-              thisVessel = FlightGlobals.ActiveVessel; 
+              thisVessel = FlightGlobals.ActiveVessel;
             }
           }
           if (toolbarPanel.loopPanel.activeSelf)
@@ -186,20 +184,19 @@ namespace SystemHeat.UI
         {
           if (stockToolbarButton != null)
             toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL();
-          
+
         }
       }
     }
     public void OnVesselChanged(Vessel v)
     {
       FindSimulator(v);
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log($"[UI]: OnVesselChanged Fired to {v.vesselName}");
+      Utils.Log($"[UI]: OnVesselChanged Fired to {v.vesselName}", LogType.UI);
 
       SystemHeatOverlay.Instance.ClearPanels();
       SystemHeatOverlay.Instance.AssignSimulator(simulator);
 
-      
+
 
       if (toolbarPanel)
         toolbarPanel.AssignSimulator(simulator);
@@ -211,14 +208,13 @@ namespace SystemHeat.UI
     void ResetToolbarPanel()
     {
       // Refresh reactors
-     
+
       if (HasHeatModules(FlightGlobals.ActiveVessel))
       {
-        if (SystemHeatSettings.DebugUI)
-          Utils.Log($"[SystemHeatToolbar]: Found modules");
+        Utils.Log($"[SystemHeatToolbar]: Found modules", LogType.UI);
         if (stockToolbarButton == null)
         {
-          Utils.Log($"[SystemHeatToolbar]: Creating toolbar button");
+          Utils.Log($"[SystemHeatToolbar]: Creating toolbar button", LogType.UI);
           stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
               OnToolbarButtonToggle,
               OnToolbarButtonToggle,
@@ -232,10 +228,10 @@ namespace SystemHeat.UI
       }
       else
       {
-        Utils.Log($"[SystemHeatToolbar]: No modules");
+        Utils.Log($"[SystemHeatToolbar]: No modules", LogType.UI);
         if (stockToolbarButton != null)
         {
-          Utils.Log($"[SystemHeatToolbar]: Removing toolbar button");
+          Utils.Log($"[SystemHeatToolbar]: Removing toolbar button", LogType.UI);
           ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
           stockToolbarButton = null;
         }
@@ -247,8 +243,7 @@ namespace SystemHeat.UI
     #region Stock Toolbar Methods
     public void OnDestroy()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: OnDestroy Fired");
+      Utils.Log("[UI]: OnDestroy Fired", LogType.UI);
       // Remove the stock toolbar button
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
       if (stockToolbarButton != null)
@@ -259,9 +254,8 @@ namespace SystemHeat.UI
 
     protected void OnToolbarButtonToggle()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Toolbar Button Toggled");
-      
+      Utils.Log("[UI]: Toolbar Button Toggled", LogType.UI);
+
       stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
       ToggleAppLauncher();
     }
@@ -270,9 +264,9 @@ namespace SystemHeat.UI
     protected void OnGUIAppLauncherReady()
     {
       showWindow = false;
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Ready");
-      if (ApplicationLauncher.Ready &&  stockToolbarButton == null)
+
+      Utils.Log("[UI]: App Launcher Ready", LogType.UI);
+      if (ApplicationLauncher.Ready && stockToolbarButton == null)
       {
         if (HighLogic.LoadedSceneIsFlight && HasHeatModules(FlightGlobals.ActiveVessel) || HighLogic.LoadedSceneIsEditor)
           stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
@@ -290,8 +284,8 @@ namespace SystemHeat.UI
 
     protected void OnGUIAppLauncherDestroyed()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Destroyed");
+
+      Utils.Log("[UI]: App Launcher Destroyed", LogType.UI);
       if (stockToolbarButton != null)
       {
         ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
@@ -303,17 +297,15 @@ namespace SystemHeat.UI
 
     protected void OnGUIAppLauncherUnreadifying(GameScenes scene)
     {
-      
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Unready");
-      
+
+      Utils.Log("[UI]: App Launcher Unready", LogType.UI);
+
       DestroyToolbarPanel();
     }
 
     protected void onAppLaunchToggleOff()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: App Launcher Toggle Off");
+      Utils.Log("[UI]: App Launcher Toggle Off", LogType.UI);
       stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(toolbarUIIconURLOff, false));
     }
 
@@ -321,8 +313,8 @@ namespace SystemHeat.UI
 
     public void ResetAppLauncher()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[UI]: Reset App Launcher");
+
+      Utils.Log("[UI]: Reset App Launcher", LogType.UI);
       //FindData();
       if (stockToolbarButton == null)
       {

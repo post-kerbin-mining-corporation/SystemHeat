@@ -25,7 +25,7 @@ namespace SystemHeat.UI
     protected SystemHeatSimulator simulator;
     protected List<OverlayLoop> overlayLoops;
 
-   // protected Dictionary<int, bool> overlayLoopVisibility;
+    // protected Dictionary<int, bool> overlayLoopVisibility;
     protected List<OverlayPanel> overlayPanels;
 
     protected void Awake()
@@ -37,8 +37,8 @@ namespace SystemHeat.UI
       overlayPanels = new List<OverlayPanel>();
       overlayRoot = (new GameObject("SHOverlayRoot")).GetComponent<Transform>();
 
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Subscribing to events");
+
+      Utils.Log("[SystemHeatOverlay]: Subscribing to events", LogType.Overlay);
       GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(onSceneChange));
 
       if (HighLogic.LoadedSceneIsEditor)
@@ -59,8 +59,8 @@ namespace SystemHeat.UI
     }
     protected void OnDestroy()
     {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Unsubscribing to events");
+
+      Utils.Log("[SystemHeatOverlay]: Unsubscribing to events", LogType.Overlay);
       GameEvents.onGameSceneLoadRequested.Remove(onSceneChange);
 
       if (HighLogic.LoadedSceneIsEditor)
@@ -81,16 +81,16 @@ namespace SystemHeat.UI
     }
     protected void onEnterMapView()
     {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels");
+
+      Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels", LogType.Overlay);
 
       VectorLine.SetCamera3D(PlanetariumCamera.Camera);
       ClearPanels();
     }
     protected void onExitMapView()
     {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels");
+
+      Utils.Log("[SystemHeatOverlay]: Entered map view, clearing panels", LogType.Overlay);
 
       VectorLine.SetCamera3D(FlightCamera.fetch.mainCamera);
 
@@ -99,37 +99,37 @@ namespace SystemHeat.UI
     protected void onEditorScreenChange(EditorScreen screen)
     {
 
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Editor Screen Changed, clearing panels");
+
+      Utils.Log("[SystemHeatOverlay]: Editor Screen Changed, clearing panels", LogType.Overlay);
       ClearPanels();
     }
     protected void onEditorLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType loadType)
     {
 
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Editor Load");
+
+      Utils.Log("[SystemHeatOverlay]: Editor Load", LogType.Overlay);
       ClearPanels();
     }
     protected void onEditorReset()
     {
 
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Editor Reset");
+
+      Utils.Log("[SystemHeatOverlay]: Editor Reset", LogType.Overlay);
       ClearPanels();
     }
 
     protected void onEditorStart()
     {
 
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Editor Start");
+
+      Utils.Log("[SystemHeatOverlay]: Editor Start", LogType.Overlay);
       ClearPanels();
     }
 
     protected void onSceneChange(GameScenes scene)
     {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Changing Scenes, clearing panels");
+
+      Utils.Log("[SystemHeatOverlay]: Changing Scenes, clearing panels", LogType.Overlay);
       SetVisible(false);
       ClearPanels();
     }
@@ -141,8 +141,8 @@ namespace SystemHeat.UI
         {
           if (overlayPanels[i].heatModule.part == part)
           {
-            if (SystemHeatSettings.DebugOverlay)
-              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"));
+
+            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"), LogType.Overlay);
 
             Destroy(overlayPanels[i].gameObject);
             overlayPanels.RemoveAt(i);
@@ -156,8 +156,8 @@ namespace SystemHeat.UI
         {
           if (overlayPanels[i].heatModule.part == part)
           {
-            if (SystemHeatSettings.DebugOverlay)
-              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"));
+
+            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"), LogType.Overlay);
 
             Destroy(overlayPanels[i].gameObject);
             overlayPanels.RemoveAt(i);
@@ -166,8 +166,8 @@ namespace SystemHeat.UI
     }
     public void ClearPanels()
     {
-      if (SystemHeatSettings.DebugOverlay)
-        Utils.Log("[SystemHeatOverlay]: Cleared all panels");
+
+      Utils.Log("[SystemHeatOverlay]: Cleared all panels", LogType.Overlay);
 
       for (int i = 0; i < overlayPanels.Count; i++)
       {
@@ -191,7 +191,6 @@ namespace SystemHeat.UI
         overLoop.Destroy();
       }
       overlayLoops.Clear();
-      //overlayLoopVisibility.Clear();
     }
     protected void LateUpdate()
     {
@@ -201,7 +200,8 @@ namespace SystemHeat.UI
 
         if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0)
         {
-          Utils.Log(String.Format("[SystemHeatOverlay]: No loops, destroying overlay"));
+
+          Utils.Log(String.Format("[SystemHeatOverlay]: No loops, destroying overlay"), LogType.Overlay);
           DestroyOverlay();
         }
         // Update each loop, build a new loop when needed
@@ -212,14 +212,14 @@ namespace SystemHeat.UI
           if (curOverlay != null)
           {
             // if no modules, hide the loop
-            if (loop.LoopModules.Count <= 1)
+            if (loop.LoopModules.Count <= 1 && curOverlay.Drawn)
             {
-              Utils.Log(String.Format("[SystemHeatOverlay]: Loop has < 2 members, hiding"));
+              Utils.Log(String.Format("[SystemHeatOverlay]: Loop has < 2 members, hiding"), LogType.Overlay);
               curOverlay.SetVisible(false);
             }
             else
             {
-              
+
               curOverlay.SetVisible((SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
               if (curOverlay.Drawn)
               {
@@ -231,8 +231,8 @@ namespace SystemHeat.UI
           else
           {
 
-            if (SystemHeatSettings.DebugOverlay)
-              Utils.Log(String.Format("[SystemHeatOverlay]: Building a new overlay for loop {0}", loop.ID));
+
+            Utils.Log(String.Format("[SystemHeatOverlay]: Building a new overlay for loop {0}", loop.ID), LogType.Overlay);
             overlayLoops.Add(new OverlayLoop(loop, overlayRoot, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID))));
           }
 
@@ -241,7 +241,7 @@ namespace SystemHeat.UI
             int index = overlayPanels.FindIndex(f => f.heatModule == system);
             if (index == -1)
             {
-              Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}");
+              Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}", LogType.Overlay);
               // new panel instance
               GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.OverlayPanelPrefab, Vector3.zero, Quaternion.identity);
               newUIPanel.transform.SetParent(UIMasterController.Instance.actionCanvas.transform);
@@ -265,8 +265,8 @@ namespace SystemHeat.UI
         {
           if (overlayPanels[i].heatModule == null)
           {
-            if (SystemHeatSettings.DebugOverlay)
-              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel"));
+
+            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel"), LogType.Overlay);
 
             Destroy(overlayPanels[i].gameObject);
             overlayPanels.RemoveAt(i);
@@ -278,7 +278,7 @@ namespace SystemHeat.UI
           {
             l.SetVisible(false);
           }
-          
+
         }
       }
       else
@@ -297,7 +297,7 @@ namespace SystemHeat.UI
     }
     public void SetVisible(bool visible)
     {
-      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility set to {0}", visible));
+      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility set to {0}", visible), LogType.Overlay);
 
       SetLoopVisiblity(visible);
       SetPanelVisiblity(visible);
@@ -309,13 +309,13 @@ namespace SystemHeat.UI
     }
     public void SetVisible(bool visible, int loopID)
     {
-      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility of loop {0} set to {1}", loopID, visible));
+      Utils.Log(String.Format("[SystemHeatOverlay]: Visibility of loop {0} set to {1}", loopID, visible), LogType.Overlay);
 
       SetLoopVisiblity(visible, loopID);
       SetPanelVisiblity(visible, loopID);
 
 
-     // overlayLoopVisibility[loopID] = visible;
+      // overlayLoopVisibility[loopID] = visible;
     }
     private void SetPanelVisiblity(bool visible)
     {

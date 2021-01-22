@@ -62,10 +62,9 @@ namespace SystemHeat
       if (heatModule == null)
         heatModule.GetComponent<ModuleSystemHeat>();
       
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatSink] Setup completed");
-      }
+      
+        Utils.Log("[ModuleSystemHeatSink] Setup completed", LogType.Modules);
+      
     }
 
     public void FixedUpdate()

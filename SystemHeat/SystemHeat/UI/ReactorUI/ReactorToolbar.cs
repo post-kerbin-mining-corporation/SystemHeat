@@ -27,8 +27,8 @@ namespace SystemHeat.UI
 
     protected virtual void Awake()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[ReactorToolbar]: Initializing toolbar");
+
+        Utils.Log("[ReactorToolbar]: Initializing toolbar", LogType.UI);
 
       GameEvents.onGUIApplicationLauncherReady.Add(OnGUIAppLauncherReady);
       GameEvents.onGUIApplicationLauncherDestroyed.Add(OnGUIAppLauncherDestroyed);
@@ -51,8 +51,8 @@ namespace SystemHeat.UI
       if (reactorPanel == null)
 
       {
-        if (SystemHeatSettings.DebugUI)
-          Utils.Log("[ReactorToolbar]: Creating toolbar panel");
+
+          Utils.Log("[ReactorToolbar]: Creating toolbar panel", LogType.UI);
         GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ReactorToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
         newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
         newUIPanel.transform.localPosition = Vector3.zero;
@@ -62,8 +62,8 @@ namespace SystemHeat.UI
     }
     protected void DestroyToolbarPanel()
     {
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log("[ReactorToolbar]: Destroying toolbar panel");
+
+        Utils.Log("[ReactorToolbar]: Destroying toolbar panel", LogType.UI);
       if (reactorPanel != null)
       {
         Destroy(reactorPanel.gameObject);
@@ -96,7 +96,7 @@ namespace SystemHeat.UI
     }
     public void OnVesselChanged(Vessel v)
     {
-      Utils.Log($"[ReactorToolbar]: Changed to vessel {v}");
+      Utils.Log($"[ReactorToolbar]: Changed to vessel {v}", LogType.UI);
       ResetToolbarPanel();
 
     }
@@ -114,10 +114,10 @@ namespace SystemHeat.UI
       ClearReactors();
       if (FindAllReactors(FlightGlobals.ActiveVessel).Count > 0)
       {
-        Utils.Log($"[ReactorToolbar]: Found reactors");
+        Utils.Log($"[ReactorToolbar]: Found reactors", LogType.UI);
         if (stockToolbarButton == null)
         {
-          Utils.Log($"[ReactorToolbar]: Creating toolbar for reactors");
+          Utils.Log($"[ReactorToolbar]: Creating toolbar for reactors", LogType.UI);
           stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
               OnToolbarButtonToggle,
               OnToolbarButtonToggle,
@@ -133,10 +133,10 @@ namespace SystemHeat.UI
       }
       else
       {
-        Utils.Log($"[ReactorToolbar]: No reactors");
+        Utils.Log($"[ReactorToolbar]: No reactors", LogType.UI);
         if (stockToolbarButton != null)
         {
-          Utils.Log($"[ReactorToolbar]: Removing toolbar for reactors");
+          Utils.Log($"[ReactorToolbar]: Removing toolbar for reactors", LogType.UI);
           ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
           stockToolbarButton = null;
         }

@@ -11,7 +11,7 @@ namespace SystemHeat
   /// <summary>
   /// A module to generate SystemHeat from an engine module
   /// </summary>
-  public class ModuleSystemHeatEngine: PartModule
+  public class ModuleSystemHeatEngine : PartModule
   {
     // This should be unique on the part
     [KSPField(isPersistant = false)]
@@ -58,38 +58,36 @@ namespace SystemHeat
 
     public override string GetModuleDisplayName()
     {
-        return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_DisplayName") ;
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_DisplayName");
     }
 
     public override string GetInfo()
     {
-        string msg = "";
-        ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
-        msg += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_PartInfo",
-          systemPower.ToString("F0"),
-          systemOutletTemperature.ToString("F0"),
-          temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length-1].time.ToString("F0")
-          );
+      string msg = "";
+      ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
+      msg += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_PartInfo",
+        systemPower.ToString("F0"),
+        systemOutletTemperature.ToString("F0"),
+        temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time.ToString("F0")
+        );
 
-        return msg;
+      return msg;
     }
 
     public void Start()
     {
-      heatModule =  ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
+      heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
       if (engineModuleID != "")
         engineModule = this.GetComponents<ModuleEngines>().ToList().Find(x => x.engineID == engineModuleID);
-      
+
       if (engineModule == null)
         engineModule = this.GetComponent<ModuleEngines>();
 
       multiModule = this.GetComponent<MultiModeEngine>();
 
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatEngine] Setup completed");
-      }
+      Utils.Log("[ModuleSystemHeatEngine] Setup completed", LogType.Modules);
+
     }
 
     public void FixedUpdate()
@@ -131,7 +129,7 @@ namespace SystemHeat
         }
         else
         {
-          
+
           systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
           heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
           Fields["systemHeatGeneration"].guiActiveEditor = false;
@@ -141,14 +139,14 @@ namespace SystemHeat
       }
       else
       {
-        
+
         engineFraction = engineModule.thrustPercentage / 100f;
         Fields["systemHeatGeneration"].guiActiveEditor = true;
         Fields["systemTemperature"].guiActiveEditor = true;
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
       }
-      
+
     }
 
     /// <summary>
@@ -157,7 +155,7 @@ namespace SystemHeat
     protected void GenerateHeatFlight()
     {
       float engineFraction = 0f;
-      
+
       if (engineModule.EngineIgnited || engineModule.requestedThrottle > 0f)
       {
         engineFraction = engineModule.requestedThrottle;
@@ -166,16 +164,16 @@ namespace SystemHeat
         Fields["systemTemperature"].guiActive = true;
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
-      } 
+      }
       else
       {
-        heatModule.AddFlux(moduleID, 0f,0f);
+        heatModule.AddFlux(moduleID, 0f, 0f);
         Fields["systemHeatGeneration"].guiActive = false;
         Fields["systemTemperature"].guiActive = false;
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
       }
-      
+
 
     }
     protected void UpdateSystemHeatFlight()
@@ -192,10 +190,9 @@ namespace SystemHeat
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           engineModule.Events["Shutdown"].Invoke();
-          if (SystemHeatSettings.DebugModules)
-          {
-            Utils.Log("[ModuleSystemHeatEngine] Engine overheated: fired shutdown");
-          }
+
+          Utils.Log("[ModuleSystemHeatEngine] Engine overheated: fired shutdown", LogType.Modules);
+
         }
       }
     }

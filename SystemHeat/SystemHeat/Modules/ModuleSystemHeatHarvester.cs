@@ -71,7 +71,7 @@ namespace SystemHeat
     }
     public void Start()
     {
-      
+
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
       if (HighLogic.LoadedSceneIsFlight)
@@ -86,10 +86,9 @@ namespace SystemHeat
 
         //this.CurrentSafetyOverride = this.NominalTemperature;
       }
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatConverter] Setup completed");
-      }
+
+      Utils.Log("[ModuleSystemHeatConverter] Setup completed", LogType.Modules);
+
 
       Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);
       Fields["HarvesterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency", base.ConverterName);
@@ -144,10 +143,9 @@ namespace SystemHeat
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           ToggleResourceConverterAction(new KSPActionParam(0, KSPActionType.Activate));
-          if (SystemHeatSettings.DebugModules)
-          {
-            Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired");
-          }
+
+          Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired", LogType.Modules);
+
         }
         base.recipe = ModuleUtils.RecalculateRatios(systemEfficiency.Evaluate(heatModule.currentLoopTemperature), inputs, outputs, inputList, outputList, base.recipe);
       }

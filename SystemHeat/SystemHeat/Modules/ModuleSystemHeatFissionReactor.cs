@@ -265,7 +265,7 @@ namespace SystemHeat
       {
         Hibernating = true;
         ReactorDeactivated();
-        Utils.Log($"[ModuleSystemHeatFissionReactor] Reactor was on: Going on rails and hibernating reactor");
+        Utils.Log($"[ModuleSystemHeatFissionReactor] Reactor was on: Going on rails and hibernating reactor", LogType.Modules);
       }
     }
     public virtual void GoOffRails(Part p)
@@ -277,7 +277,7 @@ namespace SystemHeat
         {
           ReactorActivated();
           Hibernating = false;
-          Utils.Log($"[ModuleSystemHeatFissionReactor] Going off rails and resuming reactor");
+          Utils.Log($"[ModuleSystemHeatFissionReactor] Going off rails and resuming reactor", LogType.Modules);
         }
       }
     }
@@ -401,12 +401,12 @@ namespace SystemHeat
           double elapsedTime = Planetarium.GetUniversalTime() - LastUpdateTime;
           if (elapsedTime > 0d)
           {
-            Utils.Log($"[SystemHeatFissionReactor] Catching up {elapsedTime} s of time on load");
+            Utils.Log($"[SystemHeatFissionReactor] Catching up {elapsedTime} s of time on load", LogType.Modules);
             float fuelThrottle = CurrentReactorThrottle / 100f;
 
             foreach (ResourceRatio ratio in inputs)
             {
-              Utils.Log($"[SystemHeatFissionReactor] Consuming {fuelThrottle * ratio.Ratio * elapsedTime} u of {ratio.ResourceName} on load");
+              Utils.Log($"[SystemHeatFissionReactor] Consuming {fuelThrottle * ratio.Ratio * elapsedTime} u of {ratio.ResourceName} on load", LogType.Modules);
               double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * elapsedTime, ratio.FlowMode);
 
             }
@@ -502,6 +502,8 @@ namespace SystemHeat
         // =============
         else
         {
+          CurrentElectricalGeneration = 0f;
+          GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Offline");
           // Update UI
           if (CoreIntegrity <= 0f)
           {

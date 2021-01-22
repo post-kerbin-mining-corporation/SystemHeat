@@ -10,16 +10,16 @@ namespace SystemHeat
   /// This is the editor version of the systemHeat simulator interface.
   /// </summary>
   [KSPAddon(KSPAddon.Startup.EditorAny, false)]
-  public class SystemHeatEditor: MonoBehaviour
+  public class SystemHeatEditor : MonoBehaviour
   {
     #region Accessors
     public SystemHeatSimulator Simulator
     {
-      get { return simulator;}
+      get { return simulator; }
     }
     public static SystemHeatEditor Instance { get; private set; }
 
-    public bool Ready { get {return dataReady; }}
+    public bool Ready { get { return dataReady; } }
 
     #endregion
 
@@ -48,8 +48,8 @@ namespace SystemHeat
     #region Editor
     protected void SetupEditorCallbacks()
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Setting up editor callbacks");
+
+      Utils.Log("[SystemHeatEditor]: Setting up editor callbacks", LogType.Simulator);
       GameEvents.onEditorShipModified.Add(new EventData<ShipConstruct>.OnEvent(onEditorVesselModified));
       GameEvents.onEditorRestart.Add(new EventVoid.OnEvent(onEditorVesselReset));
       GameEvents.onEditorLoad.Add(new EventData<ShipConstruct, KSP.UI.Screens.CraftBrowserDialog.LoadType>.OnEvent(onEditorLoad));
@@ -57,14 +57,13 @@ namespace SystemHeat
       GameEvents.onEditorPartDeleted.Add(new EventData<Part>.OnEvent(onEditorPartDeleted));
       GameEvents.onEditorPodDeleted.Add(new EventVoid.OnEvent(onEditorVesselReset));
       GameEvents.onEditorLoad.Add(new EventData<ShipConstruct, KSP.UI.Screens.CraftBrowserDialog.LoadType>.OnEvent(onEditorVesselLoad));
-        
+
       GameEvents.onPartRemove.Add(new EventData<GameEvents.HostTargetAction<Part, Part>>.OnEvent(onEditorVesselPartRemoved));
-      
+
     }
     protected void RemoveEditorCallbacks()
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Removing editor callbacks");
+      Utils.Log("[SystemHeatEditor]: Removing editor callbacks", LogType.Simulator);
       GameEvents.onEditorShipModified.Remove(onEditorVesselModified);
       GameEvents.onEditorRestart.Remove(onEditorVesselReset);
       GameEvents.onEditorStarted.Remove(onEditorVesselStart);
@@ -89,7 +88,8 @@ namespace SystemHeat
         {
           simulator.Reset(ship.Parts);
           simulator.ResetTemperatures();
-        } else
+        }
+        else
         {
           simulator.Refresh(ship.Parts);
           simulator.ResetTemperatures();
@@ -99,10 +99,8 @@ namespace SystemHeat
       }
       else
       {
-        if (SystemHeatSettings.DebugSimulation)
-        {
-          Utils.Log(String.Format("[SystemHeatEditor]: Ship is null"));
-        }
+        Utils.Log(String.Format("[SystemHeatEditor]: Ship is null"), LogType.Simulator);
+
         simulator = new SystemHeatSimulator();
       }
     }
@@ -115,48 +113,46 @@ namespace SystemHeat
 
 
     #region Game Events
-    public void onEditorLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType loadType )
+    public void onEditorLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType loadType)
     {
-      
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Editor Load");
+
+      Utils.Log("[SystemHeatEditor]: Editor Load", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       InitializeEditorConstruct(ship, false);
     }
     public void onEditorPartDeleted(Part part)
     {
-      if (SystemHeatSettings.DebugSimulation && part != null)
-        Utils.Log($"[SystemHeatEditor]: Part {part.name} Deleted");
+      Utils.Log($"[SystemHeatEditor]: Part {part.name} Deleted", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       InitializeEditorConstruct(EditorLogic.fetch.ship, false);
     }
     public void onEditorVesselReset()
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Vessel RESET");
+
+      Utils.Log("[SystemHeatEditor]: Vessel RESET", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(EditorLogic.fetch.ship, true);
     }
     public void onEditorVesselStart()
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Vessel START");
+
+      Utils.Log("[SystemHeatEditor]: Vessel START", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(EditorLogic.fetch.ship, true);
     }
     public void onEditorVesselLoad(ShipConstruct ship, KSP.UI.Screens.CraftBrowserDialog.LoadType type)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Vessel LOAD");
+
+      Utils.Log("[SystemHeatEditor]: Vessel LOAD", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(ship, true);
     }
     public void onEditorVesselPartRemoved(GameEvents.HostTargetAction<Part, Part> p)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Vessel PART REMOVE");
+
+      Utils.Log("[SystemHeatEditor]: Vessel PART REMOVE", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       if (simulator == null)
@@ -166,8 +162,8 @@ namespace SystemHeat
     }
     public void onEditorVesselModified(ShipConstruct ship)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEditor]: Vessel MODIFIED");
+
+      Utils.Log("[SystemHeatEditor]: Vessel MODIFIED", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
       InitializeEditorConstruct(ship, false);
     }

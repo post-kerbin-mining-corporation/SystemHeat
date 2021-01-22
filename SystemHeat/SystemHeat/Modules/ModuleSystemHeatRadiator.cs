@@ -59,10 +59,9 @@ namespace SystemHeat
         maxTempAnimation = (float)part.maxTemp;
 
       maxTempAnimation -= draperPoint;
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatRadiator] Setup completed");
-      }
+
+      Utils.Log("[ModuleSystemHeatRadiator] Setup completed", LogType.Modules);
+
     }
 
     public override string GetModuleDisplayName()
@@ -104,7 +103,7 @@ namespace SystemHeat
 
             if (scalarModule != null)
             {
-              
+
               scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, Mathf.Clamp01((heatModule.currentLoopTemperature - draperPoint) / maxTempAnimation), TimeWarp.fixedDeltaTime * heatAnimationRate));
             }
           }
@@ -114,7 +113,7 @@ namespace SystemHeat
             heatModule.AddFlux(moduleID, 0f, 0f);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
             if (scalarModule != null)
-            scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, 0f, TimeWarp.fixedDeltaTime * heatAnimationRate));
+              scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, 0f, TimeWarp.fixedDeltaTime * heatAnimationRate));
           }
 
 

@@ -29,7 +29,7 @@ namespace SystemHeat.UI
 
     private void Awake()
     {
-      Utils.Log("[SystemHeatUILoader]: Loading UI Prefabs");
+      Utils.Log("[SystemHeatUILoader]: Loading UI Prefabs", LogType.UI);
       AssetBundle prefabs = AssetBundle.LoadFromFile(Path.Combine(KSPUtil.ApplicationRootPath, "GameData/SystemHeat/UI/systemheatui.dat"));
       overlayPanelPrefab = prefabs.LoadAsset("SystemInfo") as GameObject;
       toolbarPanelPrefab = prefabs.LoadAsset("SystemHeatToolbar") as GameObject;
@@ -37,7 +37,7 @@ namespace SystemHeat.UI
       reactorToolbarPanelPrefab = prefabs.LoadAsset("ReactorWindow") as GameObject;
       reactorWidgetPrefab = prefabs.LoadAsset("ReactorWidget") as GameObject;
       reactorDataFieldPrefab = prefabs.LoadAsset("ReactorDataField") as GameObject;
-      Utils.Log("[SystemHeatUILoader]: Loaded UI Prefabs");
+      Utils.Log("[SystemHeatUILoader]: Loaded UI Prefabs", LogType.UI);
     }
   }
 }
