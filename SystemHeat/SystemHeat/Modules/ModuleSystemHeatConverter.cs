@@ -152,10 +152,9 @@ namespace SystemHeat
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           ToggleResourceConverterAction(new KSPActionParam(0, KSPActionType.Activate));
-          if (SystemHeatSettings.DebugModules)
-          {
-            Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired");
-          }
+         
+            Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired", LogType.Modules);
+          
         }
         base._recipe = ModuleUtils.RecalculateRatios(systemEfficiency.Evaluate(heatModule.currentLoopTemperature), inputs, outputs, inputList, outputList, base._recipe);
       }

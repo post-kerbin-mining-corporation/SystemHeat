@@ -20,7 +20,7 @@ namespace SystemHeat
     private void AddTest()
     {
       //Wait for DeltaV simulation to be instantiated and to finish.
-      
+
 
       //Register our test in the Report
       tempTest = new LoopTemperatureTest();
@@ -47,8 +47,8 @@ namespace SystemHeat
 
     private void ReportReady()
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log("[SystemHeatEngineerReport] Report Ready Fired");
+
+      Utils.Log("[SystemHeatEngineerReport] Report Ready Fired", LogType.Simulator);
       RemoveTest();
       AddTest();
     }

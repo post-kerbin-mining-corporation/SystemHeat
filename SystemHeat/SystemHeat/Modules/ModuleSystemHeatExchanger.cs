@@ -39,7 +39,7 @@ namespace SystemHeat
     public FloatCurve temperatureDeltaCostCurve = new FloatCurve();
 
     [KSPField(isPersistant = true, guiActive = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_MaxHeatTransfer", groupName = "heatExchanger", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_UIGroup_Title"),
-      UI_FloatRange(minValue = 0f, maxValue = 2000f,stepIncrement = 25)]
+      UI_FloatRange(minValue = 0f, maxValue = 2000f, stepIncrement = 25)]
     public float HeatRate = 0f;
 
     [KSPField(isPersistant = true, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_TemperatureAdjust", groupName = "heatExchanger", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"),
@@ -90,7 +90,7 @@ namespace SystemHeat
 
     public override string GetModuleDisplayName()
     {
-      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_ModuleName") ;
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_ModuleName");
     }
 
     public override string GetInfo()
@@ -109,9 +109,9 @@ namespace SystemHeat
       heatModule1 = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID1);
       heatModule2 = this.GetComponents<ModuleSystemHeat>().ToList().Find(x => x.moduleID == systemHeatModuleID2);
 
-      
 
-      UI_Toggle toggle = (HighLogic.LoadedSceneIsEditor) ? (UI_Toggle)Fields[nameof(ToggleSource)].uiControlEditor: (UI_Toggle)Fields[nameof(ToggleSource)].uiControlFlight;
+
+      UI_Toggle toggle = (HighLogic.LoadedSceneIsEditor) ? (UI_Toggle)Fields[nameof(ToggleSource)].uiControlEditor : (UI_Toggle)Fields[nameof(ToggleSource)].uiControlFlight;
 
       if (ToggleSource)
       {
@@ -145,10 +145,8 @@ namespace SystemHeat
         onLight = part.FindModelTransform(OnLightTransformName).GetComponent<Renderer>();
       }
 
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatSink] Setup completed");
-      }
+      Utils.Log("[ModuleSystemHeatSink] Setup completed", LogType.Modules);
+
     }
     public void Update()
     {
@@ -166,7 +164,7 @@ namespace SystemHeat
           else
             onLight.material.SetColor("_TintColor", XKCDColors.Red);
         }
-        
+
       }
     }
     public void FixedUpdate()
@@ -183,7 +181,7 @@ namespace SystemHeat
 
     private void ToggleDirection(BaseField field, object oldFieldValueObj)
     {
-      Utils.Log($"[ModuleSystemHeatExchanger] Toggled direction of flow");
+      Utils.Log($"[ModuleSystemHeatExchanger] Toggled direction of flow", LogType.Modules);
       ModuleSystemHeat saved = sourceModule;
       sourceModule = destModule;
       destModule = saved;
@@ -227,7 +225,7 @@ namespace SystemHeat
 
 
           outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
-          
+
           PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
           Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active", outletTemperature.ToString("F0"), outputHeat.ToString("F0"), sourceModule.consumedSystemFlux.ToString("F1"));
           destModule.AddFlux(moduleID, outletTemperature, outputHeat);
@@ -261,7 +259,7 @@ namespace SystemHeat
 
       if (Enabled)
       {
-        
+
         Fields["PowerStatus"].guiActive = true;
         Fields["PowerStatus"].guiActiveEditor = true;
         float outputHeat = HeatRate;

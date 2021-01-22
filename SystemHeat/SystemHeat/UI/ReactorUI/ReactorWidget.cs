@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace SystemHeat.UI
 {
-  public class ReactorWidget: MonoBehaviour
+  public class ReactorWidget : MonoBehaviour
   {
     public RectTransform rect;
     public Text reactorName;
@@ -42,7 +42,7 @@ namespace SystemHeat.UI
 
       reactorName = transform.FindDeepChild("ReactorName").GetComponent<Text>();
       onToggle = transform.FindDeepChild("OnToggle").GetComponent<Toggle>();
-      headerButton  = transform.FindDeepChild("Header").GetComponent<Button>();
+      headerButton = transform.FindDeepChild("Header").GetComponent<Button>();
       warningIcon = transform.FindDeepChild("WarningIcon").GetComponent<Image>();
       iconRoot = transform.FindDeepChild("Icons") as RectTransform;
       dataRoot = transform.FindDeepChild("DataPanel") as RectTransform;
@@ -75,16 +75,17 @@ namespace SystemHeat.UI
       if (rect == null)
         FindComponents();
 
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log($"[ReactorWidget]: Setting up widget for PM {m}");
+
+      Utils.Log($"[ReactorWidget]: Setting up widget for PM {m}", LogType.UI);
       module = m;
       reactorName.text = m.part.partInfo.title;
       datafields = new Dictionary<string, ReactorDataField>();
       // Set the data depending on the reactor type
       iconRoot.gameObject.SetActive(false);
       heatModule = module.GetComponent<ModuleSystemHeat>();
-      if (SystemHeatSettings.DebugUI)
-        Utils.Log($"[ReactorWidget]: Setting up specifc properties for for PM {m}");
+
+
+      Utils.Log($"[ReactorWidget]: Setting up specifc properties for for PM {m}", LogType.UI);
       if (m.moduleName == "ModuleSystemHeatFissionReactor")
       {
         iconRoot.gameObject.SetActive(true);
@@ -127,7 +128,7 @@ namespace SystemHeat.UI
         AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
         AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
         bool isOn = false;
-        
+
         bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
         onToggle.isOn = isOn;
 
@@ -149,14 +150,12 @@ namespace SystemHeat.UI
         AddDataWidget("powerGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGeneratedTitle"));
         AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
         AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
-        Utils.Log($"x");
-        Utils.Log($"{spacer}");
+       
         bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out bool isOn);
         onToggle.isOn = isOn;
 
         bool.TryParse(module.Fields.GetValue("Charging").ToString(), out bool chargeOn);
-        Utils.Log($"{chargeElement}");
-        Utils.Log($"{chargeToggle}");
+        
         spacer.SetActive(true);
         chargeElement.SetActive(true);
         if (chargeOn)
@@ -199,7 +198,7 @@ namespace SystemHeat.UI
           module.Invoke("DisableReactor", 0f);
         }
       }
-      
+
     }
 
     public void ToggleCharge()
@@ -226,8 +225,8 @@ namespace SystemHeat.UI
       if (module.moduleName == "FusionReactor" || module.moduleName == "ModuleFusionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("SystemOutletTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("SystemPower").ToString()).ToString("F0") ) );
-        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentPowerProduced").ToString() ).ToString("F0")));
+        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("SystemPower").ToString()).ToString("F0")));
+        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentPowerProduced").ToString()).ToString("F0")));
         datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelInput")));
         datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", heatModule.LoopTemperature.ToString("F0")));
 
@@ -254,7 +253,7 @@ namespace SystemHeat.UI
         chargeSlider.value = chargeVal;
         Color32 fillColor;
         if (chargeVal < 1.0f)
-           HexColorField.HexToColor("#F67A28", out fillColor);
+          HexColorField.HexToColor("#F67A28", out fillColor);
         else
           HexColorField.HexToColor("#B4D455", out fillColor);
 
@@ -264,8 +263,8 @@ namespace SystemHeat.UI
       if (module.moduleName == "ModuleSystemHeatFissionReactor" || module.moduleName == "ModuleSystemHeatFissionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("NominalTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()).ToString("F0") ) );
-        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentElectricalGeneration").ToString()).ToString("F0") ));
+        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()).ToString("F0")));
+        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentElectricalGeneration").ToString()).ToString("F0")));
         datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelStatus")));
 
         if (heatModule.LoopTemperature > nominalTemp)
@@ -282,14 +281,15 @@ namespace SystemHeat.UI
       if (heatModule.LoopTemperature > nominalTemp)
       {
         warningIcon.enabled = true;
-      } else
+      }
+      else
       {
         warningIcon.enabled = false;
       }
     }
     public void ToggleData()
     {
-      
+
       infoRoot.gameObject.SetActive(!infoRoot.gameObject.activeSelf);
     }
     public void SetVisible(bool state) { }

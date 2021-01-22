@@ -83,10 +83,8 @@ namespace SystemHeat
       if (heatModule == null)
         heatModule.GetComponent<ModuleSystemHeat>();
       
-      if (SystemHeatSettings.DebugModules)
-      {
-        Utils.Log("[ModuleSystemHeatTemperatureAdjuster] Setup completed");
-      }
+        Utils.Log("[ModuleSystemHeatTemperatureAdjuster] Setup completed", LogType.Modules);
+      
     }
     public void Update()
     {

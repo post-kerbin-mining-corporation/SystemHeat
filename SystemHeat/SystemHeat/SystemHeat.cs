@@ -35,7 +35,8 @@ namespace SystemHeat
     public static bool DebugSimulation = true;
     // Emit module  debug messages
     public static bool DebugModules = true;
-
+    // Emit module  debug messages
+    public static bool DebugSettings = true;
     // Show debug info in PAW UIs
     public static bool DebugPartUI = false;
 
@@ -56,13 +57,13 @@ namespace SystemHeat
     public static int MaxSteps = 30;
     // The standard timestep in the editor
     public static float SimulationRateEditor = 1f;
-    
+
     // Loop flux tolerance
     public static float AbsFluxThreshold = 0.5f;
 
 
     public static float OverlayBaseLineWidth = 4f;
-    
+
     public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;
 
@@ -92,7 +93,7 @@ namespace SystemHeat
     {
       ConfigNode settingsNode;
 
-      Utils.Log("[Settings]: Started loading");
+      Utils.Log("[Settings]: Started loading", LogType.Settings);
       if (GameDatabase.Instance.ExistsConfigNode("SystemHeat/Settings/SYSTEMHEAT"))
       {
         Utils.Log("[Settings]: Located settings file");
@@ -121,11 +122,11 @@ namespace SystemHeat
       }
       else
       {
-        Utils.Log("[Settings]: Couldn't find settings file, using defaults");
+        Utils.Log("[Settings]: Couldn't find settings file, using defaults", LogType.Settings);
       }
 
 
-      Utils.Log("[Settings]: Loading coolant types ");
+      Utils.Log("[Settings]: Loading coolant types ", LogType.Settings);
       ConfigNode[] coolantNodes = GameDatabase.Instance.GetConfigNodes("COOLANTTYPE");
 
       CoolantData = new Dictionary<string, CoolantType>();
@@ -134,9 +135,9 @@ namespace SystemHeat
         CoolantType newCoolant = new CoolantType(node);
         CoolantData.Add(newCoolant.Name, newCoolant);
       }
-      Utils.Log("[Settings]: Loaded coolant types");
+      Utils.Log("[Settings]: Loaded coolant types", LogType.Settings);
 
-      Utils.Log("[Settings]: Finished loading");
+      Utils.Log("[Settings]: Finished loading", LogType.Settings);
     }
 
     public static CoolantType GetCoolantType(string name)
@@ -145,7 +146,7 @@ namespace SystemHeat
       if (CoolantData.TryGetValue(name, out coolant))
       {
 
-        Utils.Log(String.Format("[Settings]: Using coolant {0}", coolant.Name));
+        Utils.Log(String.Format("[Settings]: Using coolant {0}", coolant.Name), LogType.Settings);
         return coolant;
       }
       else
@@ -189,7 +190,7 @@ namespace SystemHeat
 
       Density = density;
       HeatCapacity = heatCap;
-      Utils.Log(String.Format("[Settings]: Loaded coolant {0}", this.ToString()));
+      Utils.Log(String.Format("[Settings]: Loaded coolant {0}", this.ToString()), LogType.Settings);
     }
 
     public override string ToString()

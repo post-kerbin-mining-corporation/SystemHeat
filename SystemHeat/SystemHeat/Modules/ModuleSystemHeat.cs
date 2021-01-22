@@ -10,7 +10,7 @@ namespace SystemHeat
   /// The simulation interface to the heat system. All heat producing or consuming modules
   /// on a vessel interact with an instance of this module to add and remove heat.
   /// </summary>
-  public class ModuleSystemHeat: PartModule
+  public class ModuleSystemHeat : PartModule
   {
     // Unique name of the module on a part
     [KSPField(isPersistant = false)]
@@ -35,7 +35,7 @@ namespace SystemHeat
     public float totalSystemTemperature = 0f;
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor =true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
+    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "System Flux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public float totalSystemFlux = 0f;
 
     public float consumedSystemFlux = 0f;
@@ -74,19 +74,22 @@ namespace SystemHeat
     [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
-    public int LoopID {
-      get {return currentLoopID; }
-      set {currentLoopID = value; }
+    public int LoopID
+    {
+      get { return currentLoopID; }
+      set { currentLoopID = value; }
     }
 
-    public float LoopTemperature {
-      get {return currentLoopTemperature; }
-      set {currentLoopTemperature = value; }
+    public float LoopTemperature
+    {
+      get { return currentLoopTemperature; }
+      set { currentLoopTemperature = value; }
     }
 
-    public float LoopFlux {
-      get {return currentLoopFlux; }
-      set {currentLoopFlux = value; }
+    public float LoopFlux
+    {
+      get { return currentLoopFlux; }
+      set { currentLoopFlux = value; }
     }
 
     public string CurrentStatusString
@@ -134,8 +137,7 @@ namespace SystemHeat
 
       SetupUI();
 
-      if (SystemHeatSettings.DebugModules)
-        Utils.Log("[ModuleSystemHeat]: Setup complete");
+      Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
 
 
       Fields["totalSystemTemperature"].guiActive = SystemHeatSettings.DebugPartUI;
@@ -159,19 +161,17 @@ namespace SystemHeat
     {
       BaseField chooseField = Fields["currentLoopID"];
       UI_ChooseOption chooseOption = HighLogic.LoadedSceneIsFlight ? chooseField.uiControlFlight as UI_ChooseOption : chooseField.uiControlEditor as UI_ChooseOption;
-      chooseOption.options = new string[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+      chooseOption.options = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
       chooseOption.onFieldChanged = ChangeLoop;
-     
+
     }
 
     private void ChangeLoop(BaseField field, object oldFieldValueObj)
     {
       if (HighLogic.LoadedSceneIsFlight)
       {
-        if (SystemHeatSettings.DebugSimulation)
-        {
-          Utils.Log($"[ModuleSystemHeat] Changing all loop {(int)oldFieldValueObj} modules to loop {currentLoopID}");
-        }
+        Utils.Log($"[ModuleSystemHeat] Changing all loop {(int)oldFieldValueObj} modules to loop {currentLoopID}", LogType.Modules);
+
 
         List<ModuleSystemHeat> allHeatModules = new List<ModuleSystemHeat>();
         for (int i = 0; i < part.vessel.Parts.Count; i++)
@@ -191,31 +191,28 @@ namespace SystemHeat
             if (!usedModules.Contains(allHeatModules[i].currentLoopID))
             {
               usedModules.Add(allHeatModules[i].currentLoopID);
-              if (SystemHeatSettings.DebugSimulation)
-              {
-                Utils.Log($"[ModuleSystemHeat] {allHeatModules[i].currentLoopID} is in use");
-              }
+
+              Utils.Log($"[ModuleSystemHeat] {allHeatModules[i].currentLoopID} is in use", LogType.Modules);
+
             }
           }
         }
 
         bool unused = false;
-        
+
         int newID = currentLoopID;
         while (!unused)
         {
 
           if (usedModules.Contains(newID))
           {
-            if (SystemHeatSettings.DebugSimulation)
-              Utils.Log($"[ModuleSystemHeat] {newID} is in use and cannot be used");
+            Utils.Log($"[ModuleSystemHeat] {newID} is in use and cannot be used", LogType.Modules);
             newID++;
           }
           else
           {
             unused = true;
-            if (SystemHeatSettings.DebugSimulation)
-              Utils.Log($"[ModuleSystemHeat] {newID} will be the new ID");
+            Utils.Log($"[ModuleSystemHeat] {newID} will be the new ID", LogType.Modules);
           }
         }
 
@@ -226,20 +223,20 @@ namespace SystemHeat
             allHeatModules[i].currentLoopID = newID;
 
             UIPartActionWindow window = UIPartActionController.Instance?.GetItem(part, false);
-            if (window == null ) return;
+            if (window == null) return;
             window.displayDirty = true;
           }
           if (allHeatModules[i].currentLoopID == (int)oldFieldValueObj)
           {
-            if (SystemHeatSettings.DebugSimulation)
-              Utils.Log($"[ModuleSystemHeat] Changing module with loop ID {allHeatModules[i].currentLoopID } to new {newID}");
+
+            Utils.Log($"[ModuleSystemHeat] Changing module with loop ID {allHeatModules[i].currentLoopID } to new {newID}", LogType.Modules);
             allHeatModules[i].currentLoopID = newID;
 
           }
         }
         simulator.ChangeLoopID((int)oldFieldValueObj, newID);
       }
-      
+
     }
 
     /// <summary>
@@ -250,12 +247,12 @@ namespace SystemHeat
     /// <param name="flux">the flux of the source</param>
     public void AddFlux(string id, float sourceTemperature, float flux)
     {
-      
+
       if (fluxes != null && temperatures != null)
       {
 
         fluxes[id] = flux;
-        
+
         if (flux > 0f)
         {
           temperatures[id] = sourceTemperature;
@@ -265,7 +262,7 @@ namespace SystemHeat
           temperatures[id] = 0f;
         }
 
-        totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor/0.025d);
+        totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
         systemNominalTemperature = totalSystemTemperature / (fluxes.Values.ToList().Where(x => x > 0f).Count());
@@ -286,6 +283,6 @@ namespace SystemHeat
     }
 
 
-   
+
   }
 }

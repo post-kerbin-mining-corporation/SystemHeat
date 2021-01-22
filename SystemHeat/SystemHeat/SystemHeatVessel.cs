@@ -77,8 +77,8 @@ namespace SystemHeat
     /// </summary>
     protected void RefreshVesselData(Vessel eventVessel)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from Vessel event"));
+      
+        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from Vessel event"), LogType.Simulator);
 
       ResetSimulation();
     }
@@ -87,12 +87,12 @@ namespace SystemHeat
     /// </summary>
     protected void RefreshVesselData(ConfigNode node)
     {
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name));
+      
+        Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name), LogType.Simulator);
     }
     protected void OnVesselsDocked(uint v1, uint v2)
     {
-      Utils.Log(String.Format("[SystemHeatVessel]: Vessel docked", this.GetType().Name));
+      Utils.Log(String.Format("[SystemHeatVessel]: Vessel docked", this.GetType().Name), LogType.Simulator);
       ResetSimulation();
 
       SystemHeatOverlay.Instance.ResetOverlay();
@@ -104,7 +104,7 @@ namespace SystemHeat
     }
     protected void OnVesselsUndocked(Vessel v1, Vessel v2)
     {
-      Utils.Log(String.Format("[SystemHeatVessel]: Vessels undocked", this.GetType().Name));
+      Utils.Log(String.Format("[SystemHeatVessel]: Vessels undocked", this.GetType().Name), LogType.Simulator);
       ResetSimulation();
       
       SystemHeatOverlay.Instance.ResetOverlay();
@@ -122,8 +122,8 @@ namespace SystemHeat
       if (vessel == null || vessel.Parts == null)
         return;
 
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("[SystemHeatVessel]: Resetting Simulation for {0}", vessel.name));
+      
+        Utils.Log(String.Format("[SystemHeatVessel]: Resetting Simulation for {0}", vessel.name), LogType.Simulator);
 
       if (simulator != null)
         simulator.Reset(vessel.Parts);
@@ -135,8 +135,8 @@ namespace SystemHeat
     protected void OnVesselRollout(ShipConstruct node)
     {
       
-      if (SystemHeatSettings.DebugSimulation)
-        Utils.Log(String.Format("[SystemHeatVessel]: OnVesselRollout", this.GetType().Name));
+      
+        Utils.Log(String.Format("[SystemHeatVessel]: OnVesselRollout", this.GetType().Name), LogType.Simulator);
       simulator.ResetTemperatures();
     }
   }
