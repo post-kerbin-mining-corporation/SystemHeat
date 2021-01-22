@@ -3,7 +3,7 @@ v0.3.6
 - Fixed some debug settings being on by defauly
 - Implemented improved log levels, better handling for log messages overall
 - Fixed fission reactors now updadnig their electricity generation in the UI or in the NF systems manager when disabled
-
+- Generic converter patch now ignores converters that don't specify ConverterNames
 
 v0.3.5
 ------
