@@ -198,7 +198,7 @@ namespace SystemHeat.UI
       if (simulator != null && !(HighLogic.LoadedSceneIsFlight && MapView.MapIsEnabled))
       {
 
-        if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0)
+        if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0 && overlayLoops.Count >0)
         {
 
           Utils.Log(String.Format("[SystemHeatOverlay]: No loops, destroying overlay"), LogType.Overlay);

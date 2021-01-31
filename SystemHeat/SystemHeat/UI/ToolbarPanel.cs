@@ -191,7 +191,6 @@ namespace SystemHeat.UI
       for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
       {
         if (!simulator.HasLoop(loopPanelWidgets[i].trackedLoopID))
-         // if (!simulator.HeatLoops.ContainsKey(loopPanelWidgets[i].trackedLoopID))
         {
           Destroy(loopPanelWidgets[i].gameObject);
           loopPanelWidgets.RemoveAt(i);
@@ -208,6 +207,7 @@ namespace SystemHeat.UI
 
         if (generateWidget)
         {
+          Utils.Log("[UI]: Generatoing a new loop widget", LogType.UI);
           GameObject newObj = (GameObject)Instantiate(SystemHeatUILoader.ToolbarPanelLoopPrefab, Vector3.zero, Quaternion.identity);
           newObj.transform.SetParent(loopPanelScrollRoot.transform);
           //newWidget.transform.localPosition = Vector3.zero;

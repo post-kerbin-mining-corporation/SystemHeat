@@ -87,7 +87,7 @@ namespace SystemHeat
         //this.CurrentSafetyOverride = this.NominalTemperature;
       }
 
-      Utils.Log("[ModuleSystemHeatConverter] Setup completed", LogType.Modules);
+      Utils.Log("[ModuleSystemHeatHarvester] Setup completed", LogType.Modules);
 
 
       Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);

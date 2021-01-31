@@ -72,9 +72,8 @@ namespace SystemHeat
 
 
     }
-    public override void OnStart(StartState state)
+    public void Start()
     {
-      base.OnStart(state);
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
       if (HighLogic.LoadedSceneIsFlight)
       {
@@ -121,10 +120,12 @@ namespace SystemHeat
     protected void GenerateHeatEditor()
     {
       if (heatModule)
+      {
         if (editorThermalSim)
           heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);
         else
           heatModule.AddFlux(moduleID, 0f, 0f);
+      }
     }
 
     protected void GenerateHeatFlight()
