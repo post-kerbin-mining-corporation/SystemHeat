@@ -4,6 +4,7 @@ v0.3.7
 - Fixed scrolling of UI loop list
 - Fixed heat exchangers always showing as overheated in overlay
 - Fixed converter module not actually simulating heat in the VAB when set to simulate
+- Fixed more bugs in generic converter patch (PocketBrotector)
 
 v0.3.6
 ------
