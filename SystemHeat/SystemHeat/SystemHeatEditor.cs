@@ -76,6 +76,7 @@ namespace SystemHeat
     protected void InitializeEditorConstruct(ShipConstruct ship, bool forceReset)
     {
       dataReady = false;
+
       if (ship != null)
       {
         if (simulator == null)
@@ -123,7 +124,7 @@ namespace SystemHeat
     }
     public void onEditorPartDeleted(Part part)
     {
-      Utils.Log($"[SystemHeatEditor]: Part {part.name} Deleted", LogType.Simulator);
+      Utils.Log($"[SystemHeatEditor]: Part Deleted", LogType.Simulator);
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       InitializeEditorConstruct(EditorLogic.fetch.ship, false);

@@ -91,14 +91,16 @@ namespace SystemHeat.UI
           infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), loop.NetFlux.ToString("F0"), loop.Volume.ToString("F2"));
         }
 
-        if ((loop.NominalTemperature > heatModule.systemNominalTemperature || loop.Temperature > heatModule.systemNominalTemperature) && !heatIconBackground.enabled)
+        float nominalTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;
+        float tempDelta = loop.Temperature - heatModule.systemNominalTemperature;
+        if ((nominalTempDelta > 0.5f || tempDelta > 0.5f) && !heatIconBackground.enabled)
         {
           heatIconBackground.enabled = true;
           heatIconGlow.enabled = true;
           heatIcon.enabled = true;
         }
 
-        if (loop.NominalTemperature <= heatModule.systemNominalTemperature && loop.Temperature <= heatModule.systemNominalTemperature && heatIconBackground.enabled)
+        if ((nominalTempDelta <= 0.5f && tempDelta <= 0.5f ) && heatIconBackground.enabled)
         {
           heatIconBackground.enabled = false;
           heatIconGlow.enabled = false;

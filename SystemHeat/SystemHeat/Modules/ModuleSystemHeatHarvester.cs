@@ -87,7 +87,7 @@ namespace SystemHeat
         //this.CurrentSafetyOverride = this.NominalTemperature;
       }
 
-      Utils.Log("[ModuleSystemHeatConverter] Setup completed", LogType.Modules);
+      Utils.Log("[ModuleSystemHeatHarvester] Setup completed", LogType.Modules);
 
 
       Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);
@@ -96,19 +96,22 @@ namespace SystemHeat
     public override void FixedUpdate()
     {
       base.FixedUpdate();
-      if (HighLogic.LoadedSceneIsFlight)
+      if (heatModule != null)
       {
-        GenerateHeatFlight();
-        UpdateSystemHeatFlight();
-      }
-      if (HighLogic.LoadedSceneIsEditor)
-      {
-        GenerateHeatEditor();
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+          GenerateHeatFlight();
+          UpdateSystemHeatFlight();
+        }
+        if (HighLogic.LoadedSceneIsEditor)
+        {
+          GenerateHeatEditor();
 
-        Fields["HarvesterEfficiency"].guiActiveEditor = editorThermalSim;
+          Fields["HarvesterEfficiency"].guiActiveEditor = editorThermalSim;
 
+        }
+        HarvesterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
       }
-      HarvesterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
     }
 
     protected void GenerateHeatEditor()
