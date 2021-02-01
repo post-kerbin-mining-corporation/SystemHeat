@@ -34,27 +34,35 @@ namespace SystemHeat
     /// <returns></returns>
     public static ConversionRecipe RecalculateRatios(float fraction, List<ResourceBaseRatio> inputs, List<ResourceBaseRatio> outputs, List<ResourceRatio> inputList, List<ResourceRatio> outputList, ConversionRecipe _recipe)
     {
-
-      for (int i = 0; i < _recipe.Inputs.Count; i++)
+      try
       {
-        for (int j = 0; j < inputs.Count; j++)
+        if (_recipe.Inputs != null && _recipe.Outputs != null)
         {
-          if (inputs[j].ResourceName == inputList[i].ResourceName)
+          for (int i = 0; i < _recipe.Inputs.Count; i++)
           {
-            _recipe.Inputs[i] = new ResourceRatio(inputList[i].ResourceName, inputs[j].ResourceRatio * fraction, inputList[i].DumpExcess);
+            for (int j = 0; j < inputs.Count; j++)
+            {
+              if (inputs[j].ResourceName == inputList[i].ResourceName)
+              {
+                _recipe.Inputs[i] = new ResourceRatio(inputList[i].ResourceName, inputs[j].ResourceRatio * fraction, inputList[i].DumpExcess);
 
+              }
+            }
+          }
+          for (int i = 0; i < _recipe.Outputs.Count; i++)
+          {
+            for (int j = 0; j < outputs.Count; j++)
+            {
+              if (outputs[j].ResourceName == outputList[i].ResourceName)
+              {
+                _recipe.Outputs[i] = new ResourceRatio(outputList[i].ResourceName, outputs[j].ResourceRatio * fraction, outputList[i].DumpExcess);
+              }
+            }
           }
         }
-      }
-      for (int i = 0; i < _recipe.Outputs.Count; i++)
+      } catch (NullReferenceException)
       {
-        for (int j = 0; j < outputs.Count; j++)
-        {
-          if (outputs[j].ResourceName == outputList[i].ResourceName)
-          {
-            _recipe.Outputs[i] = new ResourceRatio(outputList[i].ResourceName, outputs[j].ResourceRatio * fraction, outputList[i].DumpExcess);
-          }
-        }
+
       }
 
       return _recipe;

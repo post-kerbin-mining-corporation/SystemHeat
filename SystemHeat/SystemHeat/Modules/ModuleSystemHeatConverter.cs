@@ -85,7 +85,6 @@ namespace SystemHeat
 
         SetupResourceRatios();
 
-        //this.CurrentSafetyOverride = this.NominalTemperature;
       }
       if (SystemHeatSettings.DebugModules)
       {
@@ -99,22 +98,24 @@ namespace SystemHeat
     public override void FixedUpdate()
     {
       base.FixedUpdate();
-
-      if (HighLogic.LoadedSceneIsFlight)
+      if (heatModule != null)
       {
-        GenerateHeatFlight();
-        UpdateSystemHeatFlight();
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+          GenerateHeatFlight();
+          UpdateSystemHeatFlight();
 
-        Fields["ConverterEfficiency"].guiActive = base.ModuleIsActive();
+          Fields["ConverterEfficiency"].guiActive = base.ModuleIsActive();
+        }
+        if (HighLogic.LoadedSceneIsEditor)
+        {
+          GenerateHeatEditor();
+
+          Fields["ConverterEfficiency"].guiActiveEditor = editorThermalSim;
+
+        }
+        ConverterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
       }
-      if (HighLogic.LoadedSceneIsEditor)
-      {
-        GenerateHeatEditor();
-
-        Fields["ConverterEfficiency"].guiActiveEditor = editorThermalSim;
-
-      }
-      ConverterEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency_Value", (systemEfficiency.Evaluate(heatModule.currentLoopTemperature) * 100f).ToString("F1"));
     }
 
     protected void GenerateHeatEditor()
@@ -130,7 +131,7 @@ namespace SystemHeat
 
     protected void GenerateHeatFlight()
     {
-      if (heatModule)
+
         if (base.ModuleIsActive())
         {
           heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);

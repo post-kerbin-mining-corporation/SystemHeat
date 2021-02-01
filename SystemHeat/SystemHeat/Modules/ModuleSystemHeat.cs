@@ -137,7 +137,7 @@ namespace SystemHeat
 
       SetupUI();
 
-      Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
+      
 
 
       Fields["totalSystemTemperature"].guiActive = SystemHeatSettings.DebugPartUI;
@@ -155,6 +155,7 @@ namespace SystemHeat
       {
         simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
       }
+      Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
     }
 
     void SetupUI()
@@ -229,11 +230,12 @@ namespace SystemHeat
           if (allHeatModules[i].currentLoopID == (int)oldFieldValueObj)
           {
 
-            Utils.Log($"[ModuleSystemHeat] Changing module with loop ID {allHeatModules[i].currentLoopID } to new {newID}", LogType.Modules);
+            
             allHeatModules[i].currentLoopID = newID;
 
           }
         }
+        Utils.Log($"[ModuleSystemHeat] finished changing loop IDs to new {newID}", LogType.Modules);
         simulator.ChangeLoopID((int)oldFieldValueObj, newID);
       }
 
