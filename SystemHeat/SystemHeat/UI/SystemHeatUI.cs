@@ -175,16 +175,33 @@ namespace SystemHeat.UI
               thisVessel = FlightGlobals.ActiveVessel;
             }
           }
-          if (toolbarPanel.loopPanel.activeSelf)
-            toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
 
-          toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
+          if (toolbarPanel != null && stockToolbarButton != null)
+          {
+            if (toolbarPanel.loopPanel.activeSelf)
+              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+
+            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(toolbarPanel.rect.rect.width, toolbarPanel.rect.rect.height, 0f);
+          }
         }
+        
+         
         if (HighLogic.LoadedSceneIsEditor)
         {
           if (stockToolbarButton != null)
-            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL();
+          {
+            toolbarPanel.rect.localScale = new Vector3(UIMasterController.Instance.appCanvas.scaleFactor,
+              UIMasterController.Instance.appCanvas.scaleFactor, UIMasterController.Instance.appCanvas.scaleFactor);
 
+            if (toolbarPanel.loopPanel.activeSelf)
+              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+            else
+              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 200f);
+
+            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(toolbarPanel.rect.rect.width* UIMasterController.Instance.appCanvas.scaleFactor, 0f, 0f);
+            
+            
+          }
         }
       }
     }

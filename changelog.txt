@@ -1,3 +1,17 @@
+v0.3.8
+------
+- Fixed fission reactor manual control not respecting minimum reactor throttles
+- Fixed fission reactor catchup not adding waste to reactor and only consumingit
+- Fixed fission reactor power generation not being shown in DBS planning UI
+- Fixed fission reactor manual control slider not appearing in editor
+- Normalized fission reactor warm-up rates to 5%/second for power reactors and 10%/second for propulsion reactors
+- Fixed flickering loops when only one SH part is present in a loop and loop rendering is turned on
+- Fixed loops being recreated and destroyed many many times in certain cases
+- System Heat toolbar in the Editor is now pinned to its Right side
+- Normalized System Heat toolbar text element sizes to align with stock
+- Fixed a null reference exception when switching vessels withing the same scene to one that has no SystemHeat parts
+- Fixed Horrible Things happening when switching vessels withing the same scene to one that has no SystemHeat parts and having the overlay open
+
 v0.3.7
 ------
 - Fixed a NRE on deletion of parts in the editor

@@ -186,11 +186,15 @@ namespace SystemHeat.UI
     }
     protected void DestroyOverlay()
     {
-      foreach (OverlayLoop overLoop in overlayLoops)
+      if (overlayLoops != null)
       {
-        overLoop.Destroy();
+        foreach (OverlayLoop overLoop in overlayLoops)
+        {
+          if (overLoop != null)
+            overLoop.Destroy();
+        }
+        overlayLoops.Clear();
       }
-      overlayLoops.Clear();
     }
     protected void LateUpdate()
     {
@@ -204,81 +208,84 @@ namespace SystemHeat.UI
           Utils.Log(String.Format("[SystemHeatOverlay]: No loops, destroying overlay"), LogType.Overlay);
           DestroyOverlay();
         }
-        // Update each loop, build a new loop when needed
-        foreach (HeatLoop loop in simulator.HeatLoops)
+        if (simulator.HeatLoops != null)
         {
-          // if we have an overlay for this loop, update it
-          OverlayLoop curOverlay = overlayLoops.FirstOrDefault(x => x.heatLoop.ID == loop.ID);
-          if (curOverlay != null)
+          // Update each loop, build a new loop when needed
+          foreach (HeatLoop loop in simulator.HeatLoops)
           {
-            // if no modules, hide the loop
-            if (loop.LoopModules.Count <= 1 && curOverlay.Drawn)
+            // if we have an overlay for this loop, update it
+            OverlayLoop curOverlay = overlayLoops.FirstOrDefault(x => x.heatLoop.ID == loop.ID);
+            if (curOverlay != null)
             {
-              Utils.Log(String.Format("[SystemHeatOverlay]: Loop has < 2 members, hiding"), LogType.Overlay);
-              curOverlay.SetVisible(false);
+              // if no modules, hide the loop
+              if (loop.LoopModules.Count <= 1 && curOverlay.Drawn)
+              {
+                Utils.Log(String.Format("[SystemHeatOverlay]: Loop has < 2 members, hiding"), LogType.Overlay);
+                curOverlay.SetVisible(false);
+              }
+              else if (loop.LoopModules.Count > 1)
+              {
+
+                curOverlay.SetVisible((SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                if (curOverlay.Drawn)
+                {
+                  curOverlay.Update(loop);
+                }
+              }
             }
+            // else build a new loop
             else
             {
 
-              curOverlay.SetVisible((SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
-              if (curOverlay.Drawn)
+
+              Utils.Log(String.Format("[SystemHeatOverlay]: Building a new overlay for loop {0}", loop.ID), LogType.Overlay);
+              overlayLoops.Add(new OverlayLoop(loop, overlayRoot, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID))));
+            }
+
+            foreach (ModuleSystemHeat system in loop.LoopModules)
+            {
+              int index = overlayPanels.FindIndex(f => f.heatModule == system);
+              if (index == -1)
               {
-                curOverlay.Update(loop);
+                Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}", LogType.Overlay);
+                // new panel instance
+                GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.OverlayPanelPrefab, Vector3.zero, Quaternion.identity);
+                newUIPanel.transform.SetParent(UIMasterController.Instance.actionCanvas.transform);
+                newUIPanel.transform.localPosition = Vector3.zero;
+                OverlayPanel panel = newUIPanel.AddComponent<OverlayPanel>();
+                panel.parentCanvas = UIMasterController.Instance.appCanvas;
+                panel.SetupLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                overlayPanels.Add(panel);
+              }
+              else
+              {
+
+                // Update the panel
+                overlayPanels[index].UpdateLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
               }
             }
           }
-          // else build a new loop
-          else
+
+
+          for (int i = overlayPanels.Count - 1; i >= 0; i--)
           {
-
-
-            Utils.Log(String.Format("[SystemHeatOverlay]: Building a new overlay for loop {0}", loop.ID), LogType.Overlay);
-            overlayLoops.Add(new OverlayLoop(loop, overlayRoot, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID))));
-          }
-
-          foreach (ModuleSystemHeat system in loop.LoopModules)
-          {
-            int index = overlayPanels.FindIndex(f => f.heatModule == system);
-            if (index == -1)
-            {
-              Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}", LogType.Overlay);
-              // new panel instance
-              GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.OverlayPanelPrefab, Vector3.zero, Quaternion.identity);
-              newUIPanel.transform.SetParent(UIMasterController.Instance.actionCanvas.transform);
-              newUIPanel.transform.localPosition = Vector3.zero;
-              OverlayPanel panel = newUIPanel.AddComponent<OverlayPanel>();
-              panel.parentCanvas = UIMasterController.Instance.appCanvas;
-              panel.SetupLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
-              overlayPanels.Add(panel);
-            }
-            else
+            if (overlayPanels[i].heatModule == null)
             {
 
-              // Update the panel
-              overlayPanels[index].UpdateLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel"), LogType.Overlay);
+
+              Destroy(overlayPanels[i].gameObject);
+              overlayPanels.RemoveAt(i);
             }
           }
-        }
-
-
-        for (int i = overlayPanels.Count - 1; i >= 0; i--)
-        {
-          if (overlayPanels[i].heatModule == null)
+          foreach (OverlayLoop l in overlayLoops)
           {
+            if (!simulator.HasLoop(l.heatLoop.ID))
+            {
+              l.SetVisible(false);
+            }
 
-            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel"), LogType.Overlay);
-
-            Destroy(overlayPanels[i].gameObject);
-            overlayPanels.RemoveAt(i);
           }
-        }
-        foreach (OverlayLoop l in overlayLoops)
-        {
-          if (!simulator.HasLoop(l.heatLoop.ID))
-          {
-            l.SetVisible(false);
-          }
-
         }
       }
       else
