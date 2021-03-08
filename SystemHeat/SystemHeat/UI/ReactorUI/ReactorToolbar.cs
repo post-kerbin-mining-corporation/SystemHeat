@@ -84,15 +84,22 @@ namespace SystemHeat.UI
         if (HighLogic.LoadedSceneIsFlight)
         {
           if (reactorPanel && stockToolbarButton)
-            reactorPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(reactorPanel.rect.rect.width, reactorPanel.rect.rect.height, 0f);
+            reactorPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
+              reactorPanel.rect.rect.width * UIMasterController.Instance.uiScale, 
+              reactorPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
         }
         if (HighLogic.LoadedSceneIsEditor)
         {
           if (stockToolbarButton != null)
+          {
             reactorPanel.rect.position = stockToolbarButton.GetAnchorUL();
+            reactorPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(reactorPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0,0);
+          }
 
         }
       }
+
+     
     }
     public void OnVesselChanged(Vessel v)
     {

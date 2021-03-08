@@ -11,6 +11,7 @@ v0.3.8
 - Normalized System Heat toolbar text element sizes to align with stock
 - Fixed a null reference exception when switching vessels withing the same scene to one that has no SystemHeat parts
 - Fixed Horrible Things happening when switching vessels withing the same scene to one that has no SystemHeat parts and having the overlay open
+- Changed power displays from kW to Ec/s
 
 v0.3.7
 ------
