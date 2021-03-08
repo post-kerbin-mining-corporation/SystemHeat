@@ -320,6 +320,13 @@ namespace SystemHeat
         range.minValue = 0f;
         range.maxValue = MaximumTemperature;
 
+        range = (UI_FloatRange)this.Fields["CurrentReactorThrottle"].uiControlEditor;
+        range.minValue = MinimumThrottle;
+
+        range = (UI_FloatRange)this.Fields["CurrentReactorThrottle"].uiControlFlight;
+        range.minValue = MinimumThrottle;
+
+
         foreach (BaseField field in this.Fields)
         {
           if (!string.IsNullOrEmpty(field.group.name)) continue;
@@ -340,24 +347,26 @@ namespace SystemHeat
         {
           Fields["GeneratorStatus"].guiActive = false;
         }
-        //Actions["TogglePanelAction"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Action_TogglePanelAction");
+
         if (FirstLoad)
         {
-
+          if (HighLogic.LoadedSceneIsFlight)
+            CurrentReactorThrottle = 0f;
           this.CurrentSafetyOverride = this.CriticalTemperature;
           FirstLoad = false;
         }
 
       }
-
+      if (HighLogic.LoadedSceneIsEditor)
+      {
+        Fields["CurrentReactorThrottle"].guiActive = true;
+        CurrentReactorThrottle = 100f;
+      }
       
       if (HighLogic.LoadedSceneIsFlight)
       {
-       
-
         DoCatchup();
         SetManualControl(ManualControl);
-
       }
 
     }
@@ -409,6 +418,10 @@ namespace SystemHeat
               Utils.Log($"[SystemHeatFissionReactor] Consuming {fuelThrottle * ratio.Ratio * elapsedTime} u of {ratio.ResourceName} on load", LogType.Modules);
               double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * elapsedTime, ratio.FlowMode);
 
+            }
+            foreach (ResourceRatio ratio in outputs)
+            {
+              double amt = this.part.RequestResource(ratio.ResourceName, -fuelThrottle * ratio.Ratio * elapsedTime, ratio.FlowMode);
             }
 
           }
@@ -464,6 +477,7 @@ namespace SystemHeat
     {
       if (HighLogic.LoadedSceneIsEditor)
       {
+        CurrentThrottle = CurrentReactorThrottle;
         HandleHeatGenerationEditor();
         if (GeneratesElectricity)
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
@@ -598,6 +612,7 @@ namespace SystemHeat
       if (!ManualControl)
         CurrentReactorThrottle = CalculateGoalThrottle(timeStep);
 
+      
       double burnRate = 0d;
       float fuelThrottle = CurrentReactorThrottle / 100f;
 
