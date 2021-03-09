@@ -1,3 +1,7 @@
+v0.3.9
+------
+- Hotfix fission reactor overheat on vessel launch
+
 v0.3.8
 ------
 - Fixed fission reactor manual control not respecting minimum reactor throttles

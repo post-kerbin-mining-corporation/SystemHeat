@@ -351,9 +351,14 @@ namespace SystemHeat
         if (FirstLoad)
         {
           if (HighLogic.LoadedSceneIsFlight)
+          {
+            CurrentThrottle = 0f;
             CurrentReactorThrottle = 0f;
-          this.CurrentSafetyOverride = this.CriticalTemperature;
-          FirstLoad = false;
+            this.CurrentSafetyOverride = this.CriticalTemperature;
+            FirstLoad = false;
+          }
+
+          
         }
 
       }
