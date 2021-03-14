@@ -1,5 +1,6 @@
 v0.3.10
 -------
+- Improvements to Russian localization form r4nd0m
 - Fix for stack of exceptions when radiators broke sometimes
 - Tweaked radiator thermal emission values to look less obnoxious in everyday operation
 
