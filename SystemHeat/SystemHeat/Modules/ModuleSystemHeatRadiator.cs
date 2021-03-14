@@ -36,7 +36,7 @@ namespace SystemHeat
     public string scalarModuleID;
 
     [KSPField(isPersistant = false)]
-    public float draperPoint = 300f;
+    public float draperPoint = 650;
 
     [KSPField(isPersistant = false)]
     public float heatAnimationRate = 0.1f;
