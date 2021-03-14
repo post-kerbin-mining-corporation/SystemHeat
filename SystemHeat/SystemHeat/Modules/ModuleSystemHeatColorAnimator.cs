@@ -131,6 +131,7 @@ namespace SystemHeat
 
         foreach (Renderer r in targetRenderers)
         {
+          if (r != null && r.material != null)
           r.material.SetColor(shaderProperty, c);
         }
       }
