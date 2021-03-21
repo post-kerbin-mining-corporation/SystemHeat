@@ -257,6 +257,9 @@ namespace SystemHeat
         {
           HandleActivateEngine(engineIndex);
         }
+
+        if (!multiEngine)
+          HandleActivateEngine(engineIndex);
       }
     }
 
@@ -276,10 +279,10 @@ namespace SystemHeat
         engines[engineIndex].engineModule.Events["Shutdown"].Invoke();
         engines[engineIndex].engineModule.currentThrottle = 0;
         engines[engineIndex].engineModule.requestedThrottle = 0;
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_FFT_ModuleFusionEngine_Message_ReactorNotReady",
-                                                                            part.partInfo.title),
-                                                                   5.0f,
-                                                                   ScreenMessageStyle.UPPER_CENTER));
+        //ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_FFT_ModuleFusionEngine_Message_ReactorNotReady",
+        //                                                                    part.partInfo.title),
+        //                                                           5.0f,
+        //                                                           ScreenMessageStyle.UPPER_CENTER));
       }
     }
   }

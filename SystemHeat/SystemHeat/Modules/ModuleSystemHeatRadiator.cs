@@ -12,37 +12,67 @@ namespace SystemHeat
   /// </summary>
   public class ModuleSystemHeatRadiator : ModuleActiveRadiator
   {
-    // This should be unique on the part and identifies the module
+    /// <summary>
+    /// Unique identifier
+    /// </summary>
     [KSPField(isPersistant = false)]
     public string moduleID;
 
-    // This should correspond to the related ModuleSystemHeat. If not specified, the first module will be found
+    /// <summary>
+    /// This should correspond to the related ModuleSystemHeat. If not specified, the first module will be found
+    /// </summary>
     [KSPField(isPersistant = false)]
     public string systemHeatModuleID;
 
-    // This should map system temperature to heat radiated
+    /// <summary>
+    /// This should map system temperature to heat radiated
+    /// </summary>
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve = new FloatCurve();
 
-    // Current status GUI string
+    /// <summary>
+    /// UI: Current status
+    /// </summary>
     [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
     public string RadiatorStatus = "Offline";
 
-    // Current efficiency GUI string
+
+    /// <summary>
+    /// UI: Current radiator of efficiency
+    /// </summary>
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title")]
     public string RadiatorEfficiency = "-1%";
 
+    /// <summary>
+    /// UI: Current status
+    /// </summary>
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
+    public string ConvectionStatus = "Offline";
+
+    /// <summary>
+    /// ID of the linked scalar module for animating heat
+    /// </summary>
     [KSPField(isPersistant = false)]
     public string scalarModuleID;
 
+    /// <summary>
+    /// Temperature value at which glow starts to be visible
+    /// </summary>
     [KSPField(isPersistant = false)]
     public float draperPoint = 650;
 
+    /// <summary>
+    /// Temperature value at which glow is maxed
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float maxTempAnimation = -1f;
+
+    /// <summary>
+    /// Rate at which heat animates
+    /// </summary>
     [KSPField(isPersistant = false)]
     public float heatAnimationRate = 0.1f;
 
-    [KSPField(isPersistant = false)]
-    public float maxTempAnimation = -1f;
 
     protected ModuleSystemHeat heatModule;
     protected ModuleSystemHeatColorAnimator scalarModule;
@@ -70,7 +100,7 @@ namespace SystemHeat
     }
     public override string GetInfo()
     {
-      // Need to update this to strip the CoreHeat stuff from it
+
       string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo",
         temperatureCurve.Curve.keys[0].time.ToString("F0"),
         temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
@@ -87,23 +117,26 @@ namespace SystemHeat
 
       if (heatModule != null)
       {
-        //Utils.Log($"{0} {temperatureCurve.Evaluate(0f)}\n{350f} {temperatureCurve.Evaluate(350f)}\n{1000} {temperatureCurve.Evaluate(1000f)}\n");
+
         if (HighLogic.LoadedSceneIsFlight)
         {
           if (base.IsCooling)
           {
-            float flux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
+            float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
+
+            //ConvectionStatus = $"c: {convectiveFlux}";
 
             if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-              heatModule.AddFlux(moduleID, 0f, flux);
+              heatModule.AddFlux(moduleID, 0f, radiativeFlux);
             else
               heatModule.AddFlux(moduleID, 0f, 0f);
+
+
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
-              (-flux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
+              (-radiativeFlux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
 
             if (scalarModule != null)
             {
-
               scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, Mathf.Clamp01((heatModule.currentLoopTemperature - draperPoint) / maxTempAnimation), TimeWarp.fixedDeltaTime * heatAnimationRate));
             }
           }
@@ -127,11 +160,12 @@ namespace SystemHeat
           else
             heatModule.AddFlux(moduleID, 0f, 0f);
 
-          //Utils.Log($"BLAH {heatModule.LoopTemperature} {flux} {temperatureCurve.Evaluate(heatModule.LoopTemperature)}");
           RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
             ((-temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
         }
       }
     }
+
+
   }
 }

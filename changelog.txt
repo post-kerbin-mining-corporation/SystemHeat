@@ -1,3 +1,8 @@
+v0.3.11
+-------
+- Fixed engine module reactivation on fission engines
+- Changes pass specifiers in Extras patches to conform to the Extra name
+
 v0.3.10
 -------
 - Improvements to Russian localization form r4nd0m

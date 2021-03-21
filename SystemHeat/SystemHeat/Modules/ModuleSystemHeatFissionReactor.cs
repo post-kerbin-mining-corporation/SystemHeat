@@ -591,9 +591,6 @@ namespace SystemHeat
         // core is damaged by Rate * temp exceedance * time
         CoreIntegrity = Mathf.MoveTowards(CoreIntegrity, 0f, CoreDamageRate * critExceedance * TimeWarp.fixedDeltaTime);
       }
-
-      // Calculate percent exceedance of nominal temp
-      float tempNetScale = 1f - Mathf.Clamp01((heatModule.LoopTemperature - NominalTemperature) / (MaximumTemperature - NominalTemperature));
     }
 
     protected virtual float CalculateGoalThrottle(float timeStep)
