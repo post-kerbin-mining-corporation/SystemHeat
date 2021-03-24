@@ -28,11 +28,15 @@ namespace SystemHeat
   /// </summary>
   public class ModuleSystemHeatFissionEngine: ModuleSystemHeatFissionReactor
   {
-
-    /// Curve to map engine power % to Isp 
+    /// <summary>
+    /// Curve to map reactor power % to Isp 
+    /// </summary>
     [KSPField(isPersistant = false)]
     public FloatCurve ispCurve = new FloatCurve();
 
+    /// <summary>
+    /// The amount of reactor power that is cooled by the exhaust
+    /// </summary>
     [KSPField(isPersistant = false)]
     public float engineCoolingScale = 1.0f;
 
