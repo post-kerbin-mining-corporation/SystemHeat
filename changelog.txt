@@ -1,6 +1,14 @@
-v0.3.11
--------
-- Fixed engine module reactivation on fission engines
+v0.3.0
+------
+- Reorganized some UI elements
+- Added convection simulation to radiators
+ - Convection can increase radiator efficiency in atmosphere
+ - Altitude, body and velocity-based in a similar fashion to stock
+ - New UI components in VAB to simulate situations to check convection on bodies at locations
+- Redid nuclear transfer mechanics
+ - Presence of an engineer of Level 3 on the vessel will allow nuclear transfer using the stock system
+- Fixed engine module reactivation issue on fission engines
+- Fixed several incorrect temperature curves on HeatControl radiators
 - Changes pass specifiers in Extras patches to conform to the Extra name
 
 v0.3.10

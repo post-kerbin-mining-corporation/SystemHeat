@@ -141,7 +141,7 @@ namespace SystemHeat
       {
         SimulateIteration(timeStep);
       }
-      SimulateConvection(fixedDeltaTime);
+      SimulateConvection(1f);
     }
 
     /// <summary>
@@ -293,6 +293,7 @@ namespace SystemHeat
     {
       ConvectionTemperature = simulator.AtmoSim.ExternalTemperature;
       ConvectionFlux = SystemHeatSettings.ConvectionBaseCoefficient * simulator.AtmoSim.ConvectiveCoefficient * simTimeStep;
+      //Utils.Log($"Conv flux {ConvectionFlux}, temp {ConvectionTemperature}");
     }
 
     /// <summary>

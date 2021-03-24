@@ -200,11 +200,16 @@ namespace SystemHeat.UI
         altitudeSlider.onValueChanged.AddListener(delegate { OnAltSliderChange(); });
         altitudeTextArea.onValueChanged.AddListener(delegate { OnAltInputChange(); });
       }
+      else if (HighLogic.LoadedSceneIsFlight)
+      {
+        situationHeaderObj.SetActive(false);
+        situationDataObj.SetActive(false);
+
+      }
 
 
 
       /// Settings
-
       loopToggle.onValueChanged.AddListener(delegate { ToggleLoopPanel(); });
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
@@ -222,6 +227,10 @@ namespace SystemHeat.UI
       {
         simRateHeader.SetActive(false);
         simRateSliderObject.gameObject.SetActive(false);
+        float panelSize = 215;
+        rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize);
+        loopPanelScrollViewportRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize - 45f);
+        loopPanelScrollRootRect.GetComponent<LayoutElement>().minHeight = panelSize - 45f;
       }
 
       Localize();

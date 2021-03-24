@@ -147,6 +147,8 @@ namespace SystemHeat
                 convectiveFlux = Mathf.Clamp(
                    tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
                   float.MinValue, 0f);
+
+              //  Utils.Log($"tD {tDelta}, tC, {lp.ConvectionTemperature} tL {heatModule.LoopTemperature}, tMax {temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time}, convA {convectiveArea}");
               }
 
               ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
@@ -196,6 +198,8 @@ namespace SystemHeat
             convectiveFlux = Mathf.Clamp(
                tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
               float.MinValue, 0f);
+
+            //Utils.Log($"tD {tDelta}, tC, {lp.ConvectionTemperature} tL {heatModule.LoopTemperature}, tMax {temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time}, convA {convectiveArea}");
           }
 
           ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));

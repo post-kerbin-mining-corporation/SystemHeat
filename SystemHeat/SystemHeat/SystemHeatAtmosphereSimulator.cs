@@ -24,6 +24,7 @@ namespace SystemHeat
 
     public void SimulateAtmosphere(CelestialBody body, float speed, double altitude)
     {
+      //Utils.Log($"Sim params: {body}, {speed}, {altitude}");
       if (altitude >= body.atmosphereDepth)
       {
         ExternalTemperature = (float)PhysicsGlobals.SpaceTemperature;
@@ -35,7 +36,7 @@ namespace SystemHeat
         ExternalTemperature = Mathf.Max((float)body.GetTemperature(altitude), CalculateShockTemperature(body, mach, speed));
         ConvectiveCoefficient = CalculateConvectiveCoefficient(body, speed, density, convectiveMachScale);
       }
-
+      //Utils.Log($"Sim results: {ExternalTemperature}, {ConvectiveCoefficient}");
     }
 
     public void CalculateConstants(CelestialBody body, float speed, double altitude)
