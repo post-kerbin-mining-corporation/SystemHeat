@@ -10,44 +10,37 @@ namespace SystemHeat.Modules
   public class ModuleSystemHeatFissionFuelContainer: PartModule
   {
 
-    // Fuel that is dangerous to transfer
+    /// <summary>
+    /// Resources to manage
+    /// </summary>
     [KSPField(isPersistant = false)]
-    public string WasteResourceName = "DepletedFuel";
+    public string ResourceNames = "EnrichedUranium,DepletedFuel";
 
-    // Fuel that is safe to transfer
+    /// <summary>
+    /// Engineer level to manage resources
+    /// </summary>
     [KSPField(isPersistant = false)]
-    public string FuelResourceName = "EnrichedUranium";
+    public int EngineerLevelForTransfer = 3;
 
-    [KSPField(isPersistant = false)]
-    public int EngineerLevelForRefuel = 3;
-
-    // Color Changer for waste
-    [KSPField(isPersistant = false)]
-    public string wasteModuleID;
-
-    // Color Changer for waste
-    [KSPField(isPersistant = false)]
-    public string fuelModuleID;
-
-    private ModuleColorChanger wasteColorChanger;
-    private ModuleColorChanger fuelColorChanger;
+    private string[] resourceNames;
 
     public override string GetInfo()
     {
-      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo", EngineerLevelForRefuel.ToString());
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo", 
+        EngineerLevelForTransfer.ToString(), ResourceNames
+        );
     }
     public override string GetModuleDisplayName()
     {
       return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_ModuleName");
     }
 
-
     public override void OnAwake()
     {
       base.OnAwake();
       if (HighLogic.LoadedSceneIsFlight)
       {
-        GameEvents.onCrewBoardVessel.Add(new EventData<GameEvents.FromToAction<Part,Part>>.OnEvent(onCrewBoardVessel));
+        GameEvents.onCrewBoardVessel.Add(new EventData<GameEvents.FromToAction<Part,Part>>.OnEvent(OnCrewBoardVessel));
         GameEvents.onVesselCrewWasModified.Add(new EventData<Vessel>.OnEvent(onVesselCrewWasModified));
       }
     }
@@ -55,15 +48,14 @@ namespace SystemHeat.Modules
     void OnDestroy()
     {
       // Clean up events when the item is destroyed
-      GameEvents.onCrewBoardVessel.Remove(onCrewBoardVessel);
-
+      GameEvents.onCrewBoardVessel.Remove(OnCrewBoardVessel);
       GameEvents.onVesselCrewWasModified.Remove(onVesselCrewWasModified);
     }
-    public void onCrewBoardVessel(GameEvents.FromToAction<Part, Part> action)
+    public void OnCrewBoardVessel(GameEvents.FromToAction<Part, Part> action)
     {
       if (HighLogic.LoadedSceneIsFlight)
       {
-        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: New crew boarded");
+        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: New crew boarded", LogType.Modules);
         HandleTransferModes();
       }
     }
@@ -72,45 +64,19 @@ namespace SystemHeat.Modules
     {
       if (HighLogic.LoadedSceneIsFlight)
       {
-        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: Vessel crew was modified");
+        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: Vessel crew was modified", LogType.Modules);
         HandleTransferModes();
       }
     }
 
     public void Start()
     {
-     
-      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
-      {
-        if (fuelModuleID != "")
-        {
-          fuelColorChanger = this.GetComponents<ModuleColorChanger>().ToList().Find(i => i.moduleID == fuelModuleID);
-        }
-        if (wasteModuleID != "")
-        {
-          wasteColorChanger = this.GetComponents<ModuleColorChanger>().ToList().Find(i => i.moduleID == wasteModuleID);
-        }
-      }
-
       if (HighLogic.LoadedSceneIsFlight)
-        HandleTransferModes();
-    }
-
-    private void FixedUpdate()
-    {
-      
-      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
-        if (fuelColorChanger)
-        {
-          fuelColorChanger.SetScalar((float)(GetResourceAmount(FuelResourceName, false) / GetResourceAmount(FuelResourceName, true)));
-        }
-        if (wasteColorChanger)
-        {
-          wasteColorChanger.SetScalar((float)(GetResourceAmount(WasteResourceName, false) / GetResourceAmount(WasteResourceName, true)));
-        }
+        resourceNames = ResourceNames.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray(); ;
+        
+        HandleTransferModes();
       }
-
     }
 
     /// <summary>
@@ -146,47 +112,25 @@ namespace SystemHeat.Modules
     /// </summary>
     public void HandleTransferModes()
     {
-      if (GetCrewLevel() >= EngineerLevelForRefuel)
+      if (GetCrewLevel() >= EngineerLevelForTransfer)
       {
-        Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for fuel to PUMP");
-        ChangeTransferMode(FuelResourceName, ResourceTransferMode.PUMP);
-        ChangeTransferMode(WasteResourceName, ResourceTransferMode.PUMP);
+        
+        foreach (string resN in resourceNames)
+        {
+          Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for resource {resN} to PUMP", LogType.Modules);
+          ChangeTransferMode(resN, ResourceTransferMode.PUMP);
+        }
       }
       else
       {
-        Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for fuel to NONE");
-        ChangeTransferMode(FuelResourceName, ResourceTransferMode.NONE);
-        ChangeTransferMode(WasteResourceName, ResourceTransferMode.NONE);
+        
+        foreach (string resN in resourceNames)
+        {
+          Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for resource {resN} to NONE", LogType.Modules);
+          ChangeTransferMode(resN, ResourceTransferMode.NONE);
+        }
       }
     }
-    /// <summary>
-    /// Get the amount of a resource in a part
-    /// </summary>
-    /// <param name="nm"></param>
-    /// <returns></returns>
-    public double GetResourceAmount(string nm)
-    {
-      if (this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id) != null)
-        return this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id).amount;
-      else
-        return 0.0;
-    }
-    /// <summary>
-    /// Get the amount of a resource in a part
-    /// </summary>
-    /// <param name="nm"></param>
-    /// <param name="max"></param>
-    /// <returns></returns>
-    public double GetResourceAmount(string nm, bool max)
-    {
-      if (max)
-        if (this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id) != null)
-          return this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id).maxAmount;
-        else
-          return 0.0;
-
-      else
-        return GetResourceAmount(nm);
-    }
+    
   }
 }
