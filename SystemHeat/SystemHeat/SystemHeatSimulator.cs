@@ -8,8 +8,29 @@ namespace SystemHeat
 {
   public class SystemHeatSimulator
   {
+    /// <summary>
+    /// List of heat loops managed by the simulator
+    /// </summary>
     public List<HeatLoop> HeatLoops { get; private set; }
 
+    /// <summary>
+    /// The atmosphere simulator
+    /// </summary>
+    public SystemHeatAtmosphereSimulator AtmoSim { get { return atmoSim; } }
+
+    /// <summary>
+    /// Altitude to simulate at
+    /// </summary>
+    public float SimulationAltitude { get; set; }
+    /// <summary>
+    /// Velocity to simulate at
+    /// </summary>
+    public float SimulationSpeed { get; set; }
+
+    /// <summary>
+    /// Body to simulate at
+    /// </summary>
+    public CelestialBody SimulationBody { get; set; }
     /// <summary>
     /// Returns the total heat generation of the vessel in question
     /// </summary>
@@ -60,16 +81,19 @@ namespace SystemHeat
         foreach (HeatLoop loop in HeatLoops)
         {
 
-          total = total + loop.Volume;
+          total += loop.Volume;
         }
         return total;
       }
     }
 
-
+    protected SystemHeatAtmosphereSimulator atmoSim;
 
     public SystemHeatSimulator()
     {
+      atmoSim = new SystemHeatAtmosphereSimulator();
+      SimulationAltitude = 0f;
+      SimulationSpeed = 0f;
     }
     /// TODO: This should update the simulator in place instead of reset completely
     public void Refresh(List<Part> parts)
@@ -104,6 +128,9 @@ namespace SystemHeat
 
       if (HeatLoops != null)
       {
+        if (SimulationBody != null)
+          atmoSim.SimulateAtmosphere(SimulationBody, SimulationSpeed, SimulationAltitude);
+        
         foreach (HeatLoop loop in HeatLoops)
         {
           loop.Simulate(TimeWarp.fixedDeltaTime);
@@ -119,6 +146,8 @@ namespace SystemHeat
 
       if (HeatLoops != null)
       {
+        if (SimulationBody != null)
+          atmoSim.SimulateAtmosphere(SimulationBody, SimulationSpeed, SimulationAltitude);
         foreach (HeatLoop loop in HeatLoops)
         {
           loop.Simulate(SystemHeatSettings.SimulationRateEditor);
@@ -145,7 +174,7 @@ namespace SystemHeat
       // Build a new heat loop as needed
       if (!HasLoop(loopID))
       {
-        HeatLoops.Add(new HeatLoop(loopID));
+        HeatLoops.Add(new HeatLoop(this, loopID));
 
         Utils.Log(String.Format("[SystemHeatSimulator]: Created new Heat Loop {0}", loopID), LogType.Simulator);
       }
@@ -223,6 +252,7 @@ namespace SystemHeat
       {
         return HeatLoops.Find(x => x.ID == id);
       }
+      Utils.Log("nah loop");
       return null;
     }
     public void ResetTemperatures()

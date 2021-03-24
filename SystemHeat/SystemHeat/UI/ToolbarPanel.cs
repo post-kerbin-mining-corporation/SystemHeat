@@ -10,7 +10,7 @@ using KSP.Localization;
 
 namespace SystemHeat.UI
 {
-  public class ToolbarPanel: MonoBehaviour
+  public class ToolbarPanel : MonoBehaviour
   {
     public bool OverlayMasterState
     {
@@ -26,17 +26,37 @@ namespace SystemHeat.UI
       return false;
     }
 
+    public float SimSituationAltitude
+    {
+      get { return altitudeSlider.value * 1000f; }
+    }
+    public float SimSituationVelocity
+    {
+      get { return velocitySlider.value; }
+    }
+
+    public CelestialBody SimSituationBody
+    {
+      get { return currentBody; }
+    }
 
     public bool active = true;
     public bool panelOpen = false;
     public RectTransform rect;
     public Toggle overlayToggle;
     public Toggle debugToggle;
+    public Toggle loopToggle;
+    public Text loopToggleTitle;
     public Slider simRateSlider;
     public Text simRateLabel;
 
+    public GameObject situationPanel;
+    public RectTransform situationData;
+
     public GameObject loopPanel;
     public GameObject loopPanelScrollRoot;
+    public RectTransform loopPanelScrollRootRect;
+    public RectTransform loopPanelScrollViewportRect;
 
     public GameObject simRateHeader;
     public GameObject simRateSliderObject;
@@ -58,12 +78,33 @@ namespace SystemHeat.UI
 
     protected Text noLoopsText;
 
+
+    protected Text situationTitle;
+    protected Text bodyTitle;
+    protected Dropdown bodyDopdown;
+
+    protected Button sitationButtonSeaLevel;
+    protected Button sitationButtonAtmo;
+    protected Button sitationButtonVac;
+    protected Text altitudeTitle;
+    protected Slider altitudeSlider;
+    protected Text altitudeLabel;
+    protected InputField altitudeTextArea;
+
+    protected Text velocityTitle;
+    protected Slider velocitySlider;
+    protected Text velocityLabel;
+    protected InputField velocityTextArea;
+    protected GameObject situationDataObj;
+    protected GameObject situationHeaderObj;
+
     protected int[] rates = new int[] { 1, 5, 10, 40, 100, 1000, 10000 };
 
     protected List<int> renderedLoops;
     protected List<ToolbarPanelLoopWidget> loopPanelWidgets;
 
     protected SystemHeatSimulator simulator;
+    protected CelestialBody currentBody;
 
     public void Awake()
     {
@@ -71,38 +112,102 @@ namespace SystemHeat.UI
       loopPanelWidgets = new List<ToolbarPanelLoopWidget>();
       // Find all the components
       rect = this.GetComponent<RectTransform>();
-      
+
+      panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
+
+      // Craft Stats
+      craftStatsTitle = transform.FindDeepChild("StatsHeaderText").GetComponent<Text>();
       totalIncomingFluxTitle = transform.FindDeepChild("HeatGenerationTitle").GetComponent<Text>();
       totalOutgoingFluxTitle = transform.FindDeepChild("HeatRejectionTitle").GetComponent<Text>();
-
       totalLoopsTitle = transform.FindDeepChild("LoopCountTitle").GetComponent<Text>();
-      simRateTitle = transform.FindDeepChild("SimRateTitle").GetChild(0).GetComponent<Text>();
-      overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
-      craftStatsTitle = transform.FindDeepChild("StatsHeaderText").GetComponent<Text>();
-      panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
-      loopsTitle = transform.FindDeepChild("LoopsHeaderText").GetComponent<Text>();
-      settingsTitle = transform.FindDeepChild("SettingsHeaderText").GetComponent<Text>();
-
-      noLoopsText = transform.FindDeepChild("NoLoopText").GetComponent<Text>();
-      loopPanel = transform.FindDeepChild("PanelColumn2").gameObject;
-      loopPanelScrollRoot = transform.FindDeepChild("Scrolly").gameObject;
 
       totalIncomingFluxValue = transform.FindDeepChild("HeatGenerationValue").GetComponent<Text>();
       totalOutgoingFluxValue = transform.FindDeepChild("HeatRejectionValue").GetComponent<Text>();
       totalLoopsValue = transform.FindDeepChild("LoopCountValue").GetComponent<Text>();
 
-      debugToggle = transform.FindDeepChild("DebugToggle").GetComponent<Toggle>();
+      // Situation
+      situationHeaderObj = transform.FindDeepChild("SituationHeader").gameObject;
+      situationDataObj = transform.FindDeepChild("SituationData").gameObject;
+      situationData = situationDataObj.GetComponent<RectTransform>();
+      situationTitle = transform.FindDeepChild("SituationHeaderText").GetComponent<Text>();
+      bodyTitle = transform.FindDeepChild("BodyLabel").GetComponent<Text>();
+      bodyDopdown = transform.FindDeepChild("BodyDropdown").GetComponent<Dropdown>();
+
+      sitationButtonSeaLevel = transform.FindDeepChild("SeaLevelButton").GetComponent<Button>();
+      sitationButtonAtmo = transform.FindDeepChild("AltButton").GetComponent<Button>();
+      sitationButtonVac = transform.FindDeepChild("VacButton").GetComponent<Button>();
+      altitudeTitle = transform.FindDeepChild("AltLabel").GetComponent<Text>();
+      altitudeSlider = transform.FindDeepChild("AltSlider").GetComponent<Slider>();
+      altitudeLabel = transform.FindDeepChild("AltUnits").GetComponent<Text>();
+      altitudeTextArea = transform.FindDeepChild("AltInput").GetComponent<InputField>();
+
+      velocityTitle = transform.FindDeepChild("VelLabel").GetComponent<Text>();
+      velocitySlider = transform.FindDeepChild("VelSlider").GetComponent<Slider>();
+      velocityLabel = transform.FindDeepChild("VelUnits").GetComponent<Text>();
+      velocityTextArea = transform.FindDeepChild("VelInput").GetComponent<InputField>();
+
+
+      // Settings
+
+      settingsTitle = transform.FindDeepChild("SettingsHeaderText").GetComponent<Text>();
+
+      loopToggle = transform.FindDeepChild("LoopToggle").GetComponent<Toggle>();
       overlayToggle = transform.FindDeepChild("OverlayToggle").GetComponent<Toggle>();
+      simRateTitle = transform.FindDeepChild("SimRateTitle").GetChild(0).GetComponent<Text>();
+      overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
+      loopToggleTitle = transform.FindDeepChild("LoopToggleLabel").GetComponent<Text>();
 
       simRateHeader = transform.FindDeepChild("SimRateTitle").gameObject;
       simRateSlider = transform.FindDeepChild("Slider").GetComponent<Slider>();
       simRateSliderObject = transform.FindDeepChild("SimRateSlider").gameObject;
       simRateLabel = transform.FindDeepChild("SimRateSlider").GetChild(1).GetComponent<Text>();
 
-      debugToggle.onValueChanged.AddListener(delegate { ToggleDebug(); });
+      // Loop Panel
+      loopsTitle = transform.FindDeepChild("LoopsHeaderText").GetComponent<Text>();
+      noLoopsText = transform.FindDeepChild("NoLoopText").GetComponent<Text>();
+      loopPanel = transform.FindDeepChild("PanelColumn2").gameObject;
+      loopPanelScrollRoot = transform.FindDeepChild("Scrolly").gameObject;
+      loopPanelScrollRootRect = transform.FindDeepChild("Scrolly").GetComponent<RectTransform>();
+      loopPanelScrollViewportRect = transform.FindDeepChild("ScrollViewPort").GetComponent<RectTransform>();
+
+
+
+      loopPanel.SetActive(loopToggle.isOn);
+
+      // Setup objects
+      /// Situation is only visible in editor
+      if (HighLogic.LoadedSceneIsEditor)
+      {
+
+        currentBody = FlightGlobals.GetHomeBody();
+        bodyDopdown.AddOptions(FlightGlobals.Bodies.Select(x => x.name).ToList());
+        for (int i = 0; i < bodyDopdown.options.Count; i++)
+        {
+          if (bodyDopdown.options[i].text == currentBody.name)
+            bodyDopdown.SetValueWithoutNotify(i);
+        }
+
+        SetBody(currentBody);
+
+        bodyDopdown.onValueChanged.AddListener(delegate { OnBodyDropdownChange(); });
+        sitationButtonVac.onClick.AddListener(delegate { OnVacButtonClicked(); });
+        sitationButtonSeaLevel.onClick.AddListener(delegate { OnSeaLevelButtonClicked(); });
+        sitationButtonAtmo.onClick.AddListener(delegate { OnAltitudeButtonClicked(); });
+
+        velocitySlider.onValueChanged.AddListener(delegate { OnVelSliderChange(); });
+        velocityTextArea.onValueChanged.AddListener(delegate { OnVelInputChange(); });
+
+        altitudeSlider.onValueChanged.AddListener(delegate { OnAltSliderChange(); });
+        altitudeTextArea.onValueChanged.AddListener(delegate { OnAltInputChange(); });
+      }
+
+
+
+      /// Settings
+
+      loopToggle.onValueChanged.AddListener(delegate { ToggleLoopPanel(); });
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
-      debugToggle.gameObject.SetActive(false);
       if (HighLogic.LoadedSceneIsEditor)
       {
         simRateHeader.SetActive(true);
@@ -116,10 +221,9 @@ namespace SystemHeat.UI
       if (HighLogic.LoadedSceneIsFlight)
       {
         simRateHeader.SetActive(false);
-     
         simRateSliderObject.gameObject.SetActive(false);
-        
       }
+
       Localize();
     }
     void Localize()
@@ -136,8 +240,63 @@ namespace SystemHeat.UI
 
       simRateTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SimulationRateTitle");
       overlayToggleTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OverlayToggle");
-     
+    }
 
+    void SetBody(CelestialBody b)
+    {
+
+      if (currentBody.atmosphere)
+      {
+        SetSituationAtmosphereControlState(true);
+        altitudeSlider.maxValue = (float)b.atmosphereDepth / 1000f;
+        altitudeSlider.minValue = 0;
+        altitudeSlider.SetValueWithoutNotify(0f);
+        altitudeTextArea.SetTextWithoutNotify("0");
+
+        velocitySlider.maxValue = b.GetObtVelocity().magnitude;
+        velocitySlider.minValue = 0f;
+        velocitySlider.SetValueWithoutNotify(0f);
+        velocityTextArea.SetTextWithoutNotify("0");
+      }
+      else
+      {
+        SetSituationAtmosphereControlState(false);
+      }
+    }
+    protected void SetSituationAtmosphereControlState(bool state)
+    {
+      float panelSize;
+
+      if (state)
+      {
+        panelSize = 370f;
+        situationData.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 140f);
+      }
+      else
+      {
+        panelSize = 260f;
+        situationData.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 30f);
+      }
+      rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize);
+      loopPanelScrollViewportRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize - 45f);
+      loopPanelScrollRootRect.GetComponent<LayoutElement>().minHeight = panelSize - 45f;
+
+
+      velocitySlider.gameObject.SetActive(state);
+      velocityLabel.gameObject.SetActive(state);
+      velocityTextArea.gameObject.SetActive(state);
+      velocityTitle.gameObject.SetActive(state);
+      altitudeSlider.gameObject.SetActive(state);
+      altitudeLabel.gameObject.SetActive(state);
+      altitudeTextArea.gameObject.SetActive(state);
+      altitudeTitle.gameObject.SetActive(state);
+      sitationButtonSeaLevel.gameObject.SetActive(state);
+      sitationButtonVac.gameObject.SetActive(state);
+      sitationButtonAtmo.gameObject.SetActive(state);
+
+      sitationButtonSeaLevel.gameObject.SetActive(state);
+      sitationButtonVac.gameObject.SetActive(state);
+      //sitationButtonAtmo.gameObject.SetActive(state);
     }
     protected void Update()
     {
@@ -154,23 +313,23 @@ namespace SystemHeat.UI
           if (!noLoopsText.gameObject.activeSelf)
             noLoopsText.gameObject.SetActive(true);
 
-          if (loopPanel.activeSelf)
-          {
-            loopPanel.SetActive(false);
-          }
+          //if (loopPanel.activeSelf)
+          //{
+          //  loopPanel.SetActive(false);
+          //}
         }
         else
         {
-          if (!loopPanel.activeSelf)
-          {
-            loopPanel.SetActive(true);
-          }
+          //if (!loopPanel.activeSelf)
+          //{
+          //  loopPanel.SetActive(true);
+          //}
 
           PollLoopWidgets();
           if (noLoopsText.gameObject.activeSelf)
             noLoopsText.gameObject.SetActive(false);
 
-          
+
         }
         totalLoopsValue.text = simulator.HeatLoops.Count.ToString();
         totalOutgoingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxValue", simulator.TotalHeatRejection.ToString("F0"));
@@ -179,7 +338,7 @@ namespace SystemHeat.UI
     }
     void DestroyLoopWidgets()
     {
-      for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
+      for (int i = loopPanelWidgets.Count - 1; i >= 0; i--)
       {
         Destroy(loopPanelWidgets[i].gameObject);
       }
@@ -188,7 +347,7 @@ namespace SystemHeat.UI
 
     void PollLoopWidgets()
     {
-      for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
+      for (int i = loopPanelWidgets.Count - 1; i >= 0; i--)
       {
         if (!simulator.HasLoop(loopPanelWidgets[i].trackedLoopID))
         {
@@ -199,7 +358,7 @@ namespace SystemHeat.UI
       foreach (HeatLoop loop in simulator.HeatLoops)
       {
         bool generateWidget = true;
-        for (int i = loopPanelWidgets.Count-1; i >= 0; i--)
+        for (int i = loopPanelWidgets.Count - 1; i >= 0; i--)
         {
           if (loopPanelWidgets[i].trackedLoopID == loop.ID)
             generateWidget = false;
@@ -220,11 +379,49 @@ namespace SystemHeat.UI
       }
     }
 
+    public void OnBodyDropdownChange()
+    {
+      Utils.Log($"[ToolbarPanel]: Selected body {bodyDopdown.options[bodyDopdown.value].text}", LogType.UI);
+      foreach (CelestialBody body in FlightGlobals.Bodies)
+      {
+        if (body.name == bodyDopdown.options[bodyDopdown.value].text)
+        {
+          currentBody = body;
+          SetBody(currentBody);
+        }
+      }
+    }
+    public void OnVelSliderChange()
+    {
+      velocityTextArea.SetTextWithoutNotify(velocitySlider.value.ToString("F0"));
+    }
+    public void OnAltSliderChange()
+    {
+      altitudeTextArea.SetTextWithoutNotify(altitudeSlider.value.ToString("F0"));
+    }
+    public void OnVelInputChange()
+    {
+      velocitySlider.SetValueWithoutNotify(float.Parse(velocityTextArea.text));
+    }
+
+    public void OnAltInputChange()
+    {
+      altitudeSlider.SetValueWithoutNotify(float.Parse(altitudeTextArea.text));
+    }
+
+    public void OnSeaLevelButtonClicked()
+    { altitudeSlider.value = 0f; }
+    public void OnVacButtonClicked()
+    { altitudeSlider.value = (float)currentBody.atmosphereDepth / 1000f; }
+    public void OnAltitudeButtonClicked()
+    { }
     public void OnSliderChange()
     {
       SystemHeatSettings.SimulationRateEditor = TimeWarp.fixedDeltaTime * rates[(int)simRateSlider.value];
       simRateLabel.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SimulationRateValue", rates[(int)simRateSlider.value]);
     }
+
+
     public void SetVisible(bool state)
     {
       active = state;
@@ -234,9 +431,12 @@ namespace SystemHeat.UI
     {
       simulator = sim;
     }
-    public void ToggleDebug()
+    public void ToggleLoopPanel()
     {
-      SystemHeatDebugUI.ToggleWindow();
+
+      loopPanel.SetActive(!loopPanel.activeSelf);
+
+
     }
     public void ToggleOverlay()
     {
@@ -251,6 +451,6 @@ namespace SystemHeat.UI
       }
     }
 
-     
+
   }
 }

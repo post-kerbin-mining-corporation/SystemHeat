@@ -85,6 +85,7 @@
     <Compile Include="Modules\ModuleSystemHeatAnimateHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatConvector.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
+    <Compile Include="Modules\ModuleSystemHeatExhaust.cs" />
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />
     <Compile Include="Modules\ModuleSystemHeatExchanger.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionEngine.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="ModuleUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemHeat.cs" />
+    <Compile Include="SystemHeatAtmosphereSimulator.cs" />
     <Compile Include="SystemHeatEditor.cs" />
     <Compile Include="EngineerReport\SystemHeatEngineerReport.cs" />
     <Compile Include="SystemHeatSimulator.cs" />

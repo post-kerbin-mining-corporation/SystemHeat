@@ -12,14 +12,31 @@ namespace SystemHeat
   /// </summary>
   public class HeatLoop
   {
+    /// <summary>
+    /// The loop ID
+    /// </summary>
     public int ID { get; set; }
-
+    /// <summary>
+    /// The current loop temperature
+    /// </summary>
     public float Temperature { get; set; }
+    /// <summary>
+    /// The loop nominal temperature
+    /// </summary>
     public float NominalTemperature { get; set; }
+    /// <summary>
+    /// The loop's current net flux
+    /// </summary>
     public float NetFlux { get; set; }
-
+    /// <summary>
+    /// The loop's current coolant volume
+    /// </summary>
     public float Volume { get; set; }
-
+    /// <summary>
+    /// The current convective flux in W/m2
+    /// </summary>
+    public float ConvectionFlux { get; private set; }
+    public float ConvectionTemperature { get; private set; }
     public string CoolantName { get; set; }
     public CoolantType CoolantType;
 
@@ -28,11 +45,11 @@ namespace SystemHeat
 
     public List<ModuleSystemHeat> LoopModules
     {
-      get { return modules;  }
+      get { return modules; }
     }
 
     protected List<ModuleSystemHeat> modules;
-
+    protected SystemHeatSimulator simulator;
     /// <summary>
     /// Build a new HeatLoop
     /// </summary>
@@ -44,7 +61,18 @@ namespace SystemHeat
       CoolantType = SystemHeatSettings.GetCoolantType("");
       Temperature = GetEnvironmentTemperature();
     }
-
+    /// <summary>
+    /// Build a new HeatLoop
+    /// </summary>
+    /// <param name="id">The loop ID number</param>
+    public HeatLoop(SystemHeatSimulator sim, int id)
+    {
+      ID = id;
+      modules = new List<ModuleSystemHeat>();
+      CoolantType = SystemHeatSettings.GetCoolantType("");
+      Temperature = GetEnvironmentTemperature();
+      simulator = sim;
+    }
     /// <summary>
     /// Build a new HeatLoop from a list of modules
     /// </summary>
@@ -107,12 +135,13 @@ namespace SystemHeat
     {
       NominalTemperature = CalculateNominalTemperature();
       numSteps = CalculateStepCount(fixedDeltaTime);
-      timeStep = fixedDeltaTime/(float)numSteps;
+      timeStep = fixedDeltaTime / (float)numSteps;
 
       for (int i = 0; i < numSteps; i++)
       {
-          SimulateIteration(timeStep);
+        SimulateIteration(timeStep);
       }
+      SimulateConvection(fixedDeltaTime);
     }
 
     /// <summary>
@@ -124,9 +153,9 @@ namespace SystemHeat
     protected int CalculateStepCount(float fixedDeltaTime)
     {
       // Calculate the approximate predicted change in temp for the time step and the heat parameters
-      float predictedDeltaTPerStep = CalculateNetFlux()*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * fixedDeltaTime;
+      float predictedDeltaTPerStep = CalculateNetFlux() * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * fixedDeltaTime;
 
-      return Mathf.Clamp((int)(predictedDeltaTPerStep/SystemHeatSettings.MaxDeltaTPerStep), SystemHeatSettings.MinSteps, SystemHeatSettings.MaxSteps);
+      return Mathf.Clamp((int)(predictedDeltaTPerStep / SystemHeatSettings.MaxDeltaTPerStep), SystemHeatSettings.MinSteps, SystemHeatSettings.MaxSteps);
     }
 
     /// <summary>
@@ -135,7 +164,7 @@ namespace SystemHeat
     protected float CalculateNetFlux()
     {
       float currentNetFlux = 0f;
-      for (int i=0; i< modules.Count; i++)
+      for (int i = 0; i < modules.Count; i++)
       {
         currentNetFlux += modules[i].totalSystemFlux;
       }
@@ -150,7 +179,7 @@ namespace SystemHeat
       float currentNetFlux = 0f;
       for (int i = 0; i < modules.Count; i++)
       {
-        currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux +currentNetFlux: currentNetFlux;
+        currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux + currentNetFlux : currentNetFlux;
       }
       return currentNetFlux;
     }
@@ -172,10 +201,10 @@ namespace SystemHeat
       NetFlux = currentNetFlux;
 
       // Determine the ideal change in temperature
-      float deltaTemperatureIdeal = NetFlux*1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-      
+      float deltaTemperatureIdeal = NetFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
 
-     
+
+
       // Flux has be be higher than a tolerance threshold in order to do things
       if (absFlux > SystemHeatSettings.AbsFluxThreshold)
       {
@@ -188,20 +217,20 @@ namespace SystemHeat
         else if (currentNetFlux < 0f)
         {
           float deltaToNominal = Mathf.Abs(NominalTemperature - Temperature);
-          float scale = Mathf.Clamp01(deltaToNominal/50f);
+          float scale = Mathf.Clamp01(deltaToNominal / 50f);
 
 
           // If current temp is greater than nominal temp
           if (Temperature > NominalTemperature)
           {
-            Temperature = Temperature + deltaTemperatureIdeal*scale ;
+            Temperature = Temperature + deltaTemperatureIdeal * scale;
           }
           // If current temp is lower than nominal temp
           if (Temperature < NominalTemperature)
           {
             if (deltaTemperatureIdeal <= 0)
               Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-            else 
+            else
               Temperature += deltaTemperatureIdeal * scale;
 
             Temperature = Mathf.Clamp(Temperature, 0f, NominalTemperature);
@@ -214,11 +243,15 @@ namespace SystemHeat
         }
 
       }
+      if (absFlux == 0 && currentPositiveFlux == 0)
+      {
+
+      }
       //Utils.Log($"Loop {ID} end temp {Temperature}, environment {GetEnvironmentTemperature()}");
       // Ensure temperature doesn't go super high or low
       Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), float.MaxValue);
       // Propagate to all modules
-      for (int i=0; i< modules.Count; i++)
+      for (int i = 0; i < modules.Count; i++)
       {
         modules[i].UpdateSimulationValues(NominalTemperature, Temperature, NetFlux);
       }
@@ -227,7 +260,7 @@ namespace SystemHeat
     {
       // Get all consuming systems
       List<ModuleSystemHeat> orderedConsumers = modules.Where(x => x.totalSystemFlux < 0f).OrderByDescending(x => x.priority).ToList();
-      for (int i=0; i< orderedConsumers.Count;  i++)
+      for (int i = 0; i < orderedConsumers.Count; i++)
       {
         if (totalFlux <= 0f)
         {
@@ -251,11 +284,21 @@ namespace SystemHeat
             totalFlux = 0f;
           }
         }
-        
+
       }
 
 
     }
+    void SimulateConvection(float simTimeStep)
+    {
+      ConvectionTemperature = simulator.AtmoSim.ExternalTemperature;
+      ConvectionFlux = SystemHeatSettings.ConvectionBaseCoefficient * simulator.AtmoSim.ConvectiveCoefficient * simTimeStep;
+    }
+
+    /// <summary>
+    /// Gets the radiative environment temperature
+    /// </summary>
+    /// <returns></returns>
     protected float GetEnvironmentTemperature()
     {
       if (HighLogic.LoadedSceneIsEditor)
@@ -265,8 +308,8 @@ namespace SystemHeat
       {
         if (modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude) > 50000d)
           return SystemHeatSettings.SpaceTemperature;
-        
-        return  Mathf.Clamp( (float)modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
+
+        return Mathf.Clamp((float)modules[0].part.vessel.mainBody.GetTemperature(modules[0].part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
       }
       return SystemHeatSettings.SpaceTemperature;
     }
@@ -285,7 +328,7 @@ namespace SystemHeat
     protected float CalculateLoopVolume()
     {
       float total = 0f;
-      for (int i=0; i< modules.Count; i++)
+      for (int i = 0; i < modules.Count; i++)
       {
         total += modules[i].volume;
       }
@@ -300,7 +343,7 @@ namespace SystemHeat
       float temp = 0f;
       float totalPower = 0.001f;
 
-      for (int i=0; i< modules.Count; i++)
+      for (int i = 0; i < modules.Count; i++)
       {
         if (modules[i].totalSystemFlux > 0f)
         {
@@ -308,7 +351,7 @@ namespace SystemHeat
           totalPower += modules[i].totalSystemFlux;
         }
       }
-      return Mathf.Clamp(temp/totalPower, GetEnvironmentTemperature(), float.MaxValue);
+      return Mathf.Clamp(temp / totalPower, GetEnvironmentTemperature(), float.MaxValue);
     }
   }
 }

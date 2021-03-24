@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using KSP.Localization;
 
@@ -30,12 +29,24 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve = new FloatCurve();
 
+
+    /// <summary>
+    /// Convective area
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float convectiveArea = 1f;
+
     /// <summary>
     /// UI: Current status
     /// </summary>
     [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
     public string RadiatorStatus = "Offline";
 
+    /// <summary>
+    /// UI: Current status
+    /// </summary>
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Title")]
+    public string ConvectionStatus = "Offline";
 
     /// <summary>
     /// UI: Current radiator of efficiency
@@ -43,11 +54,7 @@ namespace SystemHeat
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title")]
     public string RadiatorEfficiency = "-1%";
 
-    /// <summary>
-    /// UI: Current status
-    /// </summary>
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
-    public string ConvectionStatus = "Offline";
+
 
     /// <summary>
     /// ID of the linked scalar module for animating heat
@@ -91,7 +98,10 @@ namespace SystemHeat
       maxTempAnimation -= draperPoint;
 
       Utils.Log("[ModuleSystemHeatRadiator] Setup completed", LogType.Modules);
+      if (HighLogic.LoadedSceneIsEditor)
+      {
 
+      }
     }
 
     public override string GetModuleDisplayName()
@@ -123,11 +133,32 @@ namespace SystemHeat
           if (base.IsCooling)
           {
             float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
+            float convectiveFlux = 0f;
 
-            //ConvectionStatus = $"c: {convectiveFlux}";
+            if (vessel.atmDensity > 0d)
+            {
+              Fields["ConvectionStatus"].guiActive = true;
+              HeatLoop lp = heatModule.Loop;
+              if (lp != null)
+              {
+                float tDelta = lp.ConvectionTemperature - Mathf.Clamp(heatModule.LoopTemperature,
+              (float)PhysicsGlobals.SpaceTemperature, temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time);
+
+                convectiveFlux = Mathf.Clamp(
+                   tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
+                  float.MinValue, 0f);
+              }
+
+              ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
+            }
+            else
+            {
+              Fields["ConvectionStatus"].guiActive = false;
+            }
+
 
             if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-              heatModule.AddFlux(moduleID, 0f, radiativeFlux);
+              heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux);
             else
               heatModule.AddFlux(moduleID, 0f, 0f);
 
@@ -142,7 +173,7 @@ namespace SystemHeat
           }
           else
           {
-
+            Fields["ConvectionStatus"].guiActive = false;
             heatModule.AddFlux(moduleID, 0f, 0f);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
             if (scalarModule != null)
@@ -154,9 +185,24 @@ namespace SystemHeat
 
         if (HighLogic.LoadedSceneIsEditor)
         {
-          float flux = -1.0f * temperatureCurve.Evaluate(heatModule.LoopTemperature);
+          float convectiveFlux = 0f;
+
+          HeatLoop lp = heatModule.Loop;
+          if (lp != null)
+          {
+            float tDelta = lp.ConvectionTemperature - Mathf.Clamp(heatModule.LoopTemperature,
+              (float)PhysicsGlobals.SpaceTemperature, temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time);
+
+            convectiveFlux = Mathf.Clamp(
+               tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
+              float.MinValue, 0f);
+          }
+
+          ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
+
+          float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
           if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-            heatModule.AddFlux(moduleID, 0f, flux);
+            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux);
           else
             heatModule.AddFlux(moduleID, 0f, 0f);
 

@@ -19,12 +19,6 @@ namespace SystemHeat.Modules
     public string FuelResourceName = "EnrichedUranium";
 
     [KSPField(isPersistant = false)]
-    public string RefuelCargoPartName = "systemheat-nuclear-container-1";
-
-    [KSPField(isPersistant = false)]
-    public float MaxTemperatureForRefuel = 330;
-
-    [KSPField(isPersistant = false)]
     public int EngineerLevelForRefuel = 3;
 
     // Color Changer for waste
@@ -35,60 +29,57 @@ namespace SystemHeat.Modules
     [KSPField(isPersistant = false)]
     public string fuelModuleID;
 
-    [KSPEvent(externalToEVAOnly = true, guiActiveUnfocused = true, unfocusedRange = 3.5f, guiName = "Store Fuel")]
-    public void StoreFuel()
-    {
-      if (CheckEVARequirements() && CheckPartRequirements())
-      {
-        TransferResourceFromEVA(FuelResourceName);
-      }
-    }
-    [KSPEvent(externalToEVAOnly = true, guiActiveUnfocused = true, unfocusedRange = 3.5f, guiName = "Store Waste")]
-    public void StoreWaste()
-    {
-      if (CheckEVARequirements() && CheckPartRequirements())
-      {
-        TransferResourceFromEVA(WasteResourceName);
-      }
-    }
-
-    [KSPEvent(externalToEVAOnly = true, guiActiveUnfocused = true, unfocusedRange = 3.5f, guiName = "Collect Fuel")]
-    public void CollectFuel()
-    {
-      if (CheckEVARequirements() && CheckPartRequirements())
-      {
-        TransferResourceToEVA(FuelResourceName);
-      }
-    }
-    [KSPEvent(externalToEVAOnly = true, guiActiveUnfocused = true, unfocusedRange = 3.5f, guiName = "Collect Waste")]
-    public void CollectWaste()
-    {
-      if (CheckEVARequirements() && CheckPartRequirements())
-      {
-        TransferResourceToEVA(WasteResourceName);
-      }
-    }
-
     private ModuleColorChanger wasteColorChanger;
     private ModuleColorChanger fuelColorChanger;
 
     public override string GetInfo()
     {
-      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo");
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo", EngineerLevelForRefuel.ToString());
     }
     public override string GetModuleDisplayName()
     {
       return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_ModuleName");
     }
 
+
+    public override void OnAwake()
+    {
+      base.OnAwake();
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        GameEvents.onCrewBoardVessel.Add(new EventData<GameEvents.FromToAction<Part,Part>>.OnEvent(onCrewBoardVessel));
+        GameEvents.onVesselCrewWasModified.Add(new EventData<Vessel>.OnEvent(onVesselCrewWasModified));
+      }
+    }
+
+    void OnDestroy()
+    {
+      // Clean up events when the item is destroyed
+      GameEvents.onCrewBoardVessel.Remove(onCrewBoardVessel);
+
+      GameEvents.onVesselCrewWasModified.Remove(onVesselCrewWasModified);
+    }
+    public void onCrewBoardVessel(GameEvents.FromToAction<Part, Part> action)
+    {
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: New crew boarded");
+        HandleTransferModes();
+      }
+    }
+
+    public void onVesselCrewWasModified(Vessel ves)
+    {
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        Utils.Log("[ModuleSystemHeatFissionFuelContainer]: Vessel crew was modified");
+        HandleTransferModes();
+      }
+    }
+
     public void Start()
     {
-      Events["StoreWaste"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Field_Store_Name", WasteResourceName) ;
-      Events["StoreFuel"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Field_Store_Name", FuelResourceName);
-      Events["CollectWaste"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Field_Collect_Name", WasteResourceName);
-      Events["CollectFuel"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Field_Collect_Name", FuelResourceName);
-      
-
+     
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
         if (fuelModuleID != "")
@@ -100,60 +91,14 @@ namespace SystemHeat.Modules
           wasteColorChanger = this.GetComponents<ModuleColorChanger>().ToList().Find(i => i.moduleID == wasteModuleID);
         }
       }
+
+      if (HighLogic.LoadedSceneIsFlight)
+        HandleTransferModes();
     }
 
     private void FixedUpdate()
     {
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        
-        if (FlightGlobals.ActiveVessel.evaController != null)
-        {
-          if (FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.TotalAmountOfPartStored(RefuelCargoPartName) >= 1)
-          {
-            if (GetResourceAmount(WasteResourceName) <= 0d)
-            {
-              Events["CollectWaste"].active = false;
-            }
-            else
-            {
-              Events["CollectWaste"].active = true;
-            }
-            if (GetResourceAmount(FuelResourceName) <= 0d)
-            {
-              Events["CollectFuel"].active = false;
-            }
-            else
-            {
-              Events["CollectFuel"].active = true;
-            }
-
-            if (GetResourceEVAAmount(WasteResourceName) <= 0d)
-            {
-              Events["StoreWaste"].active = false;
-            }
-            else
-            {
-              Events["StoreWaste"].active = true;
-            }
-            if (GetResourceEVAAmount(FuelResourceName) <= 0d)
-            {
-              Events["StoreFuel"].active = false;
-            }
-            else
-            {
-              Events["StoreFuel"].active = true;
-            }
-          }
-          else
-          { 
-            Events["CollectWaste"].active = false;
-            Events["CollectFuel"].active = false;
-            Events["StoreFuel"].active = false;
-            Events["StoreWaste"].active = false;
-          }
-        }
-      }
+      
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
         if (fuelColorChanger)
@@ -168,161 +113,57 @@ namespace SystemHeat.Modules
 
     }
 
-    protected double GetResourceEVAAmount(string resourceName)
-    {
-
-      double amt = 0d;
-      if (FlightGlobals.ActiveVessel.evaController != null)
-      {
-        for (int i = 0; i < FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.InventorySlots; i++)
-        {
-          if (!FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.IsSlotEmpty(i))
-          {
-            StoredPart sPart = FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.storedParts[i];
-            if (sPart.partName == RefuelCargoPartName)
-            {
-              ProtoPartResourceSnapshot res = sPart.snapshot.resources.Find(x => x.resourceName == resourceName);
-              amt += res.amount;
-            }
-          }
-        }
-      }
-      return amt;
-    }
-    protected void TransferResourceToEVA(string resourceName)
-    {
-      double availableResource = GetResourceAmount(resourceName, true);
-      double toRemove = 0d;
-      for (int i = 0; i < FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.InventorySlots; i++)
-      {
-        if (availableResource > 0d)
-        {
-          if (!FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.IsSlotEmpty(i))
-          {
-            StoredPart sPart = FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.storedParts[i];
-            if (sPart.partName == RefuelCargoPartName)
-            {
-              ProtoPartResourceSnapshot res = sPart.snapshot.resources.Find(x => x.resourceName == resourceName);
-              double availableSpace = res.maxAmount - res.amount;
-              double addable = UtilMath.Min(availableSpace, availableResource);
-              toRemove += addable;
-
-              Utils.Log($"Added {addable} {resourceName} to {sPart.partName} ({availableResource} units in source, {availableSpace} space in stored part)");
-
-              availableResource = UtilMath.Clamp(availableResource - addable, 0, availableResource);
-              res.amount = UtilMath.Clamp(res.amount + addable, 0d, res.maxAmount);
-            }
-          }
-        }
-      }
-      ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_Collected",
-        toRemove.ToString("F2"),
-        resourceName,
-        part.partInfo.title
-        ), 5.0f, ScreenMessageStyle.UPPER_CENTER));;
-      Utils.Log($"Removed {toRemove} {resourceName} from {part.partInfo.title}");
-      part.RequestResource(resourceName, toRemove, ResourceFlowMode.NO_FLOW);
-    }
-
-    protected void TransferResourceFromEVA(string resourceName)
-    {
-      double availableSpace = GetResourceAmount(resourceName, true) - GetResourceAmount(resourceName);
-      double toAdd = 0d;
-      for (int i=0;i< FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.InventorySlots; i++)
-      {
-        if (availableSpace > 0d)
-        {
-          if (!FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.IsSlotEmpty(i))
-          {
-            StoredPart sPart = FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.storedParts[i];
-            if (sPart.partName == RefuelCargoPartName)
-            {
-              ProtoPartResourceSnapshot res = sPart.snapshot.resources.Find(x => x.resourceName == resourceName);
-              double availableResource = res.amount;
-              double addable = UtilMath.Min(availableSpace, availableResource);
-              toAdd += addable;
-
-              Utils.Log($"Removed {addable} {resourceName} from {sPart.partName} ({availableResource} units in part, {availableSpace} space in target)");
-
-              availableSpace = UtilMath.Clamp(availableSpace - addable, 0, availableSpace);
-              res.amount = UtilMath.Clamp(res.amount - addable, 0d, res.maxAmount);
-            }
-          }
-        }
-      }
-      ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_Stored",
-       toAdd.ToString("F2"),
-       resourceName,
-       part.partInfo.title
-       ), 5.0f, ScreenMessageStyle.UPPER_CENTER)); ;
-      Utils.Log($"Added {toAdd} {resourceName} to {part.partInfo.title}");
-      part.RequestResource(resourceName, -toAdd, ResourceFlowMode.NO_FLOW);
-    }
     /// <summary>
-    /// Test to see if the EVA kerbal can transfer resources
+    /// Change the transfer mode of a specified resource
+    /// </summary>
+    /// <param name="resourceName"></param>
+    /// <param name="mode"></param>
+    public void ChangeTransferMode(string resourceName, ResourceTransferMode mode)
+    {
+      var obj = PartResourceLibrary.Instance.GetDefinition(resourceName).GetType().GetField("_resourceTransferMode",
+         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+      obj.SetValue(PartResourceLibrary.Instance.GetDefinition(resourceName), mode);
+    }
+
+    /// <summary>
+    /// Get the engineer level of the crew
     /// </summary>
     /// <returns></returns>
-    protected bool CheckEVARequirements()
+    public int GetCrewLevel()
     {
-      if (FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < EngineerLevelForRefuel)
+      int maxLvl = 0;
+      foreach (var crew in part.vessel.GetVesselCrew())
       {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_AbortEngineerLevel", EngineerLevelForRefuel.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
+        if (crew.experienceTrait.TypeName == "Engineer" && crew.experienceLevel > maxLvl)
+          maxLvl = crew.experienceLevel;
+
       }
-      if (FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.TotalAmountOfPartStored(RefuelCargoPartName) < 1)
-      {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_NoFuelContainer"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
-      }
-      return true;
+      return maxLvl;
     }
 
     /// <summary>
-    /// Test to see if this part can transfter resources
+    /// Edit transfer modes in response to an event
+    /// </summary>
+    public void HandleTransferModes()
+    {
+      if (GetCrewLevel() >= EngineerLevelForRefuel)
+      {
+        Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for fuel to PUMP");
+        ChangeTransferMode(FuelResourceName, ResourceTransferMode.PUMP);
+        ChangeTransferMode(WasteResourceName, ResourceTransferMode.PUMP);
+      }
+      else
+      {
+        Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for fuel to NONE");
+        ChangeTransferMode(FuelResourceName, ResourceTransferMode.NONE);
+        ChangeTransferMode(WasteResourceName, ResourceTransferMode.NONE);
+      }
+    }
+    /// <summary>
+    /// Get the amount of a resource in a part
     /// </summary>
     /// <param name="nm"></param>
     /// <returns></returns>
-    protected bool CheckPartRequirements()
-    {
-      // Some modules need to be off.
-      ModuleSystemHeat heat = GetComponent<ModuleSystemHeat>();
-      ModuleSystemHeatConverter[] converters = GetComponents<ModuleSystemHeatConverter>();
-      ModuleSystemHeatFissionReactor reactor = GetComponent<ModuleSystemHeatFissionReactor>();
-      ModuleSystemHeatFissionEngine engine = GetComponent<ModuleSystemHeatFissionEngine>();
-
-      // Fail if a converter is on
-      foreach (ModuleSystemHeatConverter converter in converters)
-      { 
-        if (converter != null && converter.ModuleIsActive())
-          {
-          ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_AbortFromRunningConverter"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-          return false;
-        }
-      }
-      // Fail if a reactor is on
-      if (reactor != null && reactor.Enabled)
-      {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_AbortFromRunningReactor"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
-      }
-      //Fail if an nuclear engine is on
-      if (engine != null && engine.Enabled)
-      {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_AbortFromRunningReactor"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
-      }
-
-      // Fail if the part is too hot
-      if (heat != null && heat.LoopTemperature > MaxTemperatureForRefuel)
-      {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_Message_AbortTooHot", MaxTemperatureForRefuel.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
-        return false;
-      }
-
-      return true;
-    }
-
-    // Helpbers for getting a resource amount
     public double GetResourceAmount(string nm)
     {
       if (this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(nm).id) != null)
@@ -330,6 +171,12 @@ namespace SystemHeat.Modules
       else
         return 0.0;
     }
+    /// <summary>
+    /// Get the amount of a resource in a part
+    /// </summary>
+    /// <param name="nm"></param>
+    /// <param name="max"></param>
+    /// <returns></returns>
     public double GetResourceAmount(string nm, bool max)
     {
       if (max)

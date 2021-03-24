@@ -74,6 +74,17 @@ namespace SystemHeat
     [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
+    public HeatLoop Loop
+    {
+      get {
+        if (simulator != null)
+        {
+          return simulator.Loop(currentLoopID);
+        }
+        else return null;
+      }
+    }
+
     public int LoopID
     {
       get { return currentLoopID; }
@@ -137,9 +148,6 @@ namespace SystemHeat
 
       SetupUI();
 
-      
-
-
       Fields["totalSystemTemperature"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["totalSystemTemperature"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
       Fields["totalSystemFlux"].guiActive = SystemHeatSettings.DebugPartUI;
@@ -151,10 +159,7 @@ namespace SystemHeat
       Fields["currentLoopFlux"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["currentLoopFlux"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
 
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
-      }
+      
       Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
     }
 
@@ -252,9 +257,9 @@ namespace SystemHeat
 
       if (fluxes != null && temperatures != null)
       {
-
         fluxes[id] = flux;
 
+        // If the flux is > 0, heat is being added to the system and we should track the temperature
         if (flux > 0f)
         {
           temperatures[id] = sourceTemperature;
@@ -271,6 +276,19 @@ namespace SystemHeat
       }
     }
 
+    public float GetFlux(string id)
+    {
+
+      if (fluxes != null && temperatures != null)
+      {
+
+
+        return fluxes.Where(x => x.Key != id).Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
+        
+      }
+      return 0f;
+    }
+
     public void UpdateSimulationValues(float nominalTemp, float currentTemp, float currentNetFlux)
     {
       nominalLoopTemperature = nominalTemp;
@@ -282,6 +300,18 @@ namespace SystemHeat
     {
       SystemFluxUI = String.Format("{0:F0} kW", totalSystemFlux);
       SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", LoopTemperature, nominalLoopTemperature);
+
+      if (simulator == null)
+      {
+        if (HighLogic.LoadedSceneIsFlight)
+        
+          simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
+        
+        if (HighLogic.LoadedSceneIsEditor)
+        
+          simulator = SystemHeatEditor.Instance.Simulator;
+        
+      }
     }
 
 
