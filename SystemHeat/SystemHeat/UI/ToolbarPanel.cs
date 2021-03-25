@@ -237,6 +237,15 @@ namespace SystemHeat.UI
     }
     void Localize()
     {
+      situationTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SituationTitle");
+      bodyTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SituationBody");
+      sitationButtonSeaLevel.gameObject.GetChild("Text").GetComponent<Text>().text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SituationSeaLevel");
+      sitationButtonVac.gameObject.GetChild("Vacuum").GetComponent<Text>().text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SituationVacuum");
+      altitudeTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_AltitudeTitle");
+      altitudeLabel.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_AltitudeUnits");
+      velocityTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_VelocityTitle");
+      velocityLabel.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_VelocityUnits");
+      loopToggleTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopsToggle");
 
       totalIncomingFluxTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxTitle");
       totalOutgoingFluxTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxTile");
@@ -305,7 +314,7 @@ namespace SystemHeat.UI
 
       sitationButtonSeaLevel.gameObject.SetActive(state);
       sitationButtonVac.gameObject.SetActive(state);
-      //sitationButtonAtmo.gameObject.SetActive(state);
+      sitationButtonAtmo.gameObject.SetActive(false);
     }
     protected void Update()
     {
