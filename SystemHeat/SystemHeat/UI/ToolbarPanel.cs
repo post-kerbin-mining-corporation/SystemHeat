@@ -260,7 +260,7 @@ namespace SystemHeat.UI
         altitudeSlider.maxValue = (float)b.atmosphereDepth / 1000f;
         altitudeSlider.minValue = 0;
         altitudeSlider.SetValueWithoutNotify((float)b.atmosphereDepth / 1000f);
-        altitudeTextArea.SetTextWithoutNotify(altitudeSlider.ToString("F0"));
+        altitudeTextArea.SetTextWithoutNotify(altitudeSlider.value.ToString("F0"));
 
         velocitySlider.maxValue = b.GetObtVelocity().magnitude;
         velocitySlider.minValue = 0f;

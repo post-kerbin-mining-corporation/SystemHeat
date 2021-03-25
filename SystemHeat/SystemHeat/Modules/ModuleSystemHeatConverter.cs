@@ -123,9 +123,9 @@ namespace SystemHeat
       if (heatModule)
       {
         if (editorThermalSim)
-          heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);
+          heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
         else
-          heatModule.AddFlux(moduleID, 0f, 0f);
+          heatModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
 
@@ -134,11 +134,11 @@ namespace SystemHeat
 
         if (base.ModuleIsActive())
         {
-          heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower);
+          heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
         }
         else
         {
-          heatModule.AddFlux(moduleID, 0f, 0f);
+          heatModule.AddFlux(moduleID, 0f, 0f, false);
         }
     }
     protected void UpdateSystemHeatFlight()

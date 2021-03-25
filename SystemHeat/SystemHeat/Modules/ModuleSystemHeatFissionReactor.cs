@@ -612,9 +612,9 @@ namespace SystemHeat
       CurrentHeatGeneration = CalculateHeatGeneration();
       
       if (Enabled)
-        heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration);
+        heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
       else
-        heatModule.AddFlux(moduleID, 0f, CurrentHeatGeneration);
+        heatModule.AddFlux(moduleID, 0f, CurrentHeatGeneration, false);
 
       if (CoreIntegrity <= 0f)
       {
@@ -629,7 +629,7 @@ namespace SystemHeat
     protected virtual void HandleHeatGenerationEditor()
     {
       CurrentHeatGeneration = CalculateHeatGenerationEditor();
-      heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration);
+      heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
     }
 
 

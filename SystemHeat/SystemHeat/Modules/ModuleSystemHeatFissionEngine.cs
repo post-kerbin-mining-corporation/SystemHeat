@@ -67,7 +67,8 @@ namespace SystemHeat
           CriticalTemperature.ToString("F0"),
           MaximumTemperature.ToString("F0"),
           ThrottleIncreaseRate.ToString("F0"),
-          MinimumThrottle.ToString("F0"));
+          MinimumThrottle.ToString("F0"),
+          (engineCoolingScale*100f).ToString("F0"));
       else
         return
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_PartInfo_NoPower",
@@ -78,7 +79,8 @@ namespace SystemHeat
           CriticalTemperature.ToString("F0"),
           MaximumTemperature.ToString("F0"),
           ThrottleIncreaseRate.ToString("F0"),
-          MinimumThrottle.ToString("F0"));
+          MinimumThrottle.ToString("F0"),
+          (engineCoolingScale * 100f).ToString("F0"));
 
     }
     public override void Start()
@@ -163,7 +165,8 @@ namespace SystemHeat
     protected override float CalculateHeatGeneration()
     {
 
-      return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f - (GetEngineThrottleSetting() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
+      return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f - 
+        (GetEngineThrottleSetting() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
     }
     protected override float CalculateHeatGenerationEditor()
     {
@@ -178,13 +181,13 @@ namespace SystemHeat
     }
     protected override float CalculateGoalThrottle(float timeStep)
     {
-      double shipEC = 0d;
-      double shipMaxEC = 0d;
-      // Determine need for power
-      part.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out shipEC, out shipMaxEC, true);
-
       if (GeneratesElectricity)
       {
+        double shipEC = 0d;
+        double shipMaxEC = 0d;
+
+        part.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out shipEC, out shipMaxEC, true);
+
         float maxGeneration = ElectricalGeneration.Evaluate(100f) * CoreIntegrity / 100f;
         float minGeneration = ElectricalGeneration.Evaluate(MinimumThrottle) * timeStep;
         float idealGeneration = Mathf.Min(maxGeneration * timeStep, (float)(shipMaxEC - shipEC));

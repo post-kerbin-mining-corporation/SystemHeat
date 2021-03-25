@@ -221,22 +221,22 @@ namespace SystemHeat
 
         if (destModule.LoopTemperature <= outletTemperature * 1.5f)
         {
-          sourceModule.AddFlux(moduleID, 0f, -HeatRate);
+          sourceModule.AddFlux(moduleID, 0f, -HeatRate, false);
 
 
           outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
 
           PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
           Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active", outletTemperature.ToString("F0"), outputHeat.ToString("F0"), sourceModule.consumedSystemFlux.ToString("F1"));
-          destModule.AddFlux(moduleID, outletTemperature, outputHeat);
+          destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
         }
         else
         {
 
           PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
           Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
-          destModule.AddFlux(moduleID, outletTemperature, 0f);
-          sourceModule.AddFlux(moduleID, 0f, 0f);
+          destModule.AddFlux(moduleID, outletTemperature, 0f, true);
+          sourceModule.AddFlux(moduleID, 0f, 0f, false);
 
         }
 
@@ -246,8 +246,8 @@ namespace SystemHeat
         Fields["PowerStatus"].guiActive = false;
         Fields["PowerStatus"].guiActiveEditor = false;
         Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
-        destModule.AddFlux(moduleID, 0f, 0f);
-        sourceModule.AddFlux(moduleID, 0f, 0f);
+        destModule.AddFlux(moduleID, 0f, 0f, false);
+        sourceModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
 
@@ -276,30 +276,30 @@ namespace SystemHeat
 
           if (destModule.LoopTemperature <= outletTemperature * 1.5f)
           {
-            sourceModule.AddFlux(moduleID, 0f, -HeatRate);
+            sourceModule.AddFlux(moduleID, 0f, -HeatRate, false);
 
 
             outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
 
             PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F1"));
             Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active", outletTemperature.ToString("F0"), outputHeat.ToString("F0"));
-            destModule.AddFlux(moduleID, outletTemperature, outputHeat);
+            destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
           }
           else
           {
 
             PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F1"));
             Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
-            destModule.AddFlux(moduleID, outletTemperature, 0f);
-            sourceModule.AddFlux(moduleID, 0f, 0f);
+            destModule.AddFlux(moduleID, outletTemperature, 0f, true);
+            sourceModule.AddFlux(moduleID, 0f, 0f, false);
 
           }
         }
         else
         {
           Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_NoPower");
-          destModule.AddFlux(moduleID, 0f, 0f);
-          sourceModule.AddFlux(moduleID, 0f, 0f);
+          destModule.AddFlux(moduleID, 0f, 0f, false);
+          sourceModule.AddFlux(moduleID, 0f, 0f, false);
           Fields["PowerStatus"].guiActive = false;
           Fields["PowerStatus"].guiActiveEditor = false;
         }
@@ -310,8 +310,8 @@ namespace SystemHeat
         Fields["PowerStatus"].guiActive = false;
         Fields["PowerStatus"].guiActiveEditor = false;
         Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
-        destModule.AddFlux(moduleID, 0f, 0f);
-        sourceModule.AddFlux(moduleID, 0f, 0f);
+        destModule.AddFlux(moduleID, 0f, 0f, false);
+        sourceModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
 

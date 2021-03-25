@@ -337,7 +337,7 @@ namespace SystemHeat
     }
 
     /// <summary>
-    /// Calculates the nomical temperature of the loop based on its members
+    /// Calculates the nominal temperature of the loop based on its members
     /// </summary>
     protected float CalculateNominalTemperature()
     {

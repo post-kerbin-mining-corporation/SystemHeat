@@ -252,7 +252,7 @@ namespace SystemHeat
     /// <param name="id">the string ID of the source (should be unique)</param>
     /// <param name="sourceTemperature">the temperature of the source</param>
     /// <param name="flux">the flux of the source</param>
-    public void AddFlux(string id, float sourceTemperature, float flux)
+    public void AddFlux(string id, float sourceTemperature, float flux, bool useForNominal)
     {
 
       if (fluxes != null && temperatures != null)
@@ -260,7 +260,7 @@ namespace SystemHeat
         fluxes[id] = flux;
 
         // If the flux is > 0, heat is being added to the system and we should track the temperature
-        if (flux > 0f)
+        if (useForNominal)
         {
           temperatures[id] = sourceTemperature;
         }
@@ -272,7 +272,7 @@ namespace SystemHeat
         totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
-        systemNominalTemperature = totalSystemTemperature / (fluxes.Values.ToList().Where(x => x > 0f).Count());
+        systemNominalTemperature = totalSystemTemperature / (temperatures.Values.ToList().Where(x => x > 0f).Count());
       }
     }
 

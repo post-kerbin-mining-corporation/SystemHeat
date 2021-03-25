@@ -160,9 +160,9 @@ namespace SystemHeat
 
 
             if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-              heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux);
+              heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
             else
-              heatModule.AddFlux(moduleID, 0f, 0f);
+              heatModule.AddFlux(moduleID, 0f, 0f, false);
 
 
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
@@ -176,7 +176,7 @@ namespace SystemHeat
           else
           {
             Fields["ConvectionStatus"].guiActive = false;
-            heatModule.AddFlux(moduleID, 0f, 0f);
+            heatModule.AddFlux(moduleID, 0f, 0f, false);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
             if (scalarModule != null)
               scalarModule.SetScalar(Mathf.MoveTowards(scalarModule.GetScalar, 0f, TimeWarp.fixedDeltaTime * heatAnimationRate));
@@ -206,9 +206,9 @@ namespace SystemHeat
 
           float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
           if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux);
+            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
           else
-            heatModule.AddFlux(moduleID, 0f, 0f);
+            heatModule.AddFlux(moduleID, 0f, 0f, false);
 
           RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
             ((-temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
