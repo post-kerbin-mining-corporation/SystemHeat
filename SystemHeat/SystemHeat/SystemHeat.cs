@@ -37,15 +37,35 @@ namespace SystemHeat
     public static bool DebugModules = true;
     // Emit module  debug messages
     public static bool DebugSettings = true;
-    // Show debug info in PAW UIs
+ 
+    /// <summary>
+    ///  Show debug info in PAW UIs
+    /// </summary>
     public static bool DebugPartUI = false;
 
+    /// <summary>
+    /// Deep space temperature
+    /// </summary>
     public static float SpaceTemperature = 2.7f;
+
+    /// <summary>
+    /// Base coefficient for convection to mirror stock
+    /// </summary>
+    public static float ConvectionBaseCoefficient = 0.001f;
+
+    /// <summary>
+    /// Maximum number of loops
+    /// </summary>
     public static int maxLoopCount = 20;
 
-    // The maximum allows change in temperature per simulation time step
+    /// <summary>
+    ///The maximum allowed change in temperature per simulation time step 
+    /// </summary>
     public static float UIUpdateInterval = 1f;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static float TimeWarpLimit = 100f;
 
     // Simulation settings
@@ -107,6 +127,7 @@ namespace SystemHeat
         settingsNode.TryGetValue("DebugSimulation", ref DebugSimulation);
         settingsNode.TryGetValue("maxLoopCount", ref maxLoopCount);
         settingsNode.TryGetValue("SpaceTemperature", ref SpaceTemperature);
+        settingsNode.TryGetValue("ConvectionBaseCoefficient", ref ConvectionBaseCoefficient);
 
         settingsNode.TryGetValue("UIUpdateInterval", ref UIUpdateInterval);
         settingsNode.TryGetValue("TimeWarpLimit", ref TimeWarpLimit);

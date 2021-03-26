@@ -28,10 +28,17 @@ namespace SystemHeat
   /// </summary>
   public class ModuleSystemHeatFissionEngine: ModuleSystemHeatFissionReactor
   {
-
-    /// Curve to map engine power % to Isp 
+    /// <summary>
+    /// Curve to map reactor power % to Isp 
+    /// </summary>
     [KSPField(isPersistant = false)]
     public FloatCurve ispCurve = new FloatCurve();
+
+    /// <summary>
+    /// The amount of reactor power that is cooled by the exhaust
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float engineCoolingScale = 1.0f;
 
     private List<bool> engineOnStates;
     private List<EngineBaseData> engines;
@@ -60,7 +67,8 @@ namespace SystemHeat
           CriticalTemperature.ToString("F0"),
           MaximumTemperature.ToString("F0"),
           ThrottleIncreaseRate.ToString("F0"),
-          MinimumThrottle.ToString("F0"));
+          MinimumThrottle.ToString("F0"),
+          (engineCoolingScale*100f).ToString("F0"));
       else
         return
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_PartInfo_NoPower",
@@ -71,7 +79,8 @@ namespace SystemHeat
           CriticalTemperature.ToString("F0"),
           MaximumTemperature.ToString("F0"),
           ThrottleIncreaseRate.ToString("F0"),
-          MinimumThrottle.ToString("F0"));
+          MinimumThrottle.ToString("F0"),
+          (engineCoolingScale * 100f).ToString("F0"));
 
     }
     public override void Start()
@@ -114,6 +123,29 @@ namespace SystemHeat
       return 0.0f;
     }
 
+    public float GetEngineThrottleSettingEditor()
+    {
+      for (int i = 0; i < engines.Count; i++)
+      {
+        if (multiEngine != null)
+        {
+          if (multiEngine.runningPrimary && engines[i].engineModule.engineID == multiEngine.primaryEngineID)
+          {
+            return engines[i].engineModule.thrustPercentage / 100f;
+          }
+          if (!multiEngine.runningPrimary && engines[i].engineModule.engineID == multiEngine.secondaryEngineID)
+          {
+            return engines[i].engineModule.thrustPercentage / 100f;
+          }
+        }
+        else
+        {
+          return engines[i].engineModule.thrustPercentage / 100f;
+        }
+      }
+      return 0.0f;
+    }
+
     public override void FixedUpdate()
     {
       base.FixedUpdate();
@@ -130,19 +162,37 @@ namespace SystemHeat
       }
     }
 
+    protected override float CalculateHeatGeneration()
+    {
+
+      return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f - 
+        (GetEngineThrottleSetting() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
+    }
+    protected override float CalculateHeatGenerationEditor()
+    {
+      if (heatModule.currentLoopTemperature < NominalTemperature)
+      {
+        return (CurrentReactorThrottle / 100f * HeatGeneration);
+      }
+      else
+      {
+        return Mathf.Clamp((CurrentReactorThrottle / 100f * HeatGeneration) - (GetEngineThrottleSettingEditor() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
+      }
+    }
     protected override float CalculateGoalThrottle(float timeStep)
     {
-      double shipEC = 0d;
-      double shipMaxEC = 0d;
-      // Determine need for power
-      part.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out shipEC, out shipMaxEC, true);
-
       if (GeneratesElectricity)
       {
+        double shipEC = 0d;
+        double shipMaxEC = 0d;
+
+        part.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out shipEC, out shipMaxEC, true);
+
         float maxGeneration = ElectricalGeneration.Evaluate(100f) * CoreIntegrity / 100f;
         float minGeneration = ElectricalGeneration.Evaluate(MinimumThrottle) * timeStep;
         float idealGeneration = Mathf.Min(maxGeneration * timeStep, (float)(shipMaxEC - shipEC));
         float powerToGenerate = Mathf.Max(Mathf.Max(minGeneration, idealGeneration));
+
         return Mathf.Max(GetEngineThrottleSetting(), (powerToGenerate / timeStep) / maxGeneration) * 100f;
       }
       else
@@ -257,6 +307,9 @@ namespace SystemHeat
         {
           HandleActivateEngine(engineIndex);
         }
+
+        if (!multiEngine)
+          HandleActivateEngine(engineIndex);
       }
     }
 
@@ -276,10 +329,10 @@ namespace SystemHeat
         engines[engineIndex].engineModule.Events["Shutdown"].Invoke();
         engines[engineIndex].engineModule.currentThrottle = 0;
         engines[engineIndex].engineModule.requestedThrottle = 0;
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_FFT_ModuleFusionEngine_Message_ReactorNotReady",
-                                                                            part.partInfo.title),
-                                                                   5.0f,
-                                                                   ScreenMessageStyle.UPPER_CENTER));
+        //ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_FFT_ModuleFusionEngine_Message_ReactorNotReady",
+        //                                                                    part.partInfo.title),
+        //                                                           5.0f,
+        //                                                           ScreenMessageStyle.UPPER_CENTER));
       }
     }
   }

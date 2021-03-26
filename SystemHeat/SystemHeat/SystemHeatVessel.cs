@@ -69,7 +69,13 @@ namespace SystemHeat
         }
       }
       if (vesselLoaded)
+      {
+        simulator.SimulationBody = vessel.mainBody;
+        simulator.SimulationAltitude = (float)vessel.altitude;
+        simulator.SimulationSpeed = (float)vessel.speed;
+
         simulator.Simulate();
+      }
     }
 
     /// <summary>

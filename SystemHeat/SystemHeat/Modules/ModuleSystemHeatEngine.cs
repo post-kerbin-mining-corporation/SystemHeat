@@ -124,14 +124,14 @@ namespace SystemHeat
           engineFraction = engineModule.thrustPercentage / 100f;
           Fields["systemHeatGeneration"].guiActiveEditor = true;
           Fields["systemTemperature"].guiActiveEditor = true;
-          heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+          heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
           systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
         }
         else
         {
 
           systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
-          heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower);
+          heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower, false);
           Fields["systemHeatGeneration"].guiActiveEditor = false;
           Fields["systemTemperature"].guiActiveEditor = false;
 
@@ -143,7 +143,7 @@ namespace SystemHeat
         engineFraction = engineModule.thrustPercentage / 100f;
         Fields["systemHeatGeneration"].guiActiveEditor = true;
         Fields["systemTemperature"].guiActiveEditor = true;
-        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
       }
 
@@ -159,7 +159,7 @@ namespace SystemHeat
       if (engineModule.EngineIgnited || engineModule.requestedThrottle > 0f)
       {
         engineFraction = engineModule.requestedThrottle;
-        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower);
+        heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
         Fields["systemHeatGeneration"].guiActive = true;
         Fields["systemTemperature"].guiActive = true;
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
@@ -167,7 +167,7 @@ namespace SystemHeat
       }
       else
       {
-        heatModule.AddFlux(moduleID, 0f, 0f);
+        heatModule.AddFlux(moduleID, 0f, 0f, false);
         Fields["systemHeatGeneration"].guiActive = false;
         Fields["systemTemperature"].guiActive = false;
         systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));

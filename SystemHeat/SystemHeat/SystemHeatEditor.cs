@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using SystemHeat.UI;
 
 namespace SystemHeat
 {
@@ -42,7 +43,12 @@ namespace SystemHeat
     {
       if (simulator != null)
       {
+        simulator.SimulationBody = SystemHeatUI.Instance.toolbarPanel.SimSituationBody;
+        simulator.SimulationAltitude = SystemHeatUI.Instance.toolbarPanel.SimSituationAltitude;
+        simulator.SimulationSpeed = SystemHeatUI.Instance.toolbarPanel.SimSituationVelocity;
+
         simulator.SimulateEditor();
+        
       }
     }
     #region Editor

@@ -209,7 +209,7 @@ namespace SystemHeat
 
       if (storageEnabled && heatStored < heatStorageMaximum)
       {
-        heatModule.AddFlux(moduleID, 0f, -maxHeatRate);
+        heatModule.AddFlux(moduleID, 0f, -maxHeatRate, false);
         Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration");
         if (heatModule.currentLoopTemperature >= heatModule.nominalLoopTemperature)
         {
@@ -220,14 +220,14 @@ namespace SystemHeat
       else if (!storageEnabled && heatStored > 0f)
       {
         Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Dump");
-        heatModule.AddFlux(moduleID, storageTemperature, heatStorageDumpRate);
+        heatModule.AddFlux(moduleID, storageTemperature, heatStorageDumpRate, true);
         heatStored = Mathf.Clamp(heatStored - heatStorageDumpRate * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
         storageTemperature = storageTemperature - heatStorageDumpRate * TimeWarp.fixedDeltaTime / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT
       }
 
       else
       {
-        heatModule.AddFlux(moduleID, 0f, 0f);
+        heatModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
 
@@ -238,11 +238,11 @@ namespace SystemHeat
     {
       if (storageEnabled && heatStored < heatStorageMaximum)
       {
-        heatModule.AddFlux(moduleID, 0f, -maxHeatRate);
+        heatModule.AddFlux(moduleID, 0f, -maxHeatRate, false);
       }
       else
       {
-        heatModule.AddFlux(moduleID, 0f, 0f);
+        heatModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
 

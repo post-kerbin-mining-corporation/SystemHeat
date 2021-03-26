@@ -123,7 +123,7 @@ namespace SystemHeat
 
     protected void Update()
     {
-      if (HighLogic.LoadedSceneIsFlight && targetRenderers != null)
+      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor && targetRenderers != null)
       {
         animationFraction = Mathf.MoveTowards(animationFraction, animationGoal, TimeWarp.deltaTime * animRate);
 
