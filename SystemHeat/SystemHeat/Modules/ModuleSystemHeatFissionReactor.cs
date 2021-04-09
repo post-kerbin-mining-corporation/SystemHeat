@@ -48,7 +48,7 @@ namespace SystemHeat
     /// <summary>
     /// Current reactor power setting (min-100, tweakable) 
     /// </summary>
-    [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Power Setting", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
+    [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CurrentPowerPercent", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 0f, maxValue = 100f, stepIncrement = 1f)]
     public float CurrentReactorThrottle = 100f;
 
 
@@ -97,7 +97,7 @@ namespace SystemHeat
     public float CurrentElectricalGeneration = 0f;
 
     // Reactor Status string
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Generation", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string GeneratorStatus;
 
     /// <summary>
@@ -120,6 +120,12 @@ namespace SystemHeat
     public float CurrentHeatGeneration;
 
     /// <summary>
+    /// Real internal core temperature
+    /// </summary>
+    [KSPField(isPersistant = true)]
+    public float InternalCoreTemperature = 0f;
+
+    /// <summary>
     /// Nominal reactor temperature (where the reactor should live)
     /// </summary>
     [KSPField(isPersistant = false)]
@@ -140,7 +146,7 @@ namespace SystemHeat
     /// <summary>
     /// Temperature value for auto-shutdown
     /// </summary>
-    [KSPField(isPersistant = true, guiActive = true, guiName = "Auto-Shutdown Temp", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 700f, maxValue = 6000f, stepIncrement = 100f)]
+    [KSPField(isPersistant = true, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CurrentSafetyOverride", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title"), UI_FloatRange(minValue = 700f, maxValue = 6000f, stepIncrement = 100f)]
     public float CurrentSafetyOverride = 1000f;
 
     [KSPField(isPersistant = true)]
@@ -185,19 +191,19 @@ namespace SystemHeat
     /// UI FIELDS
     /// --------------------
     // Reactor Status string
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Reactor Power", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string ReactorOutput;
 
     // integrity of the core
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Core Temperature", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreTemp", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string CoreTemp;
 
     // integrity of the core
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Core Health", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreStatus", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string CoreStatus;
 
     // Fuel Status string
-    [KSPField(isPersistant = false, guiActive = true, guiName = "Core Life", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string FuelStatus;
 
     /// KSPEVENTS
@@ -547,7 +553,7 @@ namespace SystemHeat
         else
           CoreStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreStatus_Meltdown");
 
-        HandleCoreDamage();
+        HandleCore();
         HandleThrottle();
         HandleHeatGeneration();
 
@@ -595,7 +601,7 @@ namespace SystemHeat
       {
         CurrentThrottle = Mathf.MoveTowards(CurrentThrottle, CurrentReactorThrottle, TimeWarp.fixedDeltaTime * ThrottleIncreaseRate);
       }
-      CoreTemp = String.Format("{0:F1}/{1:F1} {2}", heatModule.LoopTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
+      CoreTemp = String.Format("{0:F1}/{1:F1} {2}", InternalCoreTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
     }
 
     protected virtual float CalculateHeatGeneration()
@@ -610,7 +616,7 @@ namespace SystemHeat
     {
       // Determine heat to be generated
       CurrentHeatGeneration = CalculateHeatGeneration();
-      
+
       if (Enabled)
         heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
       else
@@ -633,9 +639,51 @@ namespace SystemHeat
     }
 
 
-    // track and set core damage
-    private void HandleCoreDamage()
+    // handle core activities
+    private void HandleCore()
     {
+      //float effic = 0.4f;
+      //float coreMassKg = 800f;
+      //float coreSpecHeat = 0.5f; //kj/kG/s
+      //float loopFlux = heatModule.LoopFlux;
+      ///// waste / (1-effic) = max
+      //float tDelta = 0f;
+      //if (Enabled)
+      //{
+      //  if (heatModule.LoopTemperature < NominalTemperature)
+      //  {
+
+      //    tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
+
+
+      //  }
+      //  if (heatModule.LoopTemperature > NominalTemperature)
+      //  {
+      //    tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
+      //  }
+
+
+      //}
+      //else
+      //{
+      //  tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
+      //}
+      //InternalCoreTemperature = Mathf.Min(heatModule.LoopTemperature, InternalCoreTemperature + tDelta);
+
+      if (heatModule.LoopTemperature <= NominalTemperature)
+      {
+        InternalCoreTemperature = heatModule.LoopTemperature;
+      }
+      else
+      {
+        if (heatModule.LoopTemperature > InternalCoreTemperature)
+          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature, 0.2f * TimeWarp.fixedDeltaTime);
+        if (heatModule.LoopTemperature < InternalCoreTemperature)
+          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature, 1f * TimeWarp.fixedDeltaTime);
+      }
+      
+
+      
 
       // Update reactor damage
       float critExceedance = heatModule.LoopTemperature - CriticalTemperature;

@@ -1,3 +1,10 @@
+v0.4.1
+------
+- Fixed DebugSimulation being on by default
+- Fixed some fields in modules being saved to persistence when they didn't need to be
+- Fixed an issue where heat loops that had no producers could run into a divide by zero error
+- Changed fission engine exhaust cooling to be modeled against propellant flow instead of engine throttle
+
 v0.4.0
 ------
 - Reorganized some UI elements

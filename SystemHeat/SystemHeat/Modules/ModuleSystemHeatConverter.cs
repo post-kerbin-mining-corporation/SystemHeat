@@ -49,7 +49,7 @@ namespace SystemHeat
     }
 
     // Current efficiency GUI string
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatConverter_Field_Efficiency")]
     public string ConverterEfficiency = "-1%";
 
     // base paramters

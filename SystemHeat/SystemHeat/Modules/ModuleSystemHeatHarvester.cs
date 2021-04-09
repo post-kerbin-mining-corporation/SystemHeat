@@ -46,7 +46,7 @@ namespace SystemHeat
     }
 
     // Current efficiency GUI string
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Harvester Efficiency")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "Harvester Efficiency")]
     public string HarvesterEfficiency = "-1%";
 
     // base paramters
