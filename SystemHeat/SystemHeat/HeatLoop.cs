@@ -245,7 +245,11 @@ namespace SystemHeat
       }
       if (absFlux == 0 && currentPositiveFlux == 0)
       {
-
+        if (Temperature > NominalTemperature)
+        {
+          float decayFlux = (Temperature - NominalTemperature)* SystemHeatSettings.HeatLoopDecayCoefficient;
+          Temperature = Temperature - decayFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep; ;
+        }
       }
       //Utils.Log($"Loop {ID} end temp {Temperature}, environment {GetEnvironmentTemperature()}");
       // Ensure temperature doesn't go super high or low
@@ -342,17 +346,18 @@ namespace SystemHeat
     protected float CalculateNominalTemperature()
     {
       float temp = 0f;
-      float totalPower = 0.001f;
+      float totalVolume = 0.00f;
 
       for (int i = 0; i < modules.Count; i++)
       {
-        if (modules[i].totalSystemFlux > 0f)
+        //Utils.Log($"{modules[i].moduleID}, {modules[i].volume}, {modules[i].totalSystemFlux}");
+        if (modules[i].volume >= 0f && modules[i].totalSystemFlux >= 0f)
         {
-          temp += modules[i].systemNominalTemperature * modules[i].totalSystemFlux;
-          totalPower += modules[i].totalSystemFlux;
+          temp += modules[i].systemNominalTemperature * modules[i].volume;
+          totalVolume += modules[i].volume;
         }
       }
-      return Mathf.Clamp(temp / totalPower, GetEnvironmentTemperature(), float.MaxValue);
+      return Mathf.Clamp(temp / totalVolume, GetEnvironmentTemperature(), float.MaxValue);
     }
   }
 }

@@ -67,11 +67,11 @@ namespace SystemHeat
 
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemFlux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemFlux", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemFluxUI = "-";
 
     // Current total system flux of all associated modules
-    [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
     public HeatLoop Loop
@@ -272,7 +272,11 @@ namespace SystemHeat
         totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
-        systemNominalTemperature = totalSystemTemperature / (temperatures.Values.ToList().Where(x => x > 0f).Count());
+        float denom = (temperatures.Values.ToList().Where(x => x > 0f).Count());
+        if (denom > 0)
+          systemNominalTemperature = totalSystemTemperature / denom;
+        else
+          systemNominalTemperature = 0f;
       }
     }
 

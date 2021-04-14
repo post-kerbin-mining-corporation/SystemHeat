@@ -52,7 +52,10 @@ namespace SystemHeat
     /// Base coefficient for convection to mirror stock
     /// </summary>
     public static float ConvectionBaseCoefficient = 0.001f;
-
+    /// <summary>
+    /// Base coefficient to determine how loops slowly cool when there is no flux at all
+    /// </summary>
+    public static float HeatLoopDecayCoefficient = 0.15f;
     /// <summary>
     /// Maximum number of loops
     /// </summary>

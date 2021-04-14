@@ -40,6 +40,19 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public float engineCoolingScale = 1.0f;
 
+    /// <summary>
+    /// The rate at which the cooling scale decays
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float engineCoolingScaleDecayRate = 1.0f;
+
+    /// <summary>
+    /// Current reactor power setting (min-100, tweakable) 
+    /// </summary>
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
+    public string CurrentExhaustCooling = "-1";
+
+    private float currentEngineCooling = 0f;
     private List<bool> engineOnStates;
     private List<EngineBaseData> engines;
     private MultiModeEngine multiEngine;
@@ -122,7 +135,25 @@ namespace SystemHeat
       }
       return 0.0f;
     }
+    public float GetEngineFuelFlow()
+    {
+      for (int i = 0; i < engines.Count; i++)
+      {
+        if (engines[i].engineModule.EngineIgnited)
+        {
+          float maxFlow = engines[i].engineModule.maxThrust /
+            ((float)PhysicsGlobals.GravitationalAcceleration *
+              engines[i].ispCurve.Evaluate(0f));
+          float flow = engines[i].engineModule.finalThrust / ((float)PhysicsGlobals.GravitationalAcceleration * engines[i].engineModule.realIsp);
 
+          //Utils.Log($"Flow params: {flow} (fT, {engines[i].engineModule.finalThrust} Isp {engines[i].engineModule.realIsp}), " +
+          //  $"{maxFlow} (maxT, {engines[i].engineModule.maxThrust}, maxIsp {engines[i].engineModule.atmCurve.Evaluate(0f)})");
+          return flow / maxFlow;
+        }
+      }
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_EngineOff");
+      return 0.0f;
+    }
     public float GetEngineThrottleSettingEditor()
     {
       for (int i = 0; i < engines.Count; i++)
@@ -162,17 +193,39 @@ namespace SystemHeat
       }
     }
 
+    protected override float CalculateWasteHeatGeneration()
+    {
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running",
+        ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+      if (heatModule.currentLoopTemperature < NominalTemperature)
+      {
+        return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f, 0f, HeatGeneration);
+      }
+      else
+      {
+        currentEngineCooling = engineCoolingScale;
+        return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f -
+        (GetEngineFuelFlow() * HeatGeneration) *  currentEngineCooling, 0f, HeatGeneration);
+      }
+        
+    }
     protected override float CalculateHeatGeneration()
     {
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running", 
+        ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale).ToString("F0"));
 
       return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f - 
-        (GetEngineThrottleSetting() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
+        (GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
     }
     protected override float CalculateHeatGenerationEditor()
     {
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running",
+        ((GetEngineThrottleSettingEditor() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+
       if (heatModule.currentLoopTemperature < NominalTemperature)
       {
-        return (CurrentReactorThrottle / 100f * HeatGeneration);
+        float tempFalloff = (NominalTemperature - heatModule.currentLoopTemperature/2f)/NominalTemperature;
+        return (CurrentReactorThrottle / 100f * HeatGeneration)*tempFalloff;
       }
       else
       {
