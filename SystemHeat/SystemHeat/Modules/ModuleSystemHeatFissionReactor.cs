@@ -108,10 +108,16 @@ namespace SystemHeat
 
     // --- Thermals -----
     /// <summary>
-    /// Heat generation at full power
+    /// Waste heat generation at full power
     /// </summary>
     [KSPField(isPersistant = false)]
     public float HeatGeneration;
+
+    /// <summary>
+    /// Efficiency - can be specified.
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float Efficiency = -1f;
 
     /// <summary>
     /// Current heat generation
@@ -124,6 +130,12 @@ namespace SystemHeat
     /// </summary>
     [KSPField(isPersistant = true)]
     public float InternalCoreTemperature = 0f;
+
+    /// <summary>
+    /// Rate at which core temp responds to loop temperature adjustements
+    /// </summary>
+    [KSPField(isPersistant = true)]
+    public float InternalCoreTemperatureResponseScale = 0.25f;
 
     /// <summary>
     /// Nominal reactor temperature (where the reactor should live)
@@ -301,7 +313,7 @@ namespace SystemHeat
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_PartInfo",
           ElectricalGeneration.Evaluate(100f).ToString("F0"),
           FindTimeRemaining(this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount, baseRate),
-          HeatGeneration.ToString("F0"),
+          (HeatGeneration - ElectricalGeneration.Evaluate(100f)).ToString("F0"),
           NominalTemperature.ToString("F0"),
           NominalTemperature.ToString("F0"),
           CriticalTemperature.ToString("F0"),
@@ -398,7 +410,18 @@ namespace SystemHeat
 
         if (!GeneratesElectricity)
         {
+          if (Efficiency == -1f)
+          {
+            Efficiency = 0f;
+          }
           Fields["GeneratorStatus"].guiActive = false;
+        }
+        else
+        {
+          if (Efficiency == -1f)
+          {
+            Efficiency = ElectricalGeneration.Evaluate(100f) / HeatGeneration;
+          }
         }
 
         if (FirstLoad)
@@ -407,6 +430,7 @@ namespace SystemHeat
           {
             CurrentThrottle = 0f;
             CurrentReactorThrottle = 0f;
+            InternalCoreTemperature = 0f;
             this.CurrentSafetyOverride = this.CriticalTemperature;
             FirstLoad = false;
           }
@@ -456,6 +480,7 @@ namespace SystemHeat
     {
       CoreIntegrity = 100f;
       CurrentHeatGeneration = 0f;
+      InternalCoreTemperature = 0f;
     }
 
     public void DoCatchup()
@@ -562,7 +587,7 @@ namespace SystemHeat
         if (Enabled)
         {
           HandleResourceActivities(TimeWarp.fixedDeltaTime);
-          if (heatModule.currentLoopTemperature > CurrentSafetyOverride)
+          if (InternalCoreTemperature > CurrentSafetyOverride)
           {
             ScreenMessages.PostScreenMessage(new ScreenMessage(
               Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_EmergencyShutdown", CurrentSafetyOverride.ToString("F0"), part.partInfo.title
@@ -585,7 +610,6 @@ namespace SystemHeat
           else
           {
             FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Offline");
-            ReactorOutput = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput_Offline");
           }
         }
       }
@@ -601,7 +625,11 @@ namespace SystemHeat
       {
         CurrentThrottle = Mathf.MoveTowards(CurrentThrottle, CurrentReactorThrottle, TimeWarp.fixedDeltaTime * ThrottleIncreaseRate);
       }
-      CoreTemp = String.Format("{0:F1}/{1:F1} {2}", InternalCoreTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
+      CoreTemp = String.Format("{0:F0}/{1:F0} {2}", InternalCoreTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
+    }
+    protected virtual float CalculateWasteHeatGeneration()
+    {
+      return (CurrentThrottle / 100f * HeatGeneration * (1f - Efficiency)) * CoreIntegrity / 100f;
     }
 
     protected virtual float CalculateHeatGeneration()
@@ -610,12 +638,12 @@ namespace SystemHeat
     }
     protected virtual float CalculateHeatGenerationEditor()
     {
-      return (CurrentReactorThrottle / 100f * HeatGeneration);
+      return (CurrentReactorThrottle / 100f * HeatGeneration * (1f - Efficiency));
     }
     protected virtual void HandleHeatGeneration()
     {
       // Determine heat to be generated
-      CurrentHeatGeneration = CalculateHeatGeneration();
+      CurrentHeatGeneration = CalculateWasteHeatGeneration();
 
       if (Enabled)
         heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
@@ -642,51 +670,70 @@ namespace SystemHeat
     // handle core activities
     private void HandleCore()
     {
-      //float effic = 0.4f;
-      //float coreMassKg = 800f;
-      //float coreSpecHeat = 0.5f; //kj/kG/s
-      //float loopFlux = heatModule.LoopFlux;
-      ///// waste / (1-effic) = max
-      //float tDelta = 0f;
+
+      float loopFlux = heatModule.LoopFlux;
+      //Utils.Log($"{loopFlux}");
+      /// waste / (1-effic) = max
+
+      InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature,
+        InternalCoreTemperatureResponseScale*TimeWarp.fixedDeltaTime);
+    
       //if (Enabled)
       //{
-      //  if (heatModule.LoopTemperature < NominalTemperature)
+      //  // If not reached operating temp yet, always increase temperature
+      //  if (InternalCoreTemperature < NominalTemperature)
       //  {
-
-      //    tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
-
-
+      //    InternalCoreTemperature += (CurrentReactorThrottle / 100f * HeatGeneration) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
       //  }
-      //  if (heatModule.LoopTemperature > NominalTemperature)
+      //  // If exceeded nominal temperature, more complex handling
+      //  else if (InternalCoreTemperature > NominalTemperature)
       //  {
-      //    tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
+      //    // If the loop flux is negative, cool down to nominal temp but don't go lower
+      //    if (loopFlux < 0)
+      //    {
+      //      InternalCoreTemperature = Mathf.Clamp(
+      //        InternalCoreTemperature + (loopFlux * 0.5f) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime,
+      //        NominalTemperature, float.MaxValue);
+      //    }
+      //    // If positive, heat up by the exccess loop flux
+      //    else if (loopFlux > 0)
+      //    {
+      //      InternalCoreTemperature += ((CurrentReactorThrottle / 100f * HeatGeneration)+ loopFlux) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
+      //    }
+      //    // if loop flux is exactly zero, trend towards nominal loop temp??
+      //    else
+      //    {
+
+      //    }
       //  }
+      //  // If reached nominal temp...
+      //  else
+      //  {
+      //    if (loopFlux < 0)
+      //    {
+      //     // If there's a negative flux, do nothing
+      //    }
+      //    // If positive, heat up by the exccess loop flux
+      //    else if (loopFlux > 0)
+      //    {
+      //      InternalCoreTemperature += ((CurrentReactorThrottle / 100f * HeatGeneration) + loopFlux) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
+      //    }
+      //    else
+      //    {
 
-
+      //    }
+      //  }
       //}
       //else
       //{
-      //  tDelta = ((CurrentReactorThrottle / 100f * HeatGeneration) / (1f - effic) + loopFlux) / (coreMassKg * coreSpecHeat) * TimeWarp.fixedDeltaTime;
+      //  if (InternalCoreTemperature > heatModule.LoopTemperature)
+      //    if (loopFlux < 0)
+
+      //      InternalCoreTemperature += loopFlux / (part.mass * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
       //}
-      //InternalCoreTemperature = Mathf.Min(heatModule.LoopTemperature, InternalCoreTemperature + tDelta);
-
-      if (heatModule.LoopTemperature <= NominalTemperature)
-      {
-        InternalCoreTemperature = heatModule.LoopTemperature;
-      }
-      else
-      {
-        if (heatModule.LoopTemperature > InternalCoreTemperature)
-          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature, 0.2f * TimeWarp.fixedDeltaTime);
-        if (heatModule.LoopTemperature < InternalCoreTemperature)
-          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature, 1f * TimeWarp.fixedDeltaTime);
-      }
-      
-
-      
 
       // Update reactor damage
-      float critExceedance = heatModule.LoopTemperature - CriticalTemperature;
+      float critExceedance = InternalCoreTemperature - CriticalTemperature;
 
       // If overheated too much, damage the core
       if (critExceedance > 0f && TimeWarp.CurrentRate < 100f)

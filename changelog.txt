@@ -1,9 +1,15 @@
 v0.4.1
 ------
 - Fixed DebugSimulation being on by default
+- Fixed an issue where heat loops that had no producers could run into a divide by zero error, causing overheats
+- Heat loops will now cool down at a rate proportional to the difference between current and nominal temp if all systems on the loop are off
+- Fixed a number of unapplied localization fields on fission reactors and engines
 - Fixed some fields in modules being saved to persistence when they didn't need to be
-- Fixed an issue where heat loops that had no producers could run into a divide by zero error
 - Changed fission engine exhaust cooling to be modeled against propellant flow instead of engine throttle
+- Fission reactor cores now have a temperature lag in core temperature vs coolant temperature
+- Completely eliminated cooling requirement from Nerv, Cherenkov 
+- Added an Exhaust cooling field that shows current exhaust cooling
+- Renamed Reactor Output field to Waste Heat to clarify that it's the heat you should worry about
 
 v0.4.0
 ------

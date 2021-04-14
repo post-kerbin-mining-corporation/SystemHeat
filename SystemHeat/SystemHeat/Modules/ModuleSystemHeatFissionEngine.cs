@@ -41,11 +41,18 @@ namespace SystemHeat
     public float engineCoolingScale = 1.0f;
 
     /// <summary>
+    /// The rate at which the cooling scale decays
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public float engineCoolingScaleDecayRate = 1.0f;
+
+    /// <summary>
     /// Current reactor power setting (min-100, tweakable) 
     /// </summary>
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling", groupName = "fissionreactor", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatFissionReactor_UIGroup_Title")]
     public string CurrentExhaustCooling = "-1";
 
+    private float currentEngineCooling = 0f;
     private List<bool> engineOnStates;
     private List<EngineBaseData> engines;
     private MultiModeEngine multiEngine;
@@ -186,17 +193,39 @@ namespace SystemHeat
       }
     }
 
+    protected override float CalculateWasteHeatGeneration()
+    {
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running",
+        ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+      if (heatModule.currentLoopTemperature < NominalTemperature)
+      {
+        return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f, 0f, HeatGeneration);
+      }
+      else
+      {
+        currentEngineCooling = engineCoolingScale;
+        return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f -
+        (GetEngineFuelFlow() * HeatGeneration) *  currentEngineCooling, 0f, HeatGeneration);
+      }
+        
+    }
     protected override float CalculateHeatGeneration()
     {
-      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running", ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running", 
+        ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+
       return Mathf.Clamp((CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f - 
         (GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale, 0f, HeatGeneration);
     }
     protected override float CalculateHeatGenerationEditor()
     {
+      CurrentExhaustCooling = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_Field_CurrentExhaustCooling_Running",
+        ((GetEngineThrottleSettingEditor() * HeatGeneration) * engineCoolingScale).ToString("F0"));
+
       if (heatModule.currentLoopTemperature < NominalTemperature)
       {
-        return (CurrentReactorThrottle / 100f * HeatGeneration);
+        float tempFalloff = (NominalTemperature - heatModule.currentLoopTemperature/2f)/NominalTemperature;
+        return (CurrentReactorThrottle / 100f * HeatGeneration)*tempFalloff;
       }
       else
       {

@@ -271,6 +271,7 @@ namespace SystemHeat
 
         totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
         totalSystemTemperature = temperatures.Sum(x => x.Value);
+
         float denom = (temperatures.Values.ToList().Where(x => x > 0f).Count());
         if (denom > 0)
           systemNominalTemperature = totalSystemTemperature / denom;
