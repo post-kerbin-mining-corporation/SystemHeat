@@ -241,12 +241,12 @@ namespace SystemHeat
 
         part.GetConnectedResourceTotals(PartResourceLibrary.ElectricityHashcode, out shipEC, out shipMaxEC, true);
 
-        float maxGeneration = ElectricalGeneration.Evaluate(100f) * CoreIntegrity / 100f;
-        float minGeneration = ElectricalGeneration.Evaluate(MinimumThrottle) * timeStep;
-        float idealGeneration = Mathf.Min(maxGeneration * timeStep, (float)(shipMaxEC - shipEC));
-        float powerToGenerate = Mathf.Max(Mathf.Max(minGeneration, idealGeneration));
-
-        return Mathf.Max(GetEngineThrottleSetting(), (powerToGenerate / timeStep) / maxGeneration) * 100f;
+        float maxStepGeneration = ElectricalGeneration.Evaluate(100f) * timeStep * CoreIntegrity / 100f;
+        float minStepGeneration = ElectricalGeneration.Evaluate(MinimumThrottle) * timeStep;
+        float idealStepGeneration = Mathf.Min(maxStepGeneration, (float)(shipMaxEC - shipEC));
+        float powerToGenerateInStep = Mathf.Max(minStepGeneration, idealStepGeneration);
+        float maxThrottleGeneration = (ElectricalGeneration.Curve.keys[ElectricalGeneration.Curve.keys.Length - 1].time)/100f;
+        return Mathf.Max(GetEngineThrottleSetting(), Mathf.Clamp((powerToGenerateInStep) / maxStepGeneration, 0f, maxThrottleGeneration)) * 100f;
       }
       else
       {
@@ -266,7 +266,8 @@ namespace SystemHeat
         float ispScale = 0f;
         if (Enabled)
         {
-          ispScale = ispCurve.Evaluate(CurrentThrottle) * CoreIntegrity / 100f;
+          //Utils.Log($"{(CurrentReactorThrottle/100f * HeatGeneration)}, {((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale)}");
+          ispScale = ispCurve.Evaluate((CurrentReactorThrottle/100f * HeatGeneration) / ((GetEngineFuelFlow() * HeatGeneration) * engineCoolingScale)*100f) * CoreIntegrity / 100f;
         }
 
         engine.engineModule.atmosphereCurve = new FloatCurve();
