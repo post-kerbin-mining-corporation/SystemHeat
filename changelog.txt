@@ -1,3 +1,10 @@
+v0.4.2
+------
+- Fixed some typos in the SH implemenation of the fixed microchannel heat radiator from Heat Control's variants
+- Fixed issue where reactor throttle was not calculated correctly on multimodal nuclear engines
+- Isp is now pinned to exhaust vs reactor power, so is not lower at lower throttles. In principle this means that Isp is always maximized because reactor power response is very fast. 
+- Tweaked exhaust cooling on NTRs (more forgiving)
+
 v0.4.1
 ------
 - Fixed DebugSimulation being on by default
