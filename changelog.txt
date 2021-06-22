@@ -1,3 +1,8 @@
+v0.4.3
+------
+- Added CRP as a dependency as it is needed if using the Extras patches related to fission reactors/engines
+- FissionReactor and FissionEngine (if electrical generator) modules now fulfill electrical generation parameters of contracts
+
 v0.4.2
 ------
 - Fixed some typos in the SH implemenation of the fixed microchannel heat radiator from Heat Control's variants

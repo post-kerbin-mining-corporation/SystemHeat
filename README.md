@@ -33,6 +33,15 @@ When parts are connected into a Heat Loop , the members of the loop contribute t
 
 Your job, as the spacecraft engineer, is to construct Heat Loops such that they are well-balanced and basically don't heat up and . There can be several different Heat Loops on a vessel with different parts assigned to them (though a part can currently only belong to one loop at a time).
 
+
+## Dependencies
+
+### Required
+These components are required for the mod to function and are bundled as part of any download:
+* [ModuleManager (4.1.4)](https://github.com/sarbian/ModuleManager)
+* [Community Resource Pack (1.4.2)](https://github.com/BobPalmer/CommunityResourcePack)
+
+
 ## Installation
 
 To install, place the GameData folder inside your Kerbal Space Program folder. If asked to overwrite files, please do so.
@@ -63,3 +72,8 @@ Copyright (c) 2019 Chris Adderley
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Module Manager is distributed under its own licence (CC-SA). Please find source code and more details at https://github.com/sarbian/ModuleManager
+
+The Community Resource pack by RoverDude is also distributed under its own license.
