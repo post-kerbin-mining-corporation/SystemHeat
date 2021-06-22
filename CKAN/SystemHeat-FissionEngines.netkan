@@ -3,7 +3,7 @@
     "identifier":   "SystemHeat-FissionEngines",
     "name":         "System Heat - Nuclear Engine Configuration",
     "$kref":        "#/ckan/github/post-kerbin-mining-corporation/SystemHeat",
-    "$vref":        "#/ckan/ksp-avc",
+    "$vref":        "#/ckan/ksp-avc/SystemHeat.version",
     "abstract": "This System Heat config package changes nuclear thermal engines to use the System Heat backend. WARNING: potentially vessel-breaking.",
     "author": "Nertea (Chris Adderley)",
     "license":      "CC-BY-NC-SA-4.0",
