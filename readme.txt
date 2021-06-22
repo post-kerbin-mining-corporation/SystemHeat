@@ -1,8 +1,17 @@
 ================
-SystemHeat 0.4.2
+SystemHeat 0.4.3
 ================
 
 A mod for Kerbal Space Program, intended to provide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
+
+
+============
+DEPENDENCIES
+============
+
+Required:
+- Community Resource Pack (1.4.2)
+- ModuleManager (4.1.4)
 
 ============
 INSTALLATION

@@ -26,7 +26,7 @@ namespace SystemHeat
   /// <summary>
   /// Implements a Fission Reactor that drives a ModuleEngines
   /// </summary>
-  public class ModuleSystemHeatFissionEngine: ModuleSystemHeatFissionReactor
+  public class ModuleSystemHeatFissionEngine: ModuleSystemHeatFissionReactor, IContractObjectiveModule
   {
     /// <summary>
     /// Curve to map reactor power % to Isp 
@@ -56,7 +56,17 @@ namespace SystemHeat
     private List<bool> engineOnStates;
     private List<EngineBaseData> engines;
     private MultiModeEngine multiEngine;
-    
+
+
+    public override string GetContractObjectiveType()
+    {
+      return "Generator";
+    }
+    public override bool CheckContractObjectiveValidity()
+    {
+      return GeneratesElectricity;
+    }
+
     public override string GetModuleDisplayName()
     {
       return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_ModuleName");

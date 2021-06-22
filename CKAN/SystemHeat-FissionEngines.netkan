@@ -13,7 +13,8 @@
     },
     "depends": [
         { "name": "ModuleManager"   },
-        { "name": "SystemHeat"   }
+        { "name": "SystemHeat"   },
+        { "name": "CommunityResourcePack"   }
     ],
     "suggests": [
         { "name": "SystemHeatConverters"   },

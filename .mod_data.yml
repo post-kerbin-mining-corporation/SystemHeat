@@ -10,6 +10,9 @@ dependencies:  # Configure dependencies
   ModuleManager:
     version: 4.1.4
     location: s3
+  CommunityResourcePack:
+    version: 1.4.2
+    location: s3
 deploy:
   SpaceDock:
     enabled: false  # activate/deactivate this deployment script

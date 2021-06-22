@@ -7,7 +7,7 @@ using UnityEngine;
 namespace SystemHeat
 {
 
-  public class ModuleSystemHeatFissionReactor : PartModule
+  public class ModuleSystemHeatFissionReactor : PartModule, IContractObjectiveModule
   {
     // This should be unique on the part
     [KSPField(isPersistant = false)]
@@ -756,6 +756,15 @@ namespace SystemHeat
       float powerToGenerate = Mathf.Max(minGeneration, idealGeneration);
 
       return (powerToGenerate / timeStep) / maxGeneration * 100f;
+    }
+
+    public virtual string GetContractObjectiveType()
+    {
+      return "Generator";
+    }
+    public virtual bool CheckContractObjectiveValidity()
+    {
+      return true;
     }
 
     private void HandleResourceActivities(float timeStep)
