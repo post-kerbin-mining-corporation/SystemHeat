@@ -1,3 +1,11 @@
+v0.5.0
+------
+- Added SystemHeatIonEngines extra: adds heat generation from ion engines related to the engine's efficiency
+- Added ModuleCoreHeatAdapter
+- Corrected the sign of Radiator Efficiency field in the Editor
+- Corrected presence of overheat icon on radiators
+- Deployable radiators can now be set as tracking or non-tracking in the Editor
+
 v0.4.3
 ------
 - Added CRP as a dependency as it is needed if using the Extras patches related to fission reactors/engines
