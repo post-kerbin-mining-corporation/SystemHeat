@@ -217,16 +217,18 @@ namespace SystemHeat
     /// <param name="module">the module to remove</param>
     public void RemoveHeatModuleFromLoop(int loopID, ModuleSystemHeat module)
     {
-      HeatLoops[loopID].RemoveHeatModule(module);
-
-
-      Utils.Log(String.Format("[SystemHeatSimulator]: Removed module {0} from Heat Loop {1}", module.moduleID, loopID), LogType.Simulator);
-
-      if (Loop(loopID).LoopModules.Count == 0)
+      if (HasLoop(loopID))
       {
-        HeatLoops.Remove(Loop(loopID));
+        Loop(loopID).RemoveHeatModule(module);
 
-        Utils.Log(String.Format("[SystemHeatSimulator]: Heat Loop {0} has no more members, removing", loopID), LogType.Simulator);
+        Utils.Log(String.Format("[SystemHeatSimulator]: Removed module {0} from Heat Loop {1}", module.moduleID, loopID), LogType.Simulator);
+
+        if (Loop(loopID).LoopModules.Count == 0)
+        {
+          HeatLoops.Remove(Loop(loopID));
+
+          Utils.Log(String.Format("[SystemHeatSimulator]: Heat Loop {0} has no more members, removing", loopID), LogType.Simulator);
+        }
       }
     }
     public bool HasLoop(int id)

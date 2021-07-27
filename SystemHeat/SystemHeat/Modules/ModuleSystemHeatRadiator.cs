@@ -39,21 +39,20 @@ namespace SystemHeat
     /// <summary>
     /// UI: Current status
     /// </summary>
-    [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Title", groupName = "sysheatradiator", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_GroupName")]
     public string RadiatorStatus = "Offline";
 
     /// <summary>
     /// UI: Current status
     /// </summary>
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Title", groupName = "sysheatradiator", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_GroupName")]
     public string ConvectionStatus = "Offline";
 
     /// <summary>
     /// UI: Current radiator of efficiency
     /// </summary>
-    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title")]
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Title", groupName = "sysheatradiator", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_GroupName")]
     public string RadiatorEfficiency = "-1%";
-
 
 
     /// <summary>
@@ -80,7 +79,17 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public float heatAnimationRate = 0.1f;
 
+    /// <summary>
+    /// Rate at which heat animates
+    /// </summary>
+    [KSPField(isPersistant = true)]
+    public bool sunTracking = true;
 
+    [KSPEvent(guiActive = false, guiName = "", guiActiveEditor = true, active = true, groupName = "sysheatradiator", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_GroupName")]
+    public void ToggleEditorSunTracking()
+    {
+      sunTracking = !sunTracking;
+    }
     protected ModuleSystemHeat heatModule;
     protected ModuleSystemHeatColorAnimator scalarModule;
 
@@ -98,10 +107,38 @@ namespace SystemHeat
       maxTempAnimation -= draperPoint;
 
       Utils.Log("[ModuleSystemHeatRadiator] Setup completed", LogType.Modules);
-      if (HighLogic.LoadedSceneIsEditor)
+
+      if (this.GetComponent<ModuleDeployableRadiator>() != null)
       {
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+
+          if (sunTracking)
+          {
+            base._depRad.trackingMode = ModuleDeployablePart.TrackingMode.SUN;
+            base._depRad.isTracking = true;
+          }
+          else
+          {
+            base._depRad.trackingMode = ModuleDeployablePart.TrackingMode.NONE;
+            base._depRad.trackingSpeed = 0f;
+            base._depRad.isTracking = false;
+          }
+        }
+        else
+        {
+          this.Events["ToggleEditorSunTracking"].guiActiveEditor = true;
+        }
 
       }
+      else
+      {
+        if (HighLogic.LoadedSceneIsEditor)
+        {
+          this.Events["ToggleEditorSunTracking"].guiActiveEditor = false;
+        }
+      }
+
     }
 
     public override string GetModuleDisplayName()
@@ -148,7 +185,6 @@ namespace SystemHeat
                    tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
                   float.MinValue, 0f);
 
-              //  Utils.Log($"tD {tDelta}, tC, {lp.ConvectionTemperature} tL {heatModule.LoopTemperature}, tMax {temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time}, convA {convectiveArea}");
               }
 
               ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
@@ -158,15 +194,12 @@ namespace SystemHeat
               Fields["ConvectionStatus"].guiActive = false;
             }
 
-
-            if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-              heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
-            else
-              heatModule.AddFlux(moduleID, 0f, 0f, false);
+            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
 
 
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
               (-radiativeFlux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
+            RadiatorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Running", radiativeFlux.ToString("F1"));
 
             if (scalarModule != null)
             {
@@ -175,6 +208,7 @@ namespace SystemHeat
           }
           else
           {
+            Fields["RadiatorStatus"].guiActive = false;
             Fields["ConvectionStatus"].guiActive = false;
             heatModule.AddFlux(moduleID, 0f, 0f, false);
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Offline");
@@ -187,6 +221,16 @@ namespace SystemHeat
 
         if (HighLogic.LoadedSceneIsEditor)
         {
+          if (sunTracking)
+          {
+            this.Events["ToggleEditorSunTracking"].guiName = "Disable Sun Tracking";
+          }
+          else
+          {
+            this.Events["ToggleEditorSunTracking"].guiName = "Enable Sun Tracking";
+          }
+
+          float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
           float convectiveFlux = 0f;
 
           HeatLoop lp = heatModule.Loop;
@@ -202,16 +246,12 @@ namespace SystemHeat
             //Utils.Log($"tD {tDelta}, tC, {lp.ConvectionTemperature} tL {heatModule.LoopTemperature}, tMax {temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time}, convA {convectiveArea}");
           }
 
+          
+          heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
+
           ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
-
-          float radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
-          if (heatModule.LoopTemperature >= heatModule.nominalLoopTemperature)
-            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
-          else
-            heatModule.AddFlux(moduleID, 0f, 0f, false);
-
           RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
-            ((-temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
+            ((temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
         }
       }
     }

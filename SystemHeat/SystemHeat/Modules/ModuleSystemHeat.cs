@@ -24,6 +24,8 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public float volume = 10f;
 
+    [KSPField(isPersistant = false)]
+    public bool ignoreTemperature = false;
 
     // 
     [KSPField(isPersistant = false)]
@@ -176,6 +178,17 @@ namespace SystemHeat
     {
       if (HighLogic.LoadedSceneIsFlight)
       {
+        Utils.Log($"[ModuleSystemHeat] Changing part from loop {(int)oldFieldValueObj} to loop {currentLoopID}", LogType.Modules);
+        simulator.RemoveHeatModuleFromLoop((int)oldFieldValueObj, this);
+        simulator.AddHeatModuleToLoop(currentLoopID, this);
+      }
+
+    }
+
+    void ChangeAllLoops(object oldFieldValueObj)
+    {
+      if (HighLogic.LoadedSceneIsFlight)
+      {
         Utils.Log($"[ModuleSystemHeat] Changing all loop {(int)oldFieldValueObj} modules to loop {currentLoopID}", LogType.Modules);
 
 
@@ -235,7 +248,7 @@ namespace SystemHeat
           if (allHeatModules[i].currentLoopID == (int)oldFieldValueObj)
           {
 
-            
+
             allHeatModules[i].currentLoopID = newID;
 
           }
@@ -243,9 +256,7 @@ namespace SystemHeat
         Utils.Log($"[ModuleSystemHeat] finished changing loop IDs to new {newID}", LogType.Modules);
         simulator.ChangeLoopID((int)oldFieldValueObj, newID);
       }
-
     }
-
     /// <summary>
     /// Add heat flux at a given temperature to system
     /// </summary>
