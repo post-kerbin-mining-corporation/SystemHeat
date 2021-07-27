@@ -1,3 +1,7 @@
+v0.5.1
+------
+- Hotfix reactor configs
+
 v0.5.0
 ------
 - Marked for KSP 1.12
