@@ -100,7 +100,7 @@ namespace SystemHeat.Modules
       int maxLvl = 0;
       foreach (var crew in part.vessel.GetVesselCrew())
       {
-        if (crew.experienceTrait.TypeName == "Engineer" && crew.experienceLevel > maxLvl)
+        if (crew.experienceTrait.TypeName == Localizer.Format("#autoLOC_500103") && crew.experienceLevel > maxLvl)
           maxLvl = crew.experienceLevel;
 
       }

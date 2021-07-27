@@ -1,3 +1,47 @@
+v0.5.0
+------
+- Marked for KSP 1.12
+- Removed nuclear fuel container inventory item as it no longer has a purpose
+- NTRs:
+ - Changed how NTRs work again
+  - NTRs do not fully participate in the thermal system unless sufficiently high power that they have waste heat (GCRs, etc) or power-generating (trimodal)
+  - NTRs have sticky engine throttles similar to jet engines that approximate the need to cool the reactor during startup and shutdown. These are similar to the current timings (~5-10s for 0-100, 2.5-5s for 100-0)
+  - Higher power NTRs (gas core) generate simple extra heat when running similar to FFT engines and are balanced similarly
+  - Editor UI shows only things that need to be compensated for all NTRs, this is limited to waste heat from power generation heat and extra heat from powerful engines. 
+  - Non-trimodal NTR reactors have less user features than reactors:
+   - No minimum throttle
+   - Fuel burn rate directly tied to throttle, fuel loads generally reduced to provide meaningful gameplay 
+   - It is not possible to accidentally damage the reactor core
+   - Hibernate/manual control are disabled as they are not needed
+   - Core temp/life readouts preserved
+- New Features
+ - Heat loops can be changed in flight (somewhat experimental, needs testing)
+ - Deployable radiators can now be set as tracking or non-tracking in the Editor
+- Balance:
+ - Increased maximum temperature of Squad radiators to 400K, increased radiative capacity by 25%
+- QoL/Bugfixes:
+ - Corrected the sign of Radiator Efficiency field in the Editor
+ - Coolant tanks no longer contribute to nominal temperature calculations
+ - Corrected presence of overheat icon on radiators in the overlay
+ - Tuned radiator PAW fields
+ - UI now shows radiator capacity increasing with temperature instead of a binary on/off display
+ - Tuned loop simulator for additional stability in timewarp and situations with very high positive or negative fluxes
+ - Removed ISRU, Drill 'Simulate Editor' buttons, can now piggyback off of stock buttons (stock fix with 1.12)
+ - Corrected nuclear fuel transfer not working on non-english localizations
+ - Screen message now emitted when fission reactor forces an engine shutdown for some reason
+ - Additional fission reactor state change log messages for debugging
+- Developer 
+ - Added new ignoreTemperature field to ModuleSystemHeat, which causes the module to be ignored for the purposes of loop nominal temperatures (set to true on coolant tanks, radiators, etc)
+ - Added ModuleSystemHeatAsteroidHarvester, 
+ - Added ModuleSystemHeatBaseConverterAdapter, a new module that can adapt anything derived from BaseConverter to SH
+ - ModuleSystemHeatFissionReactor can now have allowHibernate and allowManualControl specified in config; this disables the ability
+- Extras
+ - Adjusted SystemHeatNuclearEngines extra to conform with changes above, plus:
+  - Reduced Nerv fuel load to 10 units of EnrUranium, reduces total burn time from 8 days to 1.6 days
+  - Reduced Cherenkov fuel load to 40 units of EnrUranium, reduces total burn time from 12 days to ~1.8 days
+ - Added SystemHeatIonEngines extra: adds heat generation from ion engines related to the engine's efficiency
+
+
 v0.4.3
 ------
 - Added CRP as a dependency as it is needed if using the Extras patches related to fission reactors/engines

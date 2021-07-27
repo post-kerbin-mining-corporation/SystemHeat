@@ -117,12 +117,15 @@ namespace SystemHeat
       {
         sourceModule = heatModule1;
         destModule = heatModule2;
+        
       }
       else
       {
         sourceModule = heatModule2;
         destModule = heatModule1;
       }
+      sourceModule.ignoreTemperature = true;
+      destModule.ignoreTemperature = false;
 
       toggle.onFieldChanged = ToggleDirection;
       toggle.disabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);
@@ -185,6 +188,9 @@ namespace SystemHeat
       ModuleSystemHeat saved = sourceModule;
       sourceModule = destModule;
       destModule = saved;
+      
+      sourceModule.ignoreTemperature = true;
+      destModule.ignoreTemperature = false;
 
       UI_Toggle toggle = (HighLogic.LoadedSceneIsEditor) ? (UI_Toggle)Fields[nameof(ToggleSource)].uiControlEditor : (UI_Toggle)Fields[nameof(ToggleSource)].uiControlFlight;
       toggle.disabledText = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Direction_String", sourceModule.LoopID, destModule.LoopID);

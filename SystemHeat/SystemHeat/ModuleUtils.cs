@@ -88,12 +88,15 @@ namespace SystemHeat
       
       if (heatModule == null)
       {
-        Utils.LogError($"[{part}] No ModuleSystemHeat named {moduleName} was found, using first instance");
+        Utils.Log($"[{part}] No ModuleSystemHeat named {moduleName} was found, using first instance");
+        if (part.GetComponents<ModuleSystemHeat>().Length > 0)
         return part.GetComponents<ModuleSystemHeat>().ToList().First();
+        else
+          Utils.Log($"[{part}] No ModuleSystemHeat was found.");
       } 
        
       if (heatModule == null)
-        Utils.LogError($"[{part}] No ModuleSystemHeat was found.");
+        Utils.Log($"[{part}] No ModuleSystemHeat was found.");
 
       return heatModule;
     }

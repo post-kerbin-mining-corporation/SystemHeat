@@ -93,20 +93,31 @@ namespace SystemHeat.UI
 
         float nominalTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;
         float tempDelta = loop.Temperature - heatModule.systemNominalTemperature;
-        if ((nominalTempDelta > 10f || tempDelta > 10f) && !heatIconBackground.enabled)
+        if (heatModule.systemNominalTemperature <= 0f)
         {
-          heatIconBackground.enabled = true;
-          heatIconGlow.enabled = true;
-          heatIcon.enabled = true;
+          if (heatIconBackground.enabled)
+          {
+            heatIconBackground.enabled = false;
+            heatIconGlow.enabled = false;
+            heatIcon.enabled = false;
+          }
         }
-
-        if ((nominalTempDelta <= 10f && tempDelta <= 10f ) && heatIconBackground.enabled)
+        else
         {
-          heatIconBackground.enabled = false;
-          heatIconGlow.enabled = false;
-          heatIcon.enabled = false;
-        }
+          if ((nominalTempDelta > 10f || tempDelta > 10f) && !heatIconBackground.enabled)
+          {
+            heatIconBackground.enabled = true;
+            heatIconGlow.enabled = true;
+            heatIcon.enabled = true;
+          }
 
+          if ((nominalTempDelta <= 10f && tempDelta <= 10f) && heatIconBackground.enabled)
+          {
+            heatIconBackground.enabled = false;
+            heatIconGlow.enabled = false;
+            heatIcon.enabled = false;
+          }
+        }
         Vector2 screenPoint = Camera.main.WorldToScreenPoint(heatModule.part.transform.position);
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.GetComponent<RectTransform>(), screenPoint, parentCanvas.worldCamera, out localPoint);

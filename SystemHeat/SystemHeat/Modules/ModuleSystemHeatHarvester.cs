@@ -39,7 +39,7 @@ namespace SystemHeat
     [KSPField(isPersistant = true)]
     public bool editorThermalSim = false;
 
-    [KSPEvent(guiActive = false, guiName = "Toggle", guiActiveEditor = true, active = true)]
+    [KSPEvent(guiActive = false, guiName = "Toggle", guiActiveEditor = false, active = true)]
     public void ToggleEditorThermalSim()
     {
       editorThermalSim = !editorThermalSim;
@@ -116,7 +116,7 @@ namespace SystemHeat
 
     protected void GenerateHeatEditor()
     {
-      if (editorThermalSim)
+      if (base.IsActivated)
         heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
       else
         heatModule.AddFlux(moduleID, 0f, 0f, false);

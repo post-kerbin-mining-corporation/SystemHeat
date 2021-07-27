@@ -113,8 +113,12 @@ namespace SystemHeat
     {
       Volume -= heatModule.volume;
       modules.Remove(heatModule);
+
+
       // Recalculate the nominal temperature
       NominalTemperature = CalculateNominalTemperature();
+
+
     }
 
     public void ResetTemperatures()
@@ -202,57 +206,54 @@ namespace SystemHeat
 
       // Determine the ideal change in temperature
       float deltaTemperatureIdeal = NetFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
+      float deltaToNominal = Mathf.Abs(NominalTemperature - Temperature);
+      float scale = Mathf.Clamp01(deltaToNominal / 50f);
 
-
-
-      // Flux has be be higher than a tolerance threshold in order to do things
-      if (absFlux > SystemHeatSettings.AbsFluxThreshold)
+      // If current temp is greater than nominal temp
+      if (Temperature > NominalTemperature)
       {
-        // If flux is positive (loop overheating)
+        // If net flux is positive, loop is overheating : continue overheating
         if (currentNetFlux > 0f)
         {
           Temperature += deltaTemperatureIdeal;
         }
-        // If flux is negative (loop adequeately cooled)
-        else if (currentNetFlux < 0f)
-        {
-          float deltaToNominal = Mathf.Abs(NominalTemperature - Temperature);
-          float scale = Mathf.Clamp01(deltaToNominal / 50f);
-
-
-          // If current temp is greater than nominal temp
-          if (Temperature > NominalTemperature)
-          {
-            Temperature = Temperature + deltaTemperatureIdeal * scale;
-          }
-          // If current temp is lower than nominal temp
-          if (Temperature < NominalTemperature)
-          {
-            if (deltaTemperatureIdeal <= 0)
-              Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
-            else
-              Temperature += deltaTemperatureIdeal * scale;
-
-            Temperature = Mathf.Clamp(Temperature, 0f, NominalTemperature);
-          }
-
-        }
+        // else, loop was overheated and is cooling - slowly cool down 
         else
         {
-          // Unlikely case of perfectly stable flux, do nothing
+          Temperature = Temperature + deltaTemperatureIdeal * scale;
         }
-
-      }
-      if (absFlux == 0 && currentPositiveFlux == 0)
-      {
-        if (Temperature > NominalTemperature)
+        // in a case of low abs flux and no positive flux, decay loop to nominal
+        if (absFlux == 0 && currentPositiveFlux == 0)
         {
-          float decayFlux = (Temperature - NominalTemperature)* SystemHeatSettings.HeatLoopDecayCoefficient;
+          float decayFlux = (Temperature - NominalTemperature) * SystemHeatSettings.HeatLoopDecayCoefficient;
           Temperature = Temperature - decayFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep; ;
         }
       }
-      //Utils.Log($"Loop {ID} end temp {Temperature}, environment {GetEnvironmentTemperature()}");
-      // Ensure temperature doesn't go super high or low
+      // If current temp is lower than nominal temp
+      if (Temperature < NominalTemperature)
+      {
+        // Increase based on positive flux only
+        Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
+
+        /// clamp to nominal in case exceeded this iteration
+        Temperature = Mathf.Clamp(Temperature, 0f, NominalTemperature);
+      }
+      // If the current temperature is just right...
+      if (Temperature == NominalTemperature)
+      {
+        // keep heating up
+        if (currentNetFlux > 0f)
+        {
+          Temperature += deltaTemperatureIdeal;
+        }
+        
+        else
+        {
+          // do nothing
+        }
+      }
+
+      // Ensure temperature doesn't go super high or low when the KSP environment gets weird (scene transitions)
       Temperature = Mathf.Clamp(Temperature, GetEnvironmentTemperature(), float.MaxValue);
       // Propagate to all modules
       for (int i = 0; i < modules.Count; i++)
@@ -297,7 +298,6 @@ namespace SystemHeat
     {
       ConvectionTemperature = simulator.AtmoSim.ExternalTemperature;
       ConvectionFlux = SystemHeatSettings.ConvectionBaseCoefficient * simulator.AtmoSim.ConvectiveCoefficient * simTimeStep;
-      //Utils.Log($"Conv flux {ConvectionFlux}, temp {ConvectionTemperature}");
     }
 
     /// <summary>
@@ -350,14 +350,17 @@ namespace SystemHeat
 
       for (int i = 0; i < modules.Count; i++)
       {
-        //Utils.Log($"{modules[i].moduleID}, {modules[i].volume}, {modules[i].totalSystemFlux}");
-        if (modules[i].volume >= 0f && modules[i].totalSystemFlux >= 0f)
+        if (!modules[i].ignoreTemperature && modules[i].volume >= 0f && modules[i].totalSystemFlux >= 0f)
         {
           temp += modules[i].systemNominalTemperature * modules[i].volume;
           totalVolume += modules[i].volume;
         }
       }
-      return Mathf.Clamp(temp / totalVolume, GetEnvironmentTemperature(), float.MaxValue);
+      // In the case of no volume loops, the nominal temperature is just the environment
+      if (totalVolume > 0f)
+        return Mathf.Clamp(temp / totalVolume, GetEnvironmentTemperature(), float.MaxValue);
+      else
+        return GetEnvironmentTemperature();
     }
   }
 }

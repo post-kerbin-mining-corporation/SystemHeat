@@ -84,9 +84,11 @@
     <Compile Include="Modules\ModuleSystemHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatAnimateHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
+    <Compile Include="Modules\ModuleSystemHeatBaseConverterAdapter.cs" />
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />
     <Compile Include="Modules\ModuleSystemHeatExchanger.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionEngine.cs" />
+    <Compile Include="Modules\ModuleSystemHeatFissionEngineOld.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionFuelHandler.cs" />
     <Compile Include="Modules\ModuleSystemHeatHarvester.cs" />
     <Compile Include="Modules\ModuleSystemHeatRadiator.cs" />
@@ -127,7 +129,9 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Modules\ModuleSystemHeatAsteroidHarvester.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)\..\GameData\SystemHeat\Plugin\SystemHeat.dll"</PostBuildEvent>

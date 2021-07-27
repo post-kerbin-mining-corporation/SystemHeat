@@ -1,7 +1,6 @@
 using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace SystemHeat
@@ -108,10 +107,10 @@ namespace SystemHeat
 
     // --- Thermals -----
     /// <summary>
-    /// Waste heat generation at full power
+    /// Waste heat generation curve
     /// </summary>
     [KSPField(isPersistant = false)]
-    public float HeatGeneration;
+    public FloatCurve HeatGeneration = new FloatCurve();
 
     /// <summary>
     /// Efficiency - can be specified.
@@ -167,6 +166,12 @@ namespace SystemHeat
     [KSPField(isPersistant = true)]
     public double LastUpdateTime = -1d;
 
+    [KSPField(isPersistant = false)]
+    public bool allowManualControl = true;
+
+    [KSPField(isPersistant = false)]
+    public bool allowHibernate = true;
+
     // REPAIR VARIABLES
     // integrity of the core
     [KSPField(isPersistant = true)]
@@ -179,7 +184,6 @@ namespace SystemHeat
     // Engineer level to repair the core
     [KSPField(isPersistant = false)]
     public int EngineerLevelForRepair = 5;
-
 
     [KSPField(isPersistant = false)]
     public float RepairAmountPerKit = 25;
@@ -313,7 +317,7 @@ namespace SystemHeat
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_PartInfo",
           ElectricalGeneration.Evaluate(100f).ToString("F0"),
           FindTimeRemaining(this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount, baseRate),
-          (HeatGeneration - ElectricalGeneration.Evaluate(100f)).ToString("F0"),
+          (HeatGeneration.Evaluate(100f) - ElectricalGeneration.Evaluate(100f)).ToString("F0"),
           NominalTemperature.ToString("F0"),
           NominalTemperature.ToString("F0"),
           CriticalTemperature.ToString("F0"),
@@ -348,11 +352,19 @@ namespace SystemHeat
     }
     public virtual void SetManualControl(bool state)
     {
-      ManualControl = state;
-      Events["EnableManual"].guiActive = !ManualControl;
-      Events["DisableManual"].guiActive = ManualControl;
-      Fields["CurrentReactorThrottle"].guiActive = ManualControl;
-
+      if (allowManualControl)
+      {
+        ManualControl = state;
+        Events["EnableManual"].guiActive = !ManualControl;
+        Events["DisableManual"].guiActive = ManualControl;
+        Fields["CurrentReactorThrottle"].guiActive = ManualControl;
+      }
+      else
+      {
+        Events["EnableManual"].guiActive = false;
+        Events["DisableManual"].guiActive = false;
+        Fields["CurrentReactorThrottle"].guiActive = false;
+      }
     }
     public virtual void ReactorActivated()
     {
@@ -420,7 +432,7 @@ namespace SystemHeat
         {
           if (Efficiency == -1f)
           {
-            Efficiency = ElectricalGeneration.Evaluate(100f) / HeatGeneration;
+            Efficiency = ElectricalGeneration.Evaluate(100f) / HeatGeneration.Evaluate(100f);
           }
         }
 
@@ -548,10 +560,18 @@ namespace SystemHeat
           Events["DisableReactor"].active = Enabled;
           Events["EnableReactor"].active = !Enabled;
         }
-        if (Events["EnableHibernate"].active == HibernateOnWarp || Events["DisableHibernate"].active != HibernateOnWarp)
+        if (allowHibernate)
         {
-          Events["DisableHibernate"].active = HibernateOnWarp;
-          Events["EnableHibernate"].active = !HibernateOnWarp;
+          if (Events["EnableHibernate"].active == HibernateOnWarp || Events["DisableHibernate"].active != HibernateOnWarp)
+          {
+            Events["DisableHibernate"].active = HibernateOnWarp;
+            Events["EnableHibernate"].active = !HibernateOnWarp;
+          }
+        }
+        else
+        {
+          Events["DisableHibernate"].active = false;
+          Events["EnableHibernate"].active = false;
         }
       }
     }
@@ -629,26 +649,22 @@ namespace SystemHeat
     }
     protected virtual float CalculateWasteHeatGeneration()
     {
-      return (CurrentThrottle / 100f * HeatGeneration * (1f - Efficiency)) * CoreIntegrity / 100f;
+      return (HeatGeneration.Evaluate(CurrentThrottle) * (1f - Efficiency)) * CoreIntegrity / 100f;
     }
 
     protected virtual float CalculateHeatGeneration()
     {
-      return (CurrentThrottle / 100f * HeatGeneration) * CoreIntegrity / 100f;
+      return (HeatGeneration.Evaluate(CurrentThrottle)) * CoreIntegrity / 100f;
     }
     protected virtual float CalculateHeatGenerationEditor()
     {
-      return (CurrentReactorThrottle / 100f * HeatGeneration * (1f - Efficiency));
+      return (HeatGeneration.Evaluate(CurrentReactorThrottle)) * (1f - Efficiency);
     }
     protected virtual void HandleHeatGeneration()
     {
+
       // Determine heat to be generated
       CurrentHeatGeneration = CalculateWasteHeatGeneration();
-
-      if (Enabled)
-        heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
-      else
-        heatModule.AddFlux(moduleID, 0f, CurrentHeatGeneration, false);
 
       if (CoreIntegrity <= 0f)
       {
@@ -659,78 +675,43 @@ namespace SystemHeat
       {
         ReactorOutput = String.Format("{0:F1} {1}", CurrentHeatGeneration, Localizer.Format("#LOC_SystemHeat_Units_kW"));
       }
+
+      if (heatModule)
+        if (Enabled)
+          heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
+        else
+          heatModule.AddFlux(moduleID, 0f, CurrentHeatGeneration, false);
+
     }
     protected virtual void HandleHeatGenerationEditor()
     {
       CurrentHeatGeneration = CalculateHeatGenerationEditor();
-      heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
+      if (heatModule)
+        heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
     }
 
 
     // handle core activities
     private void HandleCore()
     {
-
-      float loopFlux = heatModule.LoopFlux;
-      //Utils.Log($"{loopFlux}");
-      /// waste / (1-effic) = max
-
-      InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature,
-        InternalCoreTemperatureResponseScale*TimeWarp.fixedDeltaTime);
-    
-      //if (Enabled)
-      //{
-      //  // If not reached operating temp yet, always increase temperature
-      //  if (InternalCoreTemperature < NominalTemperature)
-      //  {
-      //    InternalCoreTemperature += (CurrentReactorThrottle / 100f * HeatGeneration) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
-      //  }
-      //  // If exceeded nominal temperature, more complex handling
-      //  else if (InternalCoreTemperature > NominalTemperature)
-      //  {
-      //    // If the loop flux is negative, cool down to nominal temp but don't go lower
-      //    if (loopFlux < 0)
-      //    {
-      //      InternalCoreTemperature = Mathf.Clamp(
-      //        InternalCoreTemperature + (loopFlux * 0.5f) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime,
-      //        NominalTemperature, float.MaxValue);
-      //    }
-      //    // If positive, heat up by the exccess loop flux
-      //    else if (loopFlux > 0)
-      //    {
-      //      InternalCoreTemperature += ((CurrentReactorThrottle / 100f * HeatGeneration)+ loopFlux) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
-      //    }
-      //    // if loop flux is exactly zero, trend towards nominal loop temp??
-      //    else
-      //    {
-
-      //    }
-      //  }
-      //  // If reached nominal temp...
-      //  else
-      //  {
-      //    if (loopFlux < 0)
-      //    {
-      //     // If there's a negative flux, do nothing
-      //    }
-      //    // If positive, heat up by the exccess loop flux
-      //    else if (loopFlux > 0)
-      //    {
-      //      InternalCoreTemperature += ((CurrentReactorThrottle / 100f * HeatGeneration) + loopFlux) / (part.mass * 1000f * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
-      //    }
-      //    else
-      //    {
-
-      //    }
-      //  }
-      //}
-      //else
-      //{
-      //  if (InternalCoreTemperature > heatModule.LoopTemperature)
-      //    if (loopFlux < 0)
-
-      //      InternalCoreTemperature += loopFlux / (part.mass * FractionalCoreMass * CoreSpecificHeat) * TimeWarp.fixedDeltaTime;
-      //}
+      if (heatModule)
+      {
+        InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, heatModule.LoopTemperature,
+          InternalCoreTemperatureResponseScale * TimeWarp.fixedDeltaTime);
+      }
+      else
+      {
+        if (Enabled)
+        {
+          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, NominalTemperature,
+          InternalCoreTemperatureResponseScale * CurrentThrottle / 100f * TimeWarp.fixedDeltaTime);
+        }
+        else
+        {
+          InternalCoreTemperature = Mathf.Lerp(InternalCoreTemperature, GetEnvironmentTemperature(),
+          InternalCoreTemperatureResponseScale * TimeWarp.fixedDeltaTime);
+        }
+      }
 
       // Update reactor damage
       float critExceedance = InternalCoreTemperature - CriticalTemperature;
@@ -784,22 +765,40 @@ namespace SystemHeat
       {
         if (CheckFull(ratio.ResourceName, fuelThrottle * ratio.Ratio * timeStep))
         {
+          Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor waste storage full");
           ReactorDeactivated();
           return;
         }
 
       }
-      // CHeck for fuel and consume
+      // Check for fuel and consume
       foreach (ResourceRatio ratio in inputs)
       {
         double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * timeStep, ratio.FlowMode);
-        if (amt < 0.0000000000001)
+
+        if (MinimumThrottle > 0)
         {
-          ReactorDeactivated();
-          fuelCheckPassed = false;
+          if (amt < 0.0000000000001)
+          {
+            Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!");
+            ReactorDeactivated();
+            fuelCheckPassed = false;
+          }
+        }
+        else
+        {
+          if (fuelThrottle > 0.001f)
+          {
+            if (amt < 0.0000000000001)
+            {
+              Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!");
+              ReactorDeactivated();
+              fuelCheckPassed = false;
+            }
+          }
         }
         if (ratio.ResourceName == FuelName)
-          burnRate = ratio.Ratio;
+          burnRate = fuelThrottle* ratio.Ratio;
       }
       // If fuel consumed, add waste
       if (fuelCheckPassed)
@@ -845,6 +844,19 @@ namespace SystemHeat
 
 
       return false;
+    }
+    protected float GetEnvironmentTemperature()
+    {
+      if (HighLogic.LoadedSceneIsEditor)
+        return SystemHeatSettings.SpaceTemperature;
+
+      if (part.vessel.mainBody.GetTemperature(part.vessel.altitude) > 50000d)
+      {
+        return SystemHeatSettings.SpaceTemperature;
+      }
+        return Mathf.Clamp((float)part.vessel.mainBody.GetTemperature(part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
+      
+      
     }
 
     #region Repair
