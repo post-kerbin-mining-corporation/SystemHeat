@@ -270,7 +270,7 @@ namespace SystemHeat
       {
         fluxes[id] = flux;
 
-        // If the flux is > 0, heat is being added to the system and we should track the temperature
+        // Add if used for nominal
         if (useForNominal)
         {
           temperatures[id] = sourceTemperature;
@@ -281,13 +281,25 @@ namespace SystemHeat
         }
 
         totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
+
         totalSystemTemperature = temperatures.Sum(x => x.Value);
 
         float denom = (temperatures.Values.ToList().Where(x => x > 0f).Count());
+
         if (denom > 0)
           systemNominalTemperature = totalSystemTemperature / denom;
         else
           systemNominalTemperature = 0f;
+
+        totalSystemTemperature = systemNominalTemperature;
+        if (totalSystemTemperature == 0f)
+        {
+          ignoreTemperature = true;
+        }
+        else
+        {
+          ignoreTemperature = false;
+        }
       }
     }
 
@@ -314,8 +326,17 @@ namespace SystemHeat
     protected void FixedUpdate()
     {
       SystemFluxUI = String.Format("{0:F0} kW", totalSystemFlux);
-      SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", LoopTemperature, nominalLoopTemperature);
-
+      if (totalSystemFlux > 0f)
+      {
+        Fields["SystemTemperatureUI"].guiActive = true;
+        Fields["SystemTemperatureUI"].guiActiveEditor = true;
+        SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", totalSystemTemperature, nominalLoopTemperature);
+      }
+      else
+      {
+        Fields["SystemTemperatureUI"].guiActive = false;
+        Fields["SystemTemperatureUI"].guiActiveEditor = false;
+      }
       if (simulator == null)
       {
         if (HighLogic.LoadedSceneIsFlight)

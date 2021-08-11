@@ -3,6 +3,9 @@ v0.5.2
 - Updated ModuleManager to 4.2.1
 - Fixed NTR configs not removing stock heat generation from all engine mode
 - Ion engine configs now also remove all excess heat generation
+- Fixed System Temperature PAW field actually displaying loop temperature 
+- System Temperature PAW field is now hidden if system flux <= 0 kW as it is meaningless
+- Fixed loop integrator to handle cases with producers that are off better
 
 v0.5.1
 ------
