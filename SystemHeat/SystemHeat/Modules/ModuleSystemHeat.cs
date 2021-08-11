@@ -76,6 +76,10 @@ namespace SystemHeat
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_SystemTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
     public string SystemTemperatureUI = "-";
 
+    // Current total system flux of all associated modules
+    [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeat_Field_LoopTemperature", groupName = "sysheatinfo", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeat_GroupName", groupStartCollapsed = false)]
+    public string LoopTemperatureUI = "-";
+
     public HeatLoop Loop
     {
       get {
@@ -326,11 +330,12 @@ namespace SystemHeat
     protected void FixedUpdate()
     {
       SystemFluxUI = String.Format("{0:F0} kW", totalSystemFlux);
+      LoopTemperatureUI = String.Format("{0:F0} / {1:F0} K", currentLoopTemperature, nominalLoopTemperature);
       if (totalSystemFlux > 0f)
       {
         Fields["SystemTemperatureUI"].guiActive = true;
         Fields["SystemTemperatureUI"].guiActiveEditor = true;
-        SystemTemperatureUI = String.Format("{0:F0} / {1:F0} K", totalSystemTemperature, nominalLoopTemperature);
+        SystemTemperatureUI = String.Format("{0:F0} K", totalSystemTemperature);
       }
       else
       {

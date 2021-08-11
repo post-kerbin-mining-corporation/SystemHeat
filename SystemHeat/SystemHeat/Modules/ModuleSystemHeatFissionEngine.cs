@@ -68,7 +68,7 @@ namespace SystemHeat
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_PartInfo",
           ElectricalGeneration.Evaluate(100f).ToString("F0"),
           FindTimeRemaining(this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount, baseRate),
-          HeatGeneration.Evaluate(100f).ToString("F0"),
+          (HeatGeneration.Evaluate(100f) - ElectricalGeneration.Evaluate(100f)).ToString("F0"),
           NominalTemperature.ToString("F0"),
           NominalTemperature.ToString("F0"),
           CriticalTemperature.ToString("F0"),

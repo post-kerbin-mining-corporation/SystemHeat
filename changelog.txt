@@ -1,3 +1,8 @@
+v0.5.3
+------
+- Fixed ModuleFissionEngine displaying total heat instead of waste heat in part info
+- Changed display of temperatures in PAW - new 'Loop Temperatures' shows loop info, tuned the other fields
+
 v0.5.2
 ------
 - Updated ModuleManager to 4.2.1
