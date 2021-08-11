@@ -1,3 +1,9 @@
+v0.5.2
+------
+- Updated ModuleManager to 4.2.1
+- Fixed NTR configs not removing stock heat generation from all engine mode
+- Ion engine configs now also remove all excess heat generation
+
 v0.5.1
 ------
 - Hotfix reactor configs
