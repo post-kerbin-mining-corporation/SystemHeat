@@ -53,7 +53,7 @@ namespace SystemHeat
         if (inputs[i].ResourceName == FuelName)
           baseRate = inputs[i].Ratio;
       }
-      if (HeatGeneration.Evaluate(0f) == 0)
+      if (HeatGeneration.Evaluate(100f) == 0)
       {
         return
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionEngine_PartInfo_Basic",

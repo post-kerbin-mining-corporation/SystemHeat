@@ -212,6 +212,7 @@ namespace SystemHeat
     {
       if (Enabled)
       {
+
         Fields["PowerStatus"].guiActive = true;
         Fields["PowerStatus"].guiActiveEditor = true;
         float outputHeat = HeatRate;
@@ -252,8 +253,9 @@ namespace SystemHeat
         Fields["PowerStatus"].guiActive = false;
         Fields["PowerStatus"].guiActiveEditor = false;
         Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
-        destModule.AddFlux(moduleID, 0f, 0f, false);
-        sourceModule.AddFlux(moduleID, 0f, 0f, false);
+
+        destModule.ignoreTemperature = true;
+        sourceModule.ignoreTemperature = true;
       }
     }
 

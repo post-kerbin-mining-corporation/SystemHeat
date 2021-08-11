@@ -38,7 +38,7 @@ Your job, as the spacecraft engineer, is to construct Heat Loops such that they 
 
 ### Required
 These components are required for the mod to function and are bundled as part of any download:
-* [ModuleManager (4.1.4)](https://github.com/sarbian/ModuleManager)
+* [ModuleManager (4.2.1)](https://github.com/sarbian/ModuleManager)
 * [Community Resource Pack (1.4.2)](https://github.com/BobPalmer/CommunityResourcePack)
 
 
