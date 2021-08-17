@@ -1,3 +1,10 @@
+v0.5.4
+------
+- Introduced allowManualShutdownTemperatureControl field for fission reactors
+- Disabled shutdown temperature adjustment on non-trimodal NTRs
+- Tuned outlet/shutdown temperatures of NTRs to be more consistent internally and with FFT/NFE
+- Updated Chinese localization (TerrestrisYE)
+
 v0.5.3
 ------
 - Fixed ModuleFissionEngine displaying total heat instead of waste heat in part info

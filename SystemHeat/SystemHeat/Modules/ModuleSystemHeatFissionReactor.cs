@@ -167,6 +167,9 @@ namespace SystemHeat
     public double LastUpdateTime = -1d;
 
     [KSPField(isPersistant = false)]
+    public bool allowManualShutdownTemperatureControl = true;
+
+    [KSPField(isPersistant = false)]
     public bool allowManualControl = true;
 
     [KSPField(isPersistant = false)]
@@ -352,6 +355,10 @@ namespace SystemHeat
     }
     public virtual void SetManualControl(bool state)
     {
+      if (allowManualShutdownTemperatureControl)
+      {
+        Fields["CurrentSafetyOverride"].guiActive = !allowManualShutdownTemperatureControl;
+      }
       if (allowManualControl)
       {
         ManualControl = state;
