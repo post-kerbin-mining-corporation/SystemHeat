@@ -190,7 +190,7 @@ namespace SystemHeat
         
 
       }
-      Utils.Log($"{engine.engineModule.engineID}, {engine.engineModule.maxThrust}, {CurrentThrottle}");
+      //Utils.Log($"{engine.engineModule.engineID}, {engine.engineModule.maxThrust}, {CurrentThrottle}");
     }
 
     protected void ChangeEngineThrust(EngineBaseData engine, float frac)
