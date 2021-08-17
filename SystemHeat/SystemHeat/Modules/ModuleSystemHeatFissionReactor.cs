@@ -355,10 +355,9 @@ namespace SystemHeat
     }
     public virtual void SetManualControl(bool state)
     {
-      if (allowManualShutdownTemperatureControl)
-      {
-        Fields["CurrentSafetyOverride"].guiActive = !allowManualShutdownTemperatureControl;
-      }
+     
+      Fields["CurrentSafetyOverride"].guiActive = allowManualShutdownTemperatureControl;
+      
       if (allowManualControl)
       {
         ManualControl = state;
@@ -460,6 +459,7 @@ namespace SystemHeat
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
+        Fields["CurrentSafetyOverride"].guiActiveEditor = allowManualShutdownTemperatureControl;
         Fields["CurrentReactorThrottle"].guiActive = true;
         CurrentReactorThrottle = 100f;
       }
