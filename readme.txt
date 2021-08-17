@@ -1,5 +1,5 @@
 ================
-SystemHeat 0.5.3
+SystemHeat 0.5.4
 ================
 
 A mod for Kerbal Space Program, intended to provide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
