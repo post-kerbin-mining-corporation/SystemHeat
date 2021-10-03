@@ -79,6 +79,36 @@ namespace SystemHeat
       Enabled = false;
     }
 
+    /// <summary>
+    ///  Actions
+    /// </summary>
+
+    [KSPAction(guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Action_EnableExchanger")]
+    public void EnableAction(KSPActionParam param)
+    {
+      EnableExchanger();
+    }
+
+    [KSPAction(guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Action_DisableExchanger")]
+    public void DisableAction(KSPActionParam param)
+    {
+      DisableExchanger();
+    }
+
+    [KSPAction(guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Action_ToggleExchanger")]
+    public void ToggleAction(KSPActionParam param)
+    {
+      if (!Enabled) EnableExchanger();
+      else DisableExchanger();
+    }
+
+    [KSPAction(guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Action_ToggleDirection")]
+    public void ToggleDirectionAction(KSPActionParam param)
+    {
+      DoToggleDirection();
+    }
+
+
     protected Renderer onLight;
     protected Renderer dirLight;
 
@@ -184,11 +214,16 @@ namespace SystemHeat
 
     private void ToggleDirection(BaseField field, object oldFieldValueObj)
     {
+      DoToggleDirection(); 
+    }
+
+    private void DoToggleDirection()
+    {
       Utils.Log($"[ModuleSystemHeatExchanger] Toggled direction of flow", LogType.Modules);
       ModuleSystemHeat saved = sourceModule;
       sourceModule = destModule;
       destModule = saved;
-      
+
       sourceModule.ignoreTemperature = true;
       destModule.ignoreTemperature = false;
 
@@ -204,7 +239,6 @@ namespace SystemHeat
         dirLight.material.SetColor("_TintColor", XKCDColors.Orange);
       }
     }
-
     /// <summary>
     /// Generates heat in the editor scene
     /// </summary>
