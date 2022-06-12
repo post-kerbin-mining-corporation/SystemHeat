@@ -1,3 +1,7 @@
+v0.5.8
+------
+- Added new optional boiloff functionality
+
 v0.5.7
 ------
 - Fixed engine heat for VASIMR argon modes

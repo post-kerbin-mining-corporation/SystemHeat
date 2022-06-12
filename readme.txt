@@ -1,9 +1,8 @@
 ================
-SystemHeat 0.5.6
+SystemHeat 0.5.8
 ================
 
 A mod for Kerbal Space Program, intended to provide a better experience for heat management, particularly geared towards resource extraction, high energy engines, and nuclear reactors.
-
 
 ============
 DEPENDENCIES
@@ -31,6 +30,8 @@ WARNING: Please note that these extras may break your ships in flight as they wi
 - SystemHeatConverters: Converts converters to use SystemHeat
 - SystemHeatFissionReactors: Converts nuclear reactors to use SystemHeat
 - SystemHeatFissionEngines: When installed, nuclear engines will have integrated reactors
+- SystemHeatIonEngines: When installed, ion engines will generate heat
+- SystemHeatBoiloff: When installed, CryoTanks boiloff will require cooling instead of electricity
 
 =======
 KSP-AVC

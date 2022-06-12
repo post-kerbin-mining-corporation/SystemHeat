@@ -202,7 +202,7 @@ namespace SystemHeat.UI
       if (simulator != null && !(HighLogic.LoadedSceneIsFlight && MapView.MapIsEnabled))
       {
 
-        if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0 && overlayLoops.Count >0)
+        if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0 && overlayLoops.Count > 0)
         {
 
           Utils.Log(String.Format("[SystemHeatOverlay]: No loops, destroying overlay"), LogType.Overlay);
@@ -245,6 +245,7 @@ namespace SystemHeat.UI
             foreach (ModuleSystemHeat system in loop.LoopModules)
             {
               int index = overlayPanels.FindIndex(f => f.heatModule == system);
+
               if (index == -1)
               {
                 Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}", LogType.Overlay);
@@ -254,14 +255,30 @@ namespace SystemHeat.UI
                 newUIPanel.transform.localPosition = Vector3.zero;
                 OverlayPanel panel = newUIPanel.AddComponent<OverlayPanel>();
                 panel.parentCanvas = UIMasterController.Instance.appCanvas;
-                panel.SetupLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                if (system.moduleUsed)
+                {
+                  panel.SetupLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                }
+                else
+                {
+                  panel.SetupLoop(loop, system, (false && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                }
                 overlayPanels.Add(panel);
+
               }
               else
               {
 
                 // Update the panel
-                overlayPanels[index].UpdateLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                if (system.moduleUsed)
+                {
+                  overlayPanels[index].UpdateLoop(loop, system, (SystemHeatUI.Instance.OverlayMasterState && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                }
+                else
+                {
+                  overlayPanels[index].UpdateLoop(loop, system, (false && SystemHeatUI.Instance.OverlayLoopState(loop.ID)));
+                }
+
               }
             }
           }
@@ -309,10 +326,6 @@ namespace SystemHeat.UI
       SetLoopVisiblity(visible);
       SetPanelVisiblity(visible);
 
-      //foreach (int id in overlayLoopVisibility.Keys.ToList())
-      //{
-      //  overlayLoopVisibility[id] = visible;
-      //}
     }
     public void SetVisible(bool visible, int loopID)
     {
@@ -321,8 +334,6 @@ namespace SystemHeat.UI
       SetLoopVisiblity(visible, loopID);
       SetPanelVisiblity(visible, loopID);
 
-
-      // overlayLoopVisibility[loopID] = visible;
     }
     private void SetPanelVisiblity(bool visible)
     {
@@ -331,8 +342,10 @@ namespace SystemHeat.UI
       {
         if (overlayPanels[i] != null)
         {
-
-          overlayPanels[i].SetVisibility(visible);
+          if (overlayPanels[i].heatModule.moduleUsed)          
+            overlayPanels[i].SetVisibility(visible);
+          else
+            overlayPanels[i].SetVisibility(false);
         }
       }
     }
@@ -343,7 +356,10 @@ namespace SystemHeat.UI
       {
         if (overlayPanels[i] != null && overlayPanels[i].loop.ID == loopID)
         {
-          overlayPanels[i].SetVisibility(visible);
+          if (overlayPanels[i].heatModule.moduleUsed)
+            overlayPanels[i].SetVisibility(visible);
+          else
+            overlayPanels[i].SetVisibility(false);
         }
       }
     }

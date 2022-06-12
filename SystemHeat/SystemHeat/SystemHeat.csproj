@@ -81,10 +81,12 @@
     <Compile Include="ArrayUtils.cs" />
     <Compile Include="EngineerReport\SystemHeatTests.cs" />
     <Compile Include="HeatLoop.cs" />
+    <Compile Include="Modules\BoiloffFuel.cs" />
     <Compile Include="Modules\ModuleSystemHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatAnimateHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
     <Compile Include="Modules\ModuleSystemHeatBaseConverterAdapter.cs" />
+    <Compile Include="Modules\ModuleSystemHeatCryoTank.cs" />
     <Compile Include="Modules\ModuleSystemHeatEngine.cs" />
     <Compile Include="Modules\ModuleSystemHeatExchanger.cs" />
     <Compile Include="Modules\ModuleSystemHeatFissionEngine.cs" />
