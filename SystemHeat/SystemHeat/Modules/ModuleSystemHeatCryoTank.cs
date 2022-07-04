@@ -79,6 +79,10 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public double MaximumBoiloffScale = 5f;
 
+    // Whether active tank refrigeration is occurring on the part
+    [KSPField(isPersistant = false)]
+    public float JettisonCoolingScale = 1f;
+
     /// <summary>
     /// Indicates whether there are any boilable resources currently on the part
     /// </summary>
@@ -97,6 +101,7 @@ namespace SystemHeat
     private double fluxScale = 1.0;
 
     protected ModuleSystemHeat heatModule;
+    protected ModuleJettison jettisonModule;
 
     // UI FIELDS/ BUTTONS
     // Status string
@@ -215,7 +220,7 @@ namespace SystemHeat
     public void Start()
     {
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
-
+      jettisonModule = this.GetComponent<ModuleJettison>();
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
         ReloadDatabaseNodes();
@@ -450,8 +455,6 @@ namespace SystemHeat
     protected void ClearHeat()
     {
       heatModule.AddFlux(moduleID, 0f, 0f, false);
-      // Fields["systemHeatGeneration"].guiActive = false;
-      // Fields["systemTemperature"].guiActive = false;
     }
 
     protected void FixedUpdate()
@@ -497,11 +500,6 @@ namespace SystemHeat
           {
             BoiloffOccuring = ResolveHeat();
             currentCoolingHeatCost = finalCoolingHeatCost;
-            //heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
-            //Fields["systemHeatGeneration"].guiActive = true;
-            //Fields["systemTemperature"].guiActive = true;
-            //systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
-            //systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
           }
         }
 
@@ -651,8 +649,14 @@ namespace SystemHeat
     {
       for (int i = 0; i < fuels.Count; i++)
       {
-        if ( heatModule.LoopTemperature > fuels[i].cryoTemperature)
+        if (heatModule.LoopTemperature > fuels[i].cryoTemperature)
+        {
           fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+        }
+        if (!CoolingEnabled)
+        {
+          fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+        }
       }
     }
 
