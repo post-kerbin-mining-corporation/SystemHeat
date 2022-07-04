@@ -220,7 +220,7 @@ namespace SystemHeat
     public void Start()
     {
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
-      jettisonModule = this.GetComponent<ModuleJettison>();
+      jettisonModule = (ModuleJettison)part.FindModulesImplementing<ModuleJettison>().FirstOrDefault();
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
         ReloadDatabaseNodes();
@@ -525,8 +525,8 @@ namespace SystemHeat
         //currentCoolingHeatCost = GetTotalCoolingCost() * GetTotalMaxResouceAmount() / 1000d;
         if (!IsCoolable())
         {
-         
-         
+
+
           currentCoolingHeatCost = 0.0;
           ClearHeat();
         }
@@ -624,7 +624,7 @@ namespace SystemHeat
       {
 
         heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)finalCoolingHeatCost, true);
-        
+
         if (heatModule.LoopTemperature <= GetMaxSourceTemperature())
         {
           boiloff = false;
@@ -649,13 +649,17 @@ namespace SystemHeat
     {
       for (int i = 0; i < fuels.Count; i++)
       {
-        if (heatModule.LoopTemperature > fuels[i].cryoTemperature)
-        {
-          fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
-        }
+
         if (!CoolingEnabled)
         {
           fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+        }
+        else
+        {
+          if (heatModule.LoopTemperature > fuels[i].cryoTemperature)
+          {
+            fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+          }
         }
       }
     }
@@ -695,8 +699,13 @@ namespace SystemHeat
       double max = 0d;
       for (int i = 0; i < fuels.Count; i++)
       {
+
+        if (!CoolingEnabled && CoolingAllowed)
+          max += fuels[i].boiloffRateSeconds;
+        else
+
         if (heatModule.LoopTemperature >= fuels[i].cryoTemperature)
-        max += fuels[i].boiloffRateSeconds;
+          max += fuels[i].boiloffRateSeconds;
       }
       return max;
     }
