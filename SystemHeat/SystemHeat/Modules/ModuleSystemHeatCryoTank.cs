@@ -79,9 +79,13 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public double MaximumBoiloffScale = 5f;
 
-    // Whether active tank refrigeration is occurring on the part
+    // How much to scale cooling if this module has been jettisioned
     [KSPField(isPersistant = false)]
-    public float JettisonCoolingScale = 1f;
+    public double JettisonCoolingScale = 1d;
+
+    // How much to scale boiloff if this module has been jettisioned
+    [KSPField(isPersistant = false)]
+    public double JettisonBoiloffScale = 1d;
 
     /// <summary>
     /// Indicates whether there are any boilable resources currently on the part
@@ -623,7 +627,10 @@ namespace SystemHeat
       if (CoolingEnabled && IsCoolable())
       {
 
-        heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)finalCoolingHeatCost, true);
+        if (jettisonModule != null && jettisonModule.isJettisoned)
+          heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)(finalCoolingHeatCost*JettisonCoolingScale), true);
+        else
+          heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)finalCoolingHeatCost, true);
 
         if (heatModule.LoopTemperature <= GetMaxSourceTemperature())
         {
@@ -647,18 +654,23 @@ namespace SystemHeat
     /// </summary>
     protected void DoBoiloff()
     {
+      double boiloffScale = fluxScale;
+
+      if (jettisonModule != null && jettisonModule.isJettisoned)
+        boiloffScale *= JettisonBoiloffScale;
+
       for (int i = 0; i < fuels.Count; i++)
       {
 
         if (!CoolingEnabled)
         {
-          fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+          fuels[i].Boiloff(TimeWarp.fixedDeltaTime, boiloffScale);
         }
         else
         {
           if (heatModule.LoopTemperature > fuels[i].cryoTemperature)
           {
-            fuels[i].Boiloff(TimeWarp.fixedDeltaTime, fluxScale);
+            fuels[i].Boiloff(TimeWarp.fixedDeltaTime, boiloffScale);
           }
         }
       }
