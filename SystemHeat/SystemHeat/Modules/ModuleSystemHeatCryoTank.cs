@@ -105,8 +105,8 @@ namespace SystemHeat
     private double fluxScale = 1.0;
 
     protected ModuleSystemHeat heatModule;
-    protected ModuleJettison jettisonModule;
-
+    protected PartModule jettisonModule;
+    protected bool isJettisoned = false;
     // UI FIELDS/ BUTTONS
     // Status string
     [KSPField(isPersistant = false, guiActive = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatCryoTank_Field_BoiloffStatus", groupName = "cryotank", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatCryoTank_UIGroup_Title")]
@@ -223,8 +223,14 @@ namespace SystemHeat
 
     public void Start()
     {
+
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
-      jettisonModule = (ModuleJettison)part.FindModulesImplementing<ModuleJettison>().FirstOrDefault();
+
+      jettisonModule = part.Modules.GetModule("ModuleBdbJettison");
+
+      if (jettisonModule != null)
+        Utils.Log($"Found {jettisonModule.GUIName} on {part.partInfo.title}");
+
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
       {
         ReloadDatabaseNodes();
@@ -466,8 +472,11 @@ namespace SystemHeat
 
       if (HighLogic.LoadedSceneIsFlight && HasAnyBoiloffResource)
       {
-
-        fluxScale = CalculateRadiativeEffects();
+        if (jettisonModule != null && bool.Parse(jettisonModule.Fields.GetValue("isJettisoned").ToString()))
+          isJettisoned = true;
+        else
+          isJettisoned = false;
+          fluxScale = CalculateRadiativeEffects();
         fuelAmount = GetTotalResouceAmount();
 
         // If we have no fuel, no need to do any calculations
@@ -526,7 +535,11 @@ namespace SystemHeat
       }
       if (HighLogic.LoadedSceneIsEditor && HasAnyBoiloffResource)
       {
-        //currentCoolingHeatCost = GetTotalCoolingCost() * GetTotalMaxResouceAmount() / 1000d;
+        if (jettisonModule != null && bool.Parse(jettisonModule.Fields.GetValue("isJettisoned").ToString()))
+          isJettisoned = true;
+        else
+          isJettisoned = false;
+
         if (!IsCoolable())
         {
 
@@ -540,7 +553,11 @@ namespace SystemHeat
           {
             if (GetTotalCoolingCost() > 0.0)
             {
+
               currentCoolingHeatCost = GetTotalCoolingCost() * GetTotalMaxResouceAmount() / 1000d;
+              if (isJettisoned)
+                currentCoolingHeatCost *= JettisonCoolingScale;
+
               heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)currentCoolingHeatCost, true);
             }
             else
@@ -627,8 +644,8 @@ namespace SystemHeat
       if (CoolingEnabled && IsCoolable())
       {
 
-        if (jettisonModule != null && jettisonModule.isJettisoned)
-          heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)(finalCoolingHeatCost*JettisonCoolingScale), true);
+        if (isJettisoned)
+          heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)(finalCoolingHeatCost * JettisonCoolingScale), true);
         else
           heatModule.AddFlux(moduleID, GetSourceTemperature(), (float)finalCoolingHeatCost, true);
 
@@ -656,7 +673,7 @@ namespace SystemHeat
     {
       double boiloffScale = fluxScale;
 
-      if (jettisonModule != null && jettisonModule.isJettisoned)
+      if (isJettisoned)
         boiloffScale *= JettisonBoiloffScale;
 
       for (int i = 0; i < fuels.Count; i++)
@@ -714,10 +731,11 @@ namespace SystemHeat
 
         if (!CoolingEnabled && CoolingAllowed)
           max += fuels[i].boiloffRateSeconds;
-        else
-
-        if (heatModule.LoopTemperature >= fuels[i].cryoTemperature)
+        else if (heatModule.LoopTemperature >= fuels[i].cryoTemperature)
           max += fuels[i].boiloffRateSeconds;
+
+        if (isJettisoned)
+          max *= JettisonBoiloffScale;
       }
       return max;
     }
