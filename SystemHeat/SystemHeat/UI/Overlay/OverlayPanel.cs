@@ -80,15 +80,15 @@ namespace SystemHeat.UI
         {
           if (heatModule.totalSystemFlux <= 0f)
           {
-            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", heatModule.totalSystemFlux.ToString("F0"));
+            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", Utils.ToSI(heatModule.totalSystemFlux,"F0"));
             infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 26f);
           } else
           {
-            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperText", heatModule.systemNominalTemperature.ToString("F0"), heatModule.totalSystemFlux.ToString("F0"));
+            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperText", heatModule.systemNominalTemperature.ToString("F0"), Utils.ToSI(heatModule.totalSystemFlux, "F0"));
             infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 48f);
           }
           
-          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), loop.NetFlux.ToString("F0"), loop.Volume.ToString("F2"));
+          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), Utils.ToSI(loop.NetFlux,"F0"), loop.Volume.ToString("F2"));
         }
 
         float nominalTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;

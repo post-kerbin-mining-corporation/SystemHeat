@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.Localization;
+using Expansions.Missions.Adjusters;
 
 namespace SystemHeat.Modules
 {
-  public class ModuleSystemHeatFissionFuelContainer: PartModule
+  public class ModuleSystemHeatFissionFuelContainer : PartModule
   {
 
     /// <summary>
@@ -22,11 +23,17 @@ namespace SystemHeat.Modules
     [KSPField(isPersistant = false)]
     public int EngineerLevelForTransfer = 3;
 
+    /// <summary>
+    /// If this is toggled, we'll override the required engineer level in the settings
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public bool OverrideEngineerLevelSettings = false;
+
     private string[] resourceNames;
 
     public override string GetInfo()
     {
-      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo", 
+      return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionFuelContainer_PartInfo",
         EngineerLevelForTransfer.ToString(), ResourceNames
         );
     }
@@ -40,7 +47,7 @@ namespace SystemHeat.Modules
       base.OnAwake();
       if (HighLogic.LoadedSceneIsFlight)
       {
-        GameEvents.onCrewBoardVessel.Add(new EventData<GameEvents.FromToAction<Part,Part>>.OnEvent(OnCrewBoardVessel));
+        GameEvents.onCrewBoardVessel.Add(new EventData<GameEvents.FromToAction<Part, Part>>.OnEvent(OnCrewBoardVessel));
         GameEvents.onVesselCrewWasModified.Add(new EventData<Vessel>.OnEvent(onVesselCrewWasModified));
       }
     }
@@ -74,7 +81,7 @@ namespace SystemHeat.Modules
       if (HighLogic.LoadedSceneIsFlight)
       {
         resourceNames = ResourceNames.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToArray(); ;
-        
+
         HandleTransferModes();
       }
     }
@@ -112,9 +119,19 @@ namespace SystemHeat.Modules
     /// </summary>
     public void HandleTransferModes()
     {
-      if (GetCrewLevel() >= EngineerLevelForTransfer)
+      int targetCrewLevel = EngineerLevelForTransfer;
+      if (SystemHeatGameSettings_NuclearFuel.RequireEngineersForTransfer)
       {
-        
+        if (!OverrideEngineerLevelSettings)
+          targetCrewLevel = SystemHeatGameSettings_NuclearFuel.EngineerLevel;
+      }
+      else
+      {
+        targetCrewLevel = 0;
+      }
+      if (GetCrewLevel() >= targetCrewLevel)
+      {
+
         foreach (string resN in resourceNames)
         {
           Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for resource {resN} to PUMP", LogType.Modules);
@@ -123,7 +140,7 @@ namespace SystemHeat.Modules
       }
       else
       {
-        
+
         foreach (string resN in resourceNames)
         {
           Utils.Log($"[ModuleSystemHeatFissionFuelContainer]: Crew level is  {GetCrewLevel()}, setting transfer for resource {resN} to NONE", LogType.Modules);
@@ -131,6 +148,6 @@ namespace SystemHeat.Modules
         }
       }
     }
-    
+
   }
 }

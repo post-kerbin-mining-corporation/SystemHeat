@@ -395,6 +395,7 @@ namespace SystemHeat
         if (IsCoolable())
         {
           Fields["CoolingStatus"].guiActive = true;
+          heatModule.SetSystemHeatModuleEnabled(true);
           if (Events["Enable"].active == CoolingEnabled || Events["Disable"].active != CoolingEnabled)
           {
             Events["Disable"].active = CoolingEnabled;
@@ -476,7 +477,7 @@ namespace SystemHeat
           isJettisoned = true;
         else
           isJettisoned = false;
-          fluxScale = CalculateRadiativeEffects();
+        fluxScale = CalculateRadiativeEffects();
         fuelAmount = GetTotalResouceAmount();
 
         // If we have no fuel, no need to do any calculations
@@ -676,6 +677,16 @@ namespace SystemHeat
       if (isJettisoned)
         boiloffScale *= JettisonBoiloffScale;
 
+      // Apply settings stuff
+      if (!SystemHeatGameSettings_Boiloff.BoiloffEnabled)
+      {
+        boiloffScale = 0f;
+      }
+      else
+      {
+        boiloffScale *= SystemHeatGameSettings_Boiloff.BoiloffScale;
+      }
+
       for (int i = 0; i < fuels.Count; i++)
       {
 
@@ -844,6 +855,7 @@ namespace SystemHeat
 
     public bool IsPartResourcePresent(string resourceName, Part p)
     {
+      if (!SystemHeatGameSettings_Boiloff.BoiloffEnabled) return false;
       int id = PartResourceLibrary.Instance.GetDefinition(resourceName).id;
       PartResource res = p.Resources.Get(id);
       if (res == null)
