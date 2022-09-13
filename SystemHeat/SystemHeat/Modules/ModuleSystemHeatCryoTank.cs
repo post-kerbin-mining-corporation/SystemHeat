@@ -395,6 +395,7 @@ namespace SystemHeat
         if (IsCoolable())
         {
           Fields["CoolingStatus"].guiActive = true;
+          Fields["BoiloffStatus"].guiActive = true;
           heatModule.SetSystemHeatModuleEnabled(true);
           if (Events["Enable"].active == CoolingEnabled || Events["Disable"].active != CoolingEnabled)
           {

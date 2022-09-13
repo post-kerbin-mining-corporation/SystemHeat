@@ -177,6 +177,13 @@ namespace SystemHeat
 
     // REPAIR VARIABLES
     // integrity of the core
+
+    /// <summary>
+    /// If this is toggled, we'll override the the settings
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public bool OverrideRepairSettings = false;
+
     [KSPField(isPersistant = true)]
     public float CoreIntegrity = 100f;
 
@@ -726,8 +733,9 @@ namespace SystemHeat
       // If overheated too much, damage the core
       if (critExceedance > 0f && TimeWarp.CurrentRate < 100f)
       {
+        if (SystemHeatGameSettings_ReactorDamage.ReactorDamage)
         // core is damaged by Rate * temp exceedance * time
-        CoreIntegrity = Mathf.MoveTowards(CoreIntegrity, 0f, CoreDamageRate * critExceedance * TimeWarp.fixedDeltaTime);
+          CoreIntegrity = Mathf.MoveTowards(CoreIntegrity, 0f, CoreDamageRate * critExceedance * TimeWarp.fixedDeltaTime);
       }
     }
 
@@ -869,15 +877,23 @@ namespace SystemHeat
     #region Repair
     public bool TryRepairReactor()
     {
-
-      if (CoreIntegrity <= MinRepairPercent)
+      float repairThreshold = SystemHeatGameSettings_ReactorDamage.RepairThreshold * 100f;
+      int engineerLevel = SystemHeatGameSettings_ReactorDamage.EngineerLevel;
+      float maxRepair = SystemHeatGameSettings_ReactorDamage.RepairMax * 100f;
+      if (OverrideRepairSettings)
+      {
+        repairThreshold = MinRepairPercent;
+        engineerLevel = EngineerLevelForRepair;
+        maxRepair = MaxRepairPercent;
+      }
+      if (CoreIntegrity <= repairThreshold)
       {
         ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreTooDamaged"), 5.0f, ScreenMessageStyle.UPPER_CENTER));
         return false;
       }
-      if (FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < EngineerLevelForRepair)
+      if (FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < engineerLevel)
       {
-        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_EngineerLevelTooLow", EngineerLevelForRepair.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
+        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_EngineerLevelTooLow", engineerLevel.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
         return false;
       }
       if (FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.TotalAmountOfPartStored("evaRepairKit") < 1)
@@ -897,21 +913,28 @@ namespace SystemHeat
         return false;
       }
 
-      //if (CoreIntegrity >= MaxRepairPercent)
-      //{
-      //  ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreAlreadyRepaired", MaxRepairPercent.ToString("F0")),
-      //      5.0f, ScreenMessageStyle.UPPER_CENTER));
-      //  return false;
-      //}
+      if (CoreIntegrity >= maxRepair)
+      {
+        ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_CoreAlreadyRepaired", maxRepair.ToString("F0")),
+            5.0f, ScreenMessageStyle.UPPER_CENTER));
+        return false;
+      }
       return true;
     }
 
     // Repair the reactor to max Repair percent
     public void DoReactorRepair()
     {
+      float repairPercent = SystemHeatGameSettings_ReactorDamage.RepairPerKit * 100f;
+      float maxRepair = SystemHeatGameSettings_ReactorDamage.RepairMax * 100f;
+      if (OverrideRepairSettings)
+      {
+        maxRepair = MaxRepairPercent;
+        repairPercent = RepairAmountPerKit;
+      }
       FlightGlobals.ActiveVessel.evaController.ModuleInventoryPartReference.RemoveNPartsFromInventory("evaRepairKit", 1, playSound: true);
 
-      this.CoreIntegrity = Mathf.Clamp(this.CoreIntegrity + RepairAmountPerKit, 0f, 100f);
+      this.CoreIntegrity = Mathf.Clamp(this.CoreIntegrity + repairPercent, 0f, maxRepair);
       ScreenMessages.PostScreenMessage(new ScreenMessage(Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Message_Repair_RepairSuccess",
         this.CoreIntegrity.ToString("F0")), 5.0f, ScreenMessageStyle.UPPER_CENTER));
     }
