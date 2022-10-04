@@ -50,7 +50,7 @@ namespace SystemHeat
         return info;
       else
         return info.Substring(0, pos) + Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_PartInfoAdd",
-          systemPower.ToString("F0"),
+          Utils.ToSI(systemPower,"F0"),
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0")
           ) + info.Substring(pos);

@@ -327,7 +327,7 @@ namespace SystemHeat
           Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_PartInfo",
           ElectricalGeneration.Evaluate(100f).ToString("F0"),
           FindTimeRemaining(this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount, baseRate),
-          (HeatGeneration.Evaluate(100f) - ElectricalGeneration.Evaluate(100f)).ToString("F0"),
+          Utils.ToSI((HeatGeneration.Evaluate(100f) - ElectricalGeneration.Evaluate(100f)), "F0"),
           NominalTemperature.ToString("F0"),
           NominalTemperature.ToString("F0"),
           CriticalTemperature.ToString("F0"),
@@ -687,7 +687,7 @@ namespace SystemHeat
       }
       else
       {
-        ReactorOutput = String.Format("{0:F1} {1}", CurrentHeatGeneration, Localizer.Format("#LOC_SystemHeat_Units_kW"));
+        ReactorOutput = String.Format("{0:F1} {1}", Utils.ToSI(CurrentHeatGeneration, "F0"), "W");
       }
 
       if (heatModule)

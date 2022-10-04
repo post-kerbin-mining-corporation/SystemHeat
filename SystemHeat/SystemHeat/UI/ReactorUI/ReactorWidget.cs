@@ -225,7 +225,8 @@ namespace SystemHeat.UI
       if (module.moduleName == "FusionReactor" || module.moduleName == "ModuleFusionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("SystemOutletTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("SystemPower").ToString()).ToString("F0")));
+        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated",
+          Utils.ToSI(float.Parse(module.Fields.GetValue("SystemPower").ToString()), "F0")));
         datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentPowerProduced").ToString()).ToString("F0")));
         datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelInput")));
         datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", heatModule.LoopTemperature.ToString("F0")));
@@ -263,7 +264,8 @@ namespace SystemHeat.UI
       if (module.moduleName == "ModuleSystemHeatFissionReactor" || module.moduleName == "ModuleSystemHeatFissionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("NominalTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()).ToString("F0")));
+        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated",
+          Utils.ToSI(float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()), "F0")));
         datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentElectricalGeneration").ToString()).ToString("F0")));
         datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelStatus")));
 

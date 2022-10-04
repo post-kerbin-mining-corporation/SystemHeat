@@ -28,7 +28,7 @@ namespace SystemHeat
     /// </summary>
     [KSPField(isPersistant = false)]
     public float systemPower = 0f;
-    
+
     /// <summary>
     /// Index of the converter module
     /// </summary>
@@ -54,12 +54,13 @@ namespace SystemHeat
 
     public string EditConverterModuleInfo(string source)
     {
-      string msg = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatBaseConverterAdapter_PartInfo", systemPower.ToString("F0"),
+      string msg = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatBaseConverterAdapter_PartInfo",
+        Utils.ToSI(systemPower, "F0"),
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0"));
 
       if (source.Contains(msg))
-      return source;
+        return source;
 
       int pos = source.IndexOf("\n\n");
       if (pos < 0)
@@ -75,11 +76,11 @@ namespace SystemHeat
     public void Start()
     {
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
-      
+
       if (converterModuleIndex != -1)
       {
-        base.part.partInfo.moduleInfos[converterModuleIndex].info = EditConverterModuleInfo(base.part.partInfo.moduleInfos[converterModuleIndex].info); 
-        
+        base.part.partInfo.moduleInfos[converterModuleIndex].info = EditConverterModuleInfo(base.part.partInfo.moduleInfos[converterModuleIndex].info);
+
         converterModule = base.part.Modules[converterModuleIndex] as BaseConverter;
         if (converterModule == null)
         {

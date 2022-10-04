@@ -334,6 +334,8 @@ namespace SystemHeat
       
       if (enabled && !moduleUsed)
       {
+        if (simulator != null)
+          simulator.AddHeatModule(this);
         Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         // turn things on
         Fields["SystemTemperatureUI"].guiActive = true;
@@ -349,6 +351,8 @@ namespace SystemHeat
       }
       if (!enabled && moduleUsed)
       {
+        if (simulator != null)
+        simulator.RemoveHeatModule(this);
         Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         // turn things off
         Fields["SystemTemperatureUI"].guiActive = false;

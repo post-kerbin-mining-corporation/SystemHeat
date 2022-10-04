@@ -55,13 +55,15 @@ namespace SystemHeat
     }
 
 
-    public static string ToSI(float d, string format = null)
+    public static string ToSI(float d, string format = null, float factor= 0.001f)
     {
       if (d == 0.0)
         return d.ToString(format);
 
       char[] incPrefixes = new[] { 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' };
       char[] decPrefixes = new[] { 'm', '\u03bc', 'n', 'p', 'f', 'a', 'z', 'y' };
+
+      d *= factor;
 
       int degree = Mathf.Clamp((int)Math.Floor(Math.Log10(Math.Abs(d)) / 3), -8, 8);
       if (degree == 0)

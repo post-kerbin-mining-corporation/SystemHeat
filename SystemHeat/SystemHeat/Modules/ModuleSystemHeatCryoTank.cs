@@ -275,6 +275,7 @@ namespace SystemHeat
           Events["Enable"].guiActive = true;
           Events["Enable"].guiActiveEditor = true;
           Events["Disable"].guiActiveEditor = true;
+          heatModule.SetSystemHeatModuleEnabled(true);
         }
         else
         {
