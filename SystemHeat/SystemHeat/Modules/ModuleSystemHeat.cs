@@ -371,7 +371,7 @@ namespace SystemHeat
     {
       if (moduleUsed)
       {
-        SystemFluxUI = String.Format("{0}W", Utils.ToSI(totalSystemFlux));
+        SystemFluxUI = String.Format("{0}W", Utils.ToSI(totalSystemFlux, "F0"));
         LoopTemperatureUI = String.Format("{0:F0} / {1:F0} K", currentLoopTemperature, nominalLoopTemperature);
         if (totalSystemFlux > 0f)
         {

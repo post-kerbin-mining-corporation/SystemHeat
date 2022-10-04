@@ -150,9 +150,9 @@ namespace SystemHeat
 
       string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo",
         temperatureCurve.Curve.keys[0].time.ToString("F0"),
-        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
+       Utils.ToSI(temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time), "F0"),
         temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time).ToString("F0"),
-        temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time.ToString("F0")
+        Utils.ToSI(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time, "F0")
         );
       message += base.GetInfo();
       return message;
@@ -187,7 +187,8 @@ namespace SystemHeat
 
               }
 
-              ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
+              ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running",
+                Utils.ToSI(convectiveFlux, "F0"));
             }
             else
             {
@@ -199,7 +200,8 @@ namespace SystemHeat
 
             RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
               (-radiativeFlux / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time) * 100f).ToString("F0"));
-            RadiatorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Running", radiativeFlux.ToString("F1"));
+            RadiatorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorStatus_Running",
+              Utils.ToSI(radiativeFlux, "F0"));
 
             if (scalarModule != null)
             {
@@ -246,10 +248,11 @@ namespace SystemHeat
             //Utils.Log($"tD {tDelta}, tC, {lp.ConvectionTemperature} tL {heatModule.LoopTemperature}, tMax {temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time}, convA {convectiveArea}");
           }
 
-          
+
           heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
 
-          ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running", convectiveFlux.ToString("F1"));
+          ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running",
+            Utils.ToSI(convectiveFlux, "F0"));
           RadiatorEfficiency = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_RadiatorEfficiency_Running",
             ((temperatureCurve.Evaluate(heatModule.LoopTemperature) / temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time)) * 100f).ToString("F0"));
         }
