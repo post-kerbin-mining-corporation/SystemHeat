@@ -335,15 +335,14 @@ namespace SystemHeat
       if (simulator == null)
         FindSimulator();
 
-      
+
       if (enabled && !moduleUsed)
       {
-
+        Utils.Log($"[ModuleSystemHeat] seting module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         moduleUsed = enabled;
         if (simulator != null)
           simulator.AddHeatModule(this);
 
-        Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         // turn things on
         Fields["SystemTemperatureUI"].guiActive = true;
         Fields["SystemTemperatureUI"].guiActiveEditor = true;
@@ -356,11 +355,11 @@ namespace SystemHeat
       }
       if (!enabled && moduleUsed)
       {
-
+        Utils.Log($"[ModuleSystemHeat] seting module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         moduleUsed = enabled;
         if (simulator != null)
           simulator.RemoveHeatModule(this);
-        Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
+
         // turn things off
         Fields["SystemTemperatureUI"].guiActive = false;
         Fields["SystemTemperatureUI"].guiActiveEditor = false;
@@ -371,9 +370,6 @@ namespace SystemHeat
         Fields["currentLoopID"].guiActive = false;
         Fields["currentLoopID"].guiActiveEditor = false;
       }
-      moduleUsed = enabled;
-
-
     }
 
     protected void FixedUpdate()

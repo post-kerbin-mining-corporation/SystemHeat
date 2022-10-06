@@ -397,18 +397,22 @@ namespace SystemHeat
         {
           Fields["CoolingStatus"].guiActive = true;
           Fields["BoiloffStatus"].guiActive = true;
-          heatModule.SetSystemHeatModuleEnabled(true);
+
+
           if (Events["Enable"].active == CoolingEnabled || Events["Disable"].active != CoolingEnabled)
           {
             Events["Disable"].active = CoolingEnabled;
             Events["Enable"].active = !CoolingEnabled;
           }
+
+          heatModule.SetSystemHeatModuleEnabled(true);
         }
         else
         {
           Fields["CoolingStatus"].guiActive = false;
           Events["Disable"].active = false;
           Events["Enable"].active = false;
+
           heatModule.SetSystemHeatModuleEnabled(false);
         }
 

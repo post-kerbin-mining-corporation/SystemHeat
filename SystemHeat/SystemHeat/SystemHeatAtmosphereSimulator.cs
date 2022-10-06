@@ -46,6 +46,8 @@ namespace SystemHeat
       atmoTemp = body.GetFullTemperature(altitude, atmosphereTemperatureOffset);
       density = body.GetDensity(staticPressurekPa, atmoTemp);
       mach = CalculateMachNumber(body, speed, staticPressurekPa, density);
+
+
       staticPressurekPa = body.GetPressure(altitude);
       convectiveMachScale = Math.Pow(UtilMath.Clamp01(
         (mach - PhysicsGlobals.NewtonianMachTempLerpStartMach) / (PhysicsGlobals.NewtonianMachTempLerpEndMach - PhysicsGlobals.NewtonianMachTempLerpStartMach)), 
@@ -56,6 +58,10 @@ namespace SystemHeat
     public float CalculateMachNumber(CelestialBody body, float speed, double staticPressure, double atmDensity)
     {
       double speedOfSound = body.GetSpeedOfSound(staticPressure, atmDensity);
+
+      if (speedOfSound < 0.00001)
+        return 0f;
+
       return speed/(float)speedOfSound;
     }
     public virtual float CalculateShockTemperature(CelestialBody body, float machNumber, float speed)

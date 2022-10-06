@@ -147,7 +147,9 @@ namespace SystemHeat
       if (HeatLoops != null)
       {
         if (SimulationBody != null)
+        {
           atmoSim.SimulateAtmosphere(SimulationBody, SimulationSpeed, SimulationAltitude);
+        }
         foreach (HeatLoop loop in HeatLoops)
         {
           loop.Simulate(SystemHeatSettings.SimulationRateEditor);
@@ -177,16 +179,18 @@ namespace SystemHeat
         // Build a new heat loop as needed
         if (!HasLoop(loopID))
         {
+          if (HeatLoops != null)
           HeatLoops.Add(new HeatLoop(this, loopID));
-
           Utils.Log(String.Format("[SystemHeatSimulator]: Created new Heat Loop {0}", loopID), LogType.Simulator);
         }
-        foreach (HeatLoop loop in HeatLoops)
+        if (HeatLoops != null)
         {
-          if (loop.ID == loopID)
-            loop.AddHeatModule(module);
+          foreach (HeatLoop loop in HeatLoops)
+          {
+            if (loop.ID == loopID)
+              loop.AddHeatModule(module);
+          }
         }
-
 
         Utils.Log(String.Format("[SystemHeatSimulator]: Added module {0} to Heat Loop {1}", module.moduleID, loopID), LogType.Simulator);
       }

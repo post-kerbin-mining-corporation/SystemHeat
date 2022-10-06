@@ -297,6 +297,7 @@ namespace SystemHeat
     }
     void SimulateConvection(float simTimeStep)
     {
+     
       ConvectionTemperature = simulator.AtmoSim.ExternalTemperature;
       ConvectionFlux = SystemHeatSettings.ConvectionBaseCoefficient * simulator.AtmoSim.ConvectiveCoefficient * simTimeStep;
     }
