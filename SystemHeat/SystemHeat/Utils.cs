@@ -55,7 +55,7 @@ namespace SystemHeat
     }
 
 
-    public static string ToSI(float d, string format = null, float factor= 0.001f)
+    public static string ToSI(float d, string format = null, float factor= 1000f)
     {
       if (d == 0.0)
         return d.ToString(format);

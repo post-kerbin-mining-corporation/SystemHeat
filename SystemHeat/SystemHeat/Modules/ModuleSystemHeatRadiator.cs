@@ -149,10 +149,10 @@ namespace SystemHeat
     {
 
       string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo",
-        temperatureCurve.Curve.keys[0].time.ToString("F0"),
-       Utils.ToSI(temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time), "F0"),
-        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time).ToString("F0"),
-        Utils.ToSI(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time, "F0")
+        Utils.ToSI(temperatureCurve.Curve.keys[0].time, "F0"),
+       temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
+        Utils.ToSI(temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time), "F0"),
+        temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time.ToString("F0")
         );
       message += base.GetInfo();
       return message;

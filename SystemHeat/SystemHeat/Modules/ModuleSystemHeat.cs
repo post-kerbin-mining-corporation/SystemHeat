@@ -10,7 +10,7 @@ namespace SystemHeat
   /// The simulation interface to the heat system. All heat producing or consuming modules
   /// on a vessel interact with an instance of this module to add and remove heat.
   /// </summary>
-  
+
   public class ModuleSystemHeat : PartModule
   {
     // Unique name of the module on a part
@@ -84,7 +84,8 @@ namespace SystemHeat
 
     public HeatLoop Loop
     {
-      get {
+      get
+      {
         if (simulator != null)
         {
           return simulator.Loop(currentLoopID);
@@ -167,7 +168,7 @@ namespace SystemHeat
       Fields["currentLoopFlux"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["currentLoopFlux"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
 
-      
+
       Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
     }
 
@@ -317,7 +318,7 @@ namespace SystemHeat
 
 
         return fluxes.Where(x => x.Key != id).Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
-        
+
       }
       return 0f;
     }
@@ -331,11 +332,17 @@ namespace SystemHeat
 
     public void SetSystemHeatModuleEnabled(bool enabled)
     {
+      if (simulator == null)
+        FindSimulator();
+
       
       if (enabled && !moduleUsed)
       {
+
+        moduleUsed = enabled;
         if (simulator != null)
           simulator.AddHeatModule(this);
+
         Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         // turn things on
         Fields["SystemTemperatureUI"].guiActive = true;
@@ -346,13 +353,13 @@ namespace SystemHeat
         Fields["LoopTemperatureUI"].guiActiveEditor = true;
         Fields["currentLoopID"].guiActive = true;
         Fields["currentLoopID"].guiActiveEditor = true;
-
-        
       }
       if (!enabled && moduleUsed)
       {
+
+        moduleUsed = enabled;
         if (simulator != null)
-        simulator.RemoveHeatModule(this);
+          simulator.RemoveHeatModule(this);
         Utils.Log($"[ModuleSystemHeat] set module {moduleID} system state from {moduleUsed} to {enabled}", LogType.Modules);
         // turn things off
         Fields["SystemTemperatureUI"].guiActive = false;
@@ -363,11 +370,9 @@ namespace SystemHeat
         Fields["LoopTemperatureUI"].guiActiveEditor = false;
         Fields["currentLoopID"].guiActive = false;
         Fields["currentLoopID"].guiActiveEditor = false;
-
-      
       }
-
       moduleUsed = enabled;
+
 
     }
 
@@ -389,17 +394,23 @@ namespace SystemHeat
           Fields["SystemTemperatureUI"].guiActiveEditor = false;
         }
       }
+
       if (simulator == null)
       {
-        if (HighLogic.LoadedSceneIsFlight)
-        
-          simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
-        
-        if (HighLogic.LoadedSceneIsEditor)
-        
-          simulator = SystemHeatEditor.Instance.Simulator;
-        
+        FindSimulator();
+
       }
+    }
+
+    protected void FindSimulator()
+    {
+      if (HighLogic.LoadedSceneIsFlight)
+
+        simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
+
+      if (HighLogic.LoadedSceneIsEditor)
+
+        simulator = SystemHeatEditor.Instance.Simulator;
     }
 
 
