@@ -58,6 +58,7 @@ Please note that these extras may break your ships in flight as they will make e
 * **SystemHeatConverters**: Converts converters to use SystemHeat
 * **SystemHeatFissionReactors**: Converts nuclear reactors to use SystemHeat
 * **SystemHeatFissionEngines**: When installed, nuclear engines will have integrated reactors
+* **SystemHeatCryoTanks**: When installed, tanks configured by CryoTanks will not use power and instead require cooling
 
 
 ## Contributing

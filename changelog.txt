@@ -1,8 +1,8 @@
 v0.6.0
 ------
 - Most UI fields now report in SI-prefixed units for flux (W, kW, MW, etc). This is not (yet) true for all modules though. 
-- Added optional patch to apply this to CryoTanks
 - Added new functionality to cool fuel tanks with radiators and the SH system
+- Added optional patch to apply this to CryoTanks
 - Added ingame settings. The following things can be customized per game
 -- Boiloff: enabled and scale
 -- Nuclear fuel transfer: require engineers, what level
