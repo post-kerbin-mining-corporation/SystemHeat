@@ -53,6 +53,35 @@ namespace SystemHeat
     {
       Debug.LogError(String.Format("[{0}]{1}", logTag, toLog));
     }
+
+
+    public static string ToSI(float d, string format = null, float factor= 1000f)
+    {
+      if (d == 0.0)
+        return d.ToString(format);
+
+      char[] incPrefixes = new[] { 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' };
+      char[] decPrefixes = new[] { 'm', '\u03bc', 'n', 'p', 'f', 'a', 'z', 'y' };
+
+      d *= factor;
+
+      int degree = Mathf.Clamp((int)Math.Floor(Math.Log10(Math.Abs(d)) / 3), -8, 8);
+      if (degree == 0)
+        return d.ToString(format);
+
+      double scaled = d * Math.Pow(1000, -degree);
+
+      char? prefix = null;
+
+      switch (Math.Sign(degree))
+      {
+        case 1: prefix = incPrefixes[degree - 1]; break;
+        case -1: prefix = decPrefixes[-degree - 1]; break;
+      }
+
+      return scaled.ToString(format) + " " + prefix;
+    }
+
   }
 
   public static class TransformDeepChildExtension
@@ -72,6 +101,7 @@ namespace SystemHeat
       }
       return null;
     }
+
 
     /*
     //Depth-first search

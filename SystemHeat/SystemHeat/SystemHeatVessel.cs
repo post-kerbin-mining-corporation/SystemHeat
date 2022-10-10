@@ -37,6 +37,7 @@ namespace SystemHeat
       simulator = new SystemHeatSimulator();
 
       // These events need to trigger a refresh
+      GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(OnVesselChanged));
       GameEvents.onVesselGoOnRails.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
       GameEvents.onVesselWasModified.Add(new EventData<Vessel>.OnEvent(RefreshVesselData));
       GameEvents.onVesselDocking.Add(new EventData<uint, uint>.OnEvent(OnVesselsDocked));
@@ -51,6 +52,7 @@ namespace SystemHeat
       GameEvents.OnVesselRollout.Remove(OnVesselRollout);
       GameEvents.onVesselDocking.Remove(OnVesselsDocked);
       GameEvents.onVesselsUndocking.Remove(OnVesselsUndocked);
+      GameEvents.onVesselChange.Remove(OnVesselChanged);
     }
 
     void FixedUpdate()
@@ -95,6 +97,18 @@ namespace SystemHeat
     {
       
         Utils.Log(String.Format("[SystemHeatVessel]: Refreshing VesselData from save node event", this.GetType().Name), LogType.Simulator);
+    }
+    protected void OnVesselChanged(Vessel v)
+    {
+      Utils.Log(String.Format("[SystemHeatVessel]: Vessel changed", this.GetType().Name), LogType.Simulator);
+      ResetSimulation();
+
+      SystemHeatOverlay.Instance.ResetOverlay();
+      if (FlightGlobals.ActiveVessel == this.vessel)
+      {
+        SystemHeatOverlay.Instance.AssignSimulator(simulator);
+        SystemHeatUI.Instance.toolbarPanel.AssignSimulator(simulator);
+      }
     }
     protected void OnVesselsDocked(uint v1, uint v2)
     {

@@ -126,10 +126,11 @@ namespace SystemHeat
     public override string GetInfo()
     {
       string msg = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_PartInfo",
-        0f.ToString("F0"), temperatureDeltaCostCurve.Evaluate(0f).ToString("F0"),
+        0f.ToString("F0"),
+        temperatureDeltaCostCurve.Evaluate(0f).ToString("F0"),
         1000f.ToString("F0"), temperatureDeltaCostCurve.Evaluate(1000f).ToString("F0"),
-        temperatureDeltaHeatCurve.Evaluate(0).ToString("F0"),
-        temperatureDeltaHeatCurve.Evaluate(1000f).ToString("F0")
+        Utils.ToSI(temperatureDeltaHeatCurve.Evaluate(0), "F0"),
+        Utils.ToSI(temperatureDeltaHeatCurve.Evaluate(1000f), "F0")
 
        );
       return msg;
@@ -147,7 +148,7 @@ namespace SystemHeat
       {
         sourceModule = heatModule1;
         destModule = heatModule2;
-        
+
       }
       else
       {
@@ -214,7 +215,7 @@ namespace SystemHeat
 
     private void ToggleDirection(BaseField field, object oldFieldValueObj)
     {
-      DoToggleDirection(); 
+      DoToggleDirection();
     }
 
     private void DoToggleDirection()
@@ -268,7 +269,10 @@ namespace SystemHeat
           outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
 
           PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
-          Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active", outletTemperature.ToString("F0"), outputHeat.ToString("F0"), sourceModule.consumedSystemFlux.ToString("F1"));
+          Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
+            outletTemperature.ToString("F0"),
+            Utils.ToSI(outputHeat, "F0"),
+            Utils.ToSI(sourceModule.consumedSystemFlux, "F0"));
           destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
         }
         else
@@ -324,7 +328,9 @@ namespace SystemHeat
             outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
 
             PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F1"));
-            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active", outletTemperature.ToString("F0"), outputHeat.ToString("F0"));
+            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
+              outletTemperature.ToString("F0"),
+              Utils.ToSI(outputHeat, "F0"));
             destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
           }
           else

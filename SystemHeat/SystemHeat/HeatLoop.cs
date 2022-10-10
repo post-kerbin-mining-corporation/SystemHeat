@@ -114,11 +114,8 @@ namespace SystemHeat
       Volume -= heatModule.volume;
       modules.Remove(heatModule);
 
-
       // Recalculate the nominal temperature
       NominalTemperature = CalculateNominalTemperature();
-
-
     }
 
     public void ResetTemperatures()
@@ -126,7 +123,8 @@ namespace SystemHeat
       Temperature = GetEnvironmentTemperature();
       for (int i = 0; i < modules.Count; i++)
       {
-        modules[i].currentLoopTemperature = GetEnvironmentTemperature();
+        if (modules[i].moduleUsed)
+          modules[i].currentLoopTemperature = GetEnvironmentTemperature();
       }
     }
 
@@ -170,7 +168,8 @@ namespace SystemHeat
       float currentNetFlux = 0f;
       for (int i = 0; i < modules.Count; i++)
       {
-        currentNetFlux += modules[i].totalSystemFlux;
+        if (modules[i].moduleUsed)
+          currentNetFlux += modules[i].totalSystemFlux;
       }
       return currentNetFlux;
     }
@@ -183,7 +182,8 @@ namespace SystemHeat
       float currentNetFlux = 0f;
       for (int i = 0; i < modules.Count; i++)
       {
-        currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux + currentNetFlux : currentNetFlux;
+        if (modules[i].moduleUsed)
+          currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux + currentNetFlux : currentNetFlux;
       }
       return currentNetFlux;
     }
@@ -246,7 +246,7 @@ namespace SystemHeat
         {
           Temperature += deltaTemperatureIdeal;
         }
-        
+
         else
         {
           // do nothing
@@ -258,7 +258,8 @@ namespace SystemHeat
       // Propagate to all modules
       for (int i = 0; i < modules.Count; i++)
       {
-        modules[i].UpdateSimulationValues(NominalTemperature, Temperature, NetFlux);
+        if (modules[i].moduleUsed)
+          modules[i].UpdateSimulationValues(NominalTemperature, Temperature, NetFlux);
       }
     }
     protected void AllocateFlux(float totalFlux)
@@ -296,6 +297,7 @@ namespace SystemHeat
     }
     void SimulateConvection(float simTimeStep)
     {
+     
       ConvectionTemperature = simulator.AtmoSim.ExternalTemperature;
       ConvectionFlux = SystemHeatSettings.ConvectionBaseCoefficient * simulator.AtmoSim.ConvectiveCoefficient * simTimeStep;
     }
@@ -335,7 +337,8 @@ namespace SystemHeat
       float total = 0f;
       for (int i = 0; i < modules.Count; i++)
       {
-        total += modules[i].volume;
+        if (modules[i].moduleUsed)
+          total += modules[i].volume;
       }
       return total;
     }
@@ -350,7 +353,7 @@ namespace SystemHeat
 
       for (int i = 0; i < modules.Count; i++)
       {
-        if (!modules[i].ignoreTemperature && modules[i].volume >= 0f && modules[i].totalSystemFlux >= 0f)
+        if (modules[i].moduleUsed && !modules[i].ignoreTemperature && modules[i].volume >= 0f && modules[i].totalSystemFlux >= 0f)
         {
           temp += modules[i].systemNominalTemperature * modules[i].volume;
           totalVolume += modules[i].volume;
@@ -362,5 +365,19 @@ namespace SystemHeat
       else
         return GetEnvironmentTemperature();
     }
+
+    public int GetActiveModuleCount()
+    {
+      int count = 0;
+      for (int i = 0; i < modules.Count; i++)
+      {
+        if (modules[i].moduleUsed)
+        {
+          count++;
+        }
+      }
+      return count;
+    }
+
   }
 }

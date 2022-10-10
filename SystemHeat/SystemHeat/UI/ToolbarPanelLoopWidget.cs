@@ -95,7 +95,7 @@ namespace SystemHeat.UI
           prefix = "";
 
         fluxTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxValue", prefix,
-        lp.NetFlux.ToString("F1"));
+        Utils.ToSI(lp.NetFlux,"F0"));
 
         if (lp.Temperature >= lp.NominalTemperature)
         {

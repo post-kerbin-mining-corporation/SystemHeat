@@ -350,8 +350,8 @@ namespace SystemHeat.UI
 
         }
         totalLoopsValue.text = simulator.HeatLoops.Count.ToString();
-        totalOutgoingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxValue", simulator.TotalHeatRejection.ToString("F0"));
-        totalIncomingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxValue", simulator.TotalHeatGeneration.ToString("F0"));
+        totalOutgoingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxValue", Utils.ToSI(simulator.TotalHeatRejection,"F0"));
+        totalIncomingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxValue", Utils.ToSI(simulator.TotalHeatGeneration, "F0"));
       }
     }
     void DestroyLoopWidgets()

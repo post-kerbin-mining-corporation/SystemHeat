@@ -101,7 +101,7 @@ namespace SystemHeat
       // Need to update this to strip the CoreHeat stuff from it
       string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_PartInfo",
         (heatStorageMaximum / 1000f).ToString("F0"),
-        maxHeatRate.ToString("F0")
+        Utils.ToSI(maxHeatRate, "F0")
         );
       return message;
     }
@@ -188,7 +188,9 @@ namespace SystemHeat
         GenerateHeatFlight();
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
         systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
+          Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
+          Utils.ToSI(maxHeatRate, "F0"));
 
       }
       if (HighLogic.LoadedSceneIsEditor)
@@ -196,7 +198,9 @@ namespace SystemHeat
         GenerateHeatEditor();
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
         systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing", (-heatModule.consumedSystemFlux).ToString("F0"), maxHeatRate.ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
+          Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
+          Utils.ToSI(maxHeatRate, "F0"));
       }
     }
 

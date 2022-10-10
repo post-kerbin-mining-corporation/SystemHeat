@@ -66,7 +66,7 @@ namespace SystemHeat
       string msg = "";
       ModuleEnginesFX[] engines = part.GetComponents<ModuleEnginesFX>();
       msg += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_PartInfo",
-        systemPower.ToString("F0"),
+        Utils.ToSI(systemPower,"F0"),
         systemOutletTemperature.ToString("F0"),
         temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time.ToString("F0")
         );
@@ -125,12 +125,14 @@ namespace SystemHeat
           Fields["systemHeatGeneration"].guiActiveEditor = true;
           Fields["systemTemperature"].guiActiveEditor = true;
           heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
-          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running",
+            Utils.ToSI((engineFraction * systemPower),"F0"));
         }
         else
         {
 
-          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+          systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", 
+            Utils.ToSI((engineFraction * systemPower),"F0"));
           heatModule.AddFlux(moduleID, 0f, engineFraction * systemPower, false);
           Fields["systemHeatGeneration"].guiActiveEditor = false;
           Fields["systemTemperature"].guiActiveEditor = false;
@@ -144,7 +146,8 @@ namespace SystemHeat
         Fields["systemHeatGeneration"].guiActiveEditor = true;
         Fields["systemTemperature"].guiActiveEditor = true;
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running",
+          Utils.ToSI((engineFraction * systemPower), "F0"));
       }
 
     }
@@ -162,7 +165,8 @@ namespace SystemHeat
         heatModule.AddFlux(moduleID, systemOutletTemperature, engineFraction * systemPower, true);
         Fields["systemHeatGeneration"].guiActive = true;
         Fields["systemTemperature"].guiActive = true;
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", 
+          Utils.ToSI((engineFraction * systemPower),"F0"));
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
       }
       else
@@ -170,7 +174,8 @@ namespace SystemHeat
         heatModule.AddFlux(moduleID, 0f, 0f, false);
         Fields["systemHeatGeneration"].guiActive = false;
         Fields["systemTemperature"].guiActive = false;
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", (engineFraction * systemPower).ToString("F0"));
+        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_HeatGeneration_Running", 
+          Utils.ToSI((engineFraction * systemPower),"F0"));
         systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatEngine_Field_Temperature_Running", heatModule.currentLoopTemperature.ToString("F0"), systemOutletTemperature.ToString("F0"));
       }
 

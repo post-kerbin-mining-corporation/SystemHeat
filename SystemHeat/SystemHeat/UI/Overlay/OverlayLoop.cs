@@ -67,18 +67,21 @@ namespace SystemHeat.UI
 
     public void GenerateLinePoints()
     {
+      int moduleCount = heatLoop.GetActiveModuleCount();
       // Collect positions of all heat modules
-      Vector3[] systemCoords = new Vector3[heatLoop.LoopModules.Count];
-      for (int i = 0; i < heatLoop.LoopModules.Count; i++)
+      Vector3[] systemCoords = new Vector3[moduleCount];
+      for (int i = 0; i < moduleCount; i++)
       {
-        if (HighLogic.LoadedSceneIsEditor)
-        {
-          systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
-        }
+        if (heatLoop.LoopModules[i].moduleUsed) {
+          if (HighLogic.LoadedSceneIsEditor)
+          {
+            systemCoords[i] = heatLoop.LoopModules[i].part.transform.position;
+          }
 
-        if (HighLogic.LoadedSceneIsFlight)
-        {
-          systemCoords[i] = heatLoop.LoopModules[i].part.vessel.vesselTransform.InverseTransformPoint(heatLoop.LoopModules[i].part.transform.position);
+          if (HighLogic.LoadedSceneIsFlight)
+          {
+            systemCoords[i] = heatLoop.LoopModules[i].part.vessel.vesselTransform.InverseTransformPoint(heatLoop.LoopModules[i].part.transform.position);
+          }
         }
       }
       
