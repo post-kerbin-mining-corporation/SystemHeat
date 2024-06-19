@@ -7,6 +7,11 @@ using KSP.Localization;
 
 namespace SystemHeat
 {
+  /// <summary>
+  /// Plug a fuel container into the SystemHeat system to allow it to boil off
+  /// if not cooled
+  /// Mostly ripped from CryoTanks
+  /// </summary>
   public class ModuleSystemHeatCryoTank : PartModule
   {
 

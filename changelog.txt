@@ -1,3 +1,11 @@
+v0.6.1
+------
+- Improved configuration of heat exhangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
+- Performance pass, mostly on string handling in various system heat modules, should improve performance in a lot of places
+- Fixed a word order in Chinese localization (c6ForH66)
+- SystemHeatBoiloff: Fixed boiloff scale calculations which would negatively affect playing with the connections to stock thermal systems (Starstrider42)
+- SystemHeatBoiloff: Improved the balance of cooling costs for various tanks (Wyzard256)
+
 v0.6.0
 ------
 - Most UI fields now report in SI-prefixed units for flux (W, kW, MW, etc). This is not (yet) true for all modules though. 

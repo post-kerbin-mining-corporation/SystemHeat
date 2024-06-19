@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.Localization;
-
+using System.Diagnostics.Eventing.Reader;
 
 namespace SystemHeat
 {
@@ -37,6 +37,10 @@ namespace SystemHeat
     // Map temperature to power consumed
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureDeltaCostCurve = new FloatCurve();
+
+    // Map temperature to power consumed
+    [KSPField(isPersistant = false)]
+    public FloatCurve heatFlowCostCurve = new FloatCurve();
 
     [KSPField(isPersistant = true, guiActive = false, guiName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_MaxHeatTransfer", groupName = "heatExchanger", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatExchanger_UIGroup_Title"),
       UI_FloatRange(minValue = 0f, maxValue = 2000f, stepIncrement = 25)]
@@ -107,7 +111,10 @@ namespace SystemHeat
     {
       DoToggleDirection();
     }
-
+    protected float outletTemperature = 0f;
+    protected float outputHeat = 0f;
+    protected bool loopTransferPossible = false;
+    protected bool powerAvailable = false;
 
     protected Renderer onLight;
     protected Renderer dirLight;
@@ -199,6 +206,70 @@ namespace SystemHeat
             onLight.material.SetColor("_TintColor", XKCDColors.Red);
         }
 
+        if (part.IsPAWVisible())
+        {
+          UpdatePAW();
+        }
+      }
+    }
+    protected void UpdatePAW()
+    {
+      if (Enabled)
+      {
+        Fields["PowerStatus"].guiActive = true;
+        Fields["PowerStatus"].guiActiveEditor = true;
+
+        /// Different PAW logic in editor
+        if (HighLogic.LoadedSceneIsEditor)
+        {
+          if (loopTransferPossible)
+          {
+            PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active",
+              (-CurrentPowerConsumption).ToString("F0"));
+            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
+              outletTemperature.ToString("F0"),
+              Utils.ToSI(outputHeat, "F0"),
+              Utils.ToSI(sourceModule.consumedSystemFlux, "F0"));
+          }
+          else
+          {
+            PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active",
+              (-CurrentPowerConsumption).ToString("F0"));
+            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
+          }
+        }
+        else
+        {
+          if (powerAvailable)
+          {
+            if (loopTransferPossible)
+            {
+              PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active",
+                (-CurrentPowerConsumption).ToString("F1"));
+              Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
+                outletTemperature.ToString("F0"),
+                Utils.ToSI(outputHeat, "F0"));
+            }
+            else
+            {
+              PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active",
+                (-CurrentPowerConsumption).ToString("F1"));
+              Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
+            }
+          }
+          else
+          {
+            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_NoPower");
+            Fields["PowerStatus"].guiActive = false;
+            Fields["PowerStatus"].guiActiveEditor = false;
+          }
+        }
+      }
+      else
+      {
+        Fields["PowerStatus"].guiActive = false;
+        Fields["PowerStatus"].guiActiveEditor = false;
+        Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
       }
     }
     public void FixedUpdate()
@@ -247,51 +318,30 @@ namespace SystemHeat
     {
       if (Enabled)
       {
+        outletTemperature = Mathf.Clamp(sourceModule.nominalLoopTemperature + OutletAdjustement, 0f, float.MaxValue);
+        outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement); ;
 
-        Fields["PowerStatus"].guiActive = true;
-        Fields["PowerStatus"].guiActiveEditor = true;
-        float outputHeat = HeatRate;
-        float outletTemperature = sourceModule.nominalLoopTemperature;
-
-        float powerCost = temperatureDeltaCostCurve.Evaluate(OutletAdjustement);
+        /// Calculate a power cost from that change in temperature desired and the heat flow rate
+        float powerCost = temperatureDeltaCostCurve.Evaluate(OutletAdjustement) + heatFlowCostCurve.Evaluate(HeatRate);
 
         double amt = this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, powerCost * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL);
         CurrentPowerConsumption = -powerCost;
 
-
-        outletTemperature = Mathf.Clamp(outletTemperature + OutletAdjustement, 0f, float.MaxValue);
-
         if (destModule.LoopTemperature <= outletTemperature * 1.5f)
         {
+          loopTransferPossible = true;
           sourceModule.AddFlux(moduleID, 0f, -HeatRate, false);
-
-
-          outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
-
-          PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
-          Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
-            outletTemperature.ToString("F0"),
-            Utils.ToSI(outputHeat, "F0"),
-            Utils.ToSI(sourceModule.consumedSystemFlux, "F0"));
           destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
         }
         else
         {
-
-          PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F0"));
-          Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
+          loopTransferPossible = false;
           destModule.AddFlux(moduleID, outletTemperature, 0f, true);
           sourceModule.AddFlux(moduleID, 0f, 0f, false);
-
         }
-
       }
       else
       {
-        Fields["PowerStatus"].guiActive = false;
-        Fields["PowerStatus"].guiActiveEditor = false;
-        Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
-
         destModule.ignoreTemperature = true;
         sourceModule.ignoreTemperature = true;
       }
@@ -305,59 +355,42 @@ namespace SystemHeat
 
       if (Enabled)
       {
+        outputHeat = HeatRate;
+        outletTemperature = sourceModule.nominalLoopTemperature;
 
-        Fields["PowerStatus"].guiActive = true;
-        Fields["PowerStatus"].guiActiveEditor = true;
-        float outputHeat = HeatRate;
-        float outletTemperature = sourceModule.nominalLoopTemperature;
-
-        float powerCost = temperatureDeltaCostCurve.Evaluate(OutletAdjustement);
+        float powerCost = temperatureDeltaCostCurve.Evaluate(OutletAdjustement) + heatFlowCostCurve.Evaluate(HeatRate);
 
         double amt = this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, powerCost * TimeWarp.fixedDeltaTime, ResourceFlowMode.ALL_VESSEL);
         CurrentPowerConsumption = -powerCost;
 
         if (amt > 0.0000000001)
         {
+          powerAvailable = true;
           outletTemperature = Mathf.Clamp(outletTemperature + OutletAdjustement, 0f, float.MaxValue);
 
           if (destModule.LoopTemperature <= outletTemperature * 1.5f)
           {
+            loopTransferPossible = true;
             sourceModule.AddFlux(moduleID, 0f, -HeatRate, false);
-
-
             outputHeat = Mathf.Min(-sourceModule.consumedSystemFlux, HeatRate) + temperatureDeltaHeatCurve.Evaluate(OutletAdjustement);
-
-            PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F1"));
-            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Active",
-              outletTemperature.ToString("F0"),
-              Utils.ToSI(outputHeat, "F0"));
             destModule.AddFlux(moduleID, outletTemperature, outputHeat, true);
           }
           else
           {
-
-            PowerStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_PowerCost_Active", powerCost.ToString("F1"));
-            Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_TooHot");
+            loopTransferPossible = false;
             destModule.AddFlux(moduleID, outletTemperature, 0f, true);
             sourceModule.AddFlux(moduleID, 0f, 0f, false);
-
           }
         }
         else
         {
-          Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_NoPower");
+          powerAvailable = false;
           destModule.AddFlux(moduleID, 0f, 0f, false);
           sourceModule.AddFlux(moduleID, 0f, 0f, false);
-          Fields["PowerStatus"].guiActive = false;
-          Fields["PowerStatus"].guiActiveEditor = false;
         }
-
       }
       else
       {
-        Fields["PowerStatus"].guiActive = false;
-        Fields["PowerStatus"].guiActiveEditor = false;
-        Status = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatExchanger_Field_Status_Disabled");
         destModule.AddFlux(moduleID, 0f, 0f, false);
         sourceModule.AddFlux(moduleID, 0f, 0f, false);
       }

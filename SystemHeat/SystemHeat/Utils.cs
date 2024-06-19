@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace SystemHeat
 {
-
   public enum LogType
   {
     UI,
@@ -20,7 +19,6 @@ namespace SystemHeat
   public static class Utils
   {
     public static string logTag = "SystemHeat";
-
 
     /// <summary>
     /// Log a message with the mod name tag prefixed
@@ -52,6 +50,15 @@ namespace SystemHeat
     public static void LogError(string toLog)
     {
       Debug.LogError(String.Format("[{0}]{1}", logTag, toLog));
+    }
+
+
+    // <summary>
+    /// Return true if the Part Action Window for this part is shown, false otherwise
+    /// </summary>
+    public static bool IsPAWVisible(this Part part)
+    {
+      return part.PartActionWindow != null && part.PartActionWindow.isActiveAndEnabled;
     }
 
 

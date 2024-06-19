@@ -125,8 +125,12 @@
     <Compile Include="UI\ReactorUI\ReactorWidget.cs" />
     <Compile Include="UI\SystemHeatUI.cs" />
     <Compile Include="UI\SystemHeatUILoader.cs" />
-    <Compile Include="UI\ToolbarPanel.cs" />
-    <Compile Include="UI\ToolbarPanelLoopWidget.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarPanel.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarPanelLoopWidget.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarLoops.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarSettings.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarSituation.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarStats.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

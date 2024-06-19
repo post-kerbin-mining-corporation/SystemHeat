@@ -10,7 +10,6 @@ namespace SystemHeat
   /// The simulation interface to the heat system. All heat producing or consuming modules
   /// on a vessel interact with an instance of this module to add and remove heat.
   /// </summary>
-
   public class ModuleSystemHeat : PartModule
   {
     // Unique name of the module on a part
@@ -112,21 +111,6 @@ namespace SystemHeat
       set { currentLoopFlux = value; }
     }
 
-    public string CurrentStatusString
-    {
-      get
-      {
-        if (totalSystemFlux >= 0f)
-        {
-          return $"Temperature Output: {systemNominalTemperature} K \nHeat Output: {totalSystemFlux} kW";
-        }
-        else
-        {
-          return $"Maximum Temperature {systemNominalTemperature} K \nHeat Consumed {totalSystemFlux} kW";
-        }
-      }
-    }
-
     protected SystemHeatSimulator simulator;
     protected Dictionary<string, float> fluxes;
     protected Dictionary<string, float> temperatures;
@@ -168,7 +152,6 @@ namespace SystemHeat
       Fields["currentLoopFlux"].guiActive = SystemHeatSettings.DebugPartUI;
       Fields["currentLoopFlux"].guiActiveEditor = SystemHeatSettings.DebugPartUI;
 
-
       Utils.Log("[ModuleSystemHeat]: Setup complete", LogType.Modules);
     }
 
@@ -178,7 +161,6 @@ namespace SystemHeat
       UI_ChooseOption chooseOption = HighLogic.LoadedSceneIsFlight ? chooseField.uiControlFlight as UI_ChooseOption : chooseField.uiControlEditor as UI_ChooseOption;
       chooseOption.options = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
       chooseOption.onFieldChanged = ChangeLoop;
-
     }
 
     private void ChangeLoop(BaseField field, object oldFieldValueObj)
@@ -189,7 +171,6 @@ namespace SystemHeat
         simulator.RemoveHeatModuleFromLoop((int)oldFieldValueObj, this);
         simulator.AddHeatModuleToLoop(currentLoopID, this);
       }
-
     }
 
     void ChangeAllLoops(object oldFieldValueObj)
@@ -197,8 +178,6 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsFlight)
       {
         Utils.Log($"[ModuleSystemHeat] Changing all loop {(int)oldFieldValueObj} modules to loop {currentLoopID}", LogType.Modules);
-
-
         List<ModuleSystemHeat> allHeatModules = new List<ModuleSystemHeat>();
         for (int i = 0; i < part.vessel.Parts.Count; i++)
         {
@@ -217,9 +196,7 @@ namespace SystemHeat
             if (!usedModules.Contains(allHeatModules[i].currentLoopID))
             {
               usedModules.Add(allHeatModules[i].currentLoopID);
-
               Utils.Log($"[ModuleSystemHeat] {allHeatModules[i].currentLoopID} is in use", LogType.Modules);
-
             }
           }
         }
@@ -288,9 +265,7 @@ namespace SystemHeat
         }
 
         totalSystemFlux = fluxes.Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
-
         totalSystemTemperature = temperatures.Sum(x => x.Value);
-
         float denom = (temperatures.Values.ToList().Where(x => x > 0f).Count());
 
         if (denom > 0)
@@ -315,8 +290,6 @@ namespace SystemHeat
 
       if (fluxes != null && temperatures != null)
       {
-
-
         return fluxes.Where(x => x.Key != id).Sum(x => x.Value) * (float)(PhysicsGlobals.InternalHeatProductionFactor / 0.025d);
 
       }
@@ -374,42 +347,46 @@ namespace SystemHeat
 
     protected void FixedUpdate()
     {
-      if (moduleUsed)
-      {
-        SystemFluxUI = String.Format("{0}W", Utils.ToSI(totalSystemFlux, "F0"));
-        LoopTemperatureUI = String.Format("{0:F0} / {1:F0} K", currentLoopTemperature, nominalLoopTemperature);
-        if (totalSystemFlux > 0f)
-        {
-          Fields["SystemTemperatureUI"].guiActive = true;
-          Fields["SystemTemperatureUI"].guiActiveEditor = true;
-          SystemTemperatureUI = String.Format("{0:F0} K", totalSystemTemperature);
-        }
-        else
-        {
-          Fields["SystemTemperatureUI"].guiActive = false;
-          Fields["SystemTemperatureUI"].guiActiveEditor = false;
-        }
-      }
-
       if (simulator == null)
       {
         FindSimulator();
+      }
+    }
 
+    protected void Update()
+    {
+      if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
+      {
+        if (part.IsPAWVisible() && moduleUsed)
+        {
+          SystemFluxUI = String.Format("{0}W", Utils.ToSI(totalSystemFlux, "F0"));
+          LoopTemperatureUI = String.Format("{0:F0} / {1:F0} K", currentLoopTemperature, nominalLoopTemperature);
+          if (totalSystemFlux > 0f)
+          {
+            Fields["SystemTemperatureUI"].guiActive = true;
+            Fields["SystemTemperatureUI"].guiActiveEditor = true;
+            SystemTemperatureUI = String.Format("{0:F0} K", totalSystemTemperature);
+          }
+          else
+          {
+            Fields["SystemTemperatureUI"].guiActive = false;
+            Fields["SystemTemperatureUI"].guiActiveEditor = false;
+          }
+        }
       }
     }
 
     protected void FindSimulator()
     {
       if (HighLogic.LoadedSceneIsFlight)
-
+      {
         simulator = part.vessel.GetComponent<SystemHeatVessel>().Simulator;
+      }
 
       if (HighLogic.LoadedSceneIsEditor)
-
+      { 
         simulator = SystemHeatEditor.Instance.Simulator;
+      }
     }
-
-
-
   }
 }

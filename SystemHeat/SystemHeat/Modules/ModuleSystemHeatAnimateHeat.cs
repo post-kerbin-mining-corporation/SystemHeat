@@ -6,9 +6,11 @@ using UnityEngine;
 
 namespace SystemHeat
 {
+  /// <summary>
+  /// Animates a ModuleColorChanger based on SystemHeat temperatures
+  /// </summary>
   public class ModuleSystemHeatAnimateHeat : PartModule
   {
-
     // This should correspond to the related ModuleSystemHeat
     [KSPField(isPersistant = false)]
     public string systemHeatModuleID;
@@ -36,10 +38,8 @@ namespace SystemHeat
     }
     public void FixedUpdate()
     {
-      
       if (HighLogic.LoadedSceneIsFlight && scalarModule != null && heatModule != null)
       {
-        
         scalarModule.SetScalar(Mathf.Clamp01((heatModule.currentLoopTemperature - draperPoint)/maxTempAnimation));
       }
     }

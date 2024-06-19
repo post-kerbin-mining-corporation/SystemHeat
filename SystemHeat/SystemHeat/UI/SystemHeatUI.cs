@@ -82,7 +82,7 @@ namespace SystemHeat.UI
       toolbarPanel.SetVisible(showWindow);
       if (showWindow)
       {
-        SystemHeatOverlay.Instance.SetVisible(toolbarPanel.overlayToggle.isOn);
+        SystemHeatOverlay.Instance.SetVisible(toolbarPanel.OverlayMasterState);
       }
       else
       {
@@ -179,31 +179,35 @@ namespace SystemHeat.UI
 
           if (toolbarPanel != null && stockToolbarButton != null)
           {
-            if (toolbarPanel.loopPanel.activeSelf)
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+            toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUL());
+            // TODO REALLY FIX ME
+            //if (toolbarPanel.loopPanel.activeSelf)
+            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
 
-            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
-              toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 
-              toolbarPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
+            //toolbarPanel.SetToolbarPosition()
+            //toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
+            //  toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale,
+            //  toolbarPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
           }
         }
-        
-         
+
+
         if (HighLogic.LoadedSceneIsEditor)
         {
           if (stockToolbarButton != null)
           {
             //toolbarPanel.rect.localScale = new Vector3(UIMasterController.Instance.appCanvas.scaleFactor,
-             // UIMasterController.Instance.appCanvas.scaleFactor, UIMasterController.Instance.appCanvas.scaleFactor);
+            // UIMasterController.Instance.appCanvas.scaleFactor, UIMasterController.Instance.appCanvas.scaleFactor);
 
-            if (toolbarPanel.loopPanel.activeSelf)
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
-            else
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 200f);
+            //if (toolbarPanel.loopPanel.activeSelf)
+            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+            //else
+            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 200f);
 
-            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0f, 0f);
-            
-            
+            toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUR());
+              //.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0f, 0f);
+
+
           }
         }
       }

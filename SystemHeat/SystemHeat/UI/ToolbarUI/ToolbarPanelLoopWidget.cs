@@ -10,20 +10,26 @@ namespace SystemHeat.UI
 {
   public class ToolbarPanelLoopWidget : MonoBehaviour
   {
+
+    public int TrackedLoopID { get { return trackedLoopID; } }
+    public bool OverlayState { get { return overlayToggle.isOn; } }
     bool active = true;
 
-    public RectTransform rect;
-    public Toggle overlayToggle;
-    public Text overlayToggleText;
-    public Text temperatureTextHeader;
-    public Text temperatureTextValue;
-    public Text fluxTextHeader;
-    public Text fluxTextValue;
+    protected RectTransform rect;
+    protected Toggle overlayToggle;
+    protected Text overlayToggleText;
+    protected Text temperatureTextHeader;
+    protected Text temperatureTextValue;
+    protected Text fluxTextHeader;
+    protected Text fluxTextValue;
 
-    public Image swatch;
+    protected Image border;
+    protected Image swatch;
+    protected Color targetBorderColor;
+    public float pulseRate = 2f;
 
-    public int trackedLoopID = -1;
-    SystemHeatSimulator simulator;
+    protected int trackedLoopID = -1;
+    protected SystemHeatSimulator simulator;
 
     public void Awake()
     {
@@ -36,13 +42,14 @@ namespace SystemHeat.UI
       rect = this.GetComponent<RectTransform>();
       overlayToggle = transform.FindDeepChild("LoopToggle").GetComponent<Toggle>();
       swatch = transform.FindDeepChild("Swatch").GetComponent<Image>();
+      border = transform.FindDeepChild("AlertBorder").GetComponent<Image>();
       overlayToggleText = transform.FindDeepChild("LoopToggleName").GetComponent<Text>();
       temperatureTextHeader = transform.FindDeepChild("TempText").GetComponent<Text>();
       temperatureTextValue = transform.FindDeepChild("TempDataText").GetComponent<Text>();
       fluxTextHeader = transform.FindDeepChild("FluxText").GetComponent<Text>();
       fluxTextValue = transform.FindDeepChild("FluxDataText").GetComponent<Text>();
 
-      
+
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
       Localize();
@@ -90,38 +97,63 @@ namespace SystemHeat.UI
         if (lp.NetFlux == 0f)
           prefix = "";
         if (lp.NetFlux > 0f)
-          prefix = "+";
+          prefix = "▲";
         if (lp.NetFlux < 0f)
-          prefix = "";
+          prefix = "▼";
 
         fluxTextValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopFluxValue", prefix,
-        Utils.ToSI(lp.NetFlux,"F0"));
+        Utils.ToSI(lp.NetFlux, "F0"));
 
-        if (lp.Temperature >= lp.NominalTemperature)
+        UpdateTextColors(lp);
+        UpdateBorderFlasher(lp);
+      }
+    }
+    protected void UpdateTextColors(HeatLoop lp)
+    {
+      if (lp.NetFlux > 0)
+      {
+        Color32 c;
+        HexColorField.HexToColor("fe8401", out c);
+        fluxTextValue.color = c;
+      }
+      else
+      {
+        Color32 c;
+        HexColorField.HexToColor("B4D455", out c);
+        fluxTextValue.color = c;
+      }
+      if (lp.Temperature >= (lp.NominalTemperature +0.5f))
+      {
+        targetBorderColor = Color.red;
+        Color32 c;
+        HexColorField.HexToColor("fe8401", out c);
+        temperatureTextValue.color = c;
+      }
+      else
+      {
+        Color32 c;
+        HexColorField.HexToColor("B4D455", out c);
+        temperatureTextValue.color = c;
+      }
+    }
+    protected void UpdateBorderFlasher(HeatLoop lp)
+    {
+      if (border != null)
+      {
+        if (lp.NetFlux <= 0.05f && lp.Temperature <= (lp.NominalTemperature + 0.5f))
         {
-          Color32 c;
-          HexColorField.HexToColor("fe8401", out c);
-          temperatureTextValue.color = c;
+          targetBorderColor = new Color(0, 0, 0, 0f);
+        }
+        else if (lp.Temperature > (lp.NominalTemperature + 0.5f))
+        {
+          targetBorderColor = new Color(0.97f, 0.27f, 0, 0.75f);
         }
         else
         {
-          Color32 c;
-          HexColorField.HexToColor("B4D455", out c);
-          temperatureTextValue.color = c;
+          targetBorderColor = new Color(0.97f, 0.69f, 0, 0.75f);
         }
-
-        if (lp.NetFlux > 0)
-        {
-          Color32 c;
-          HexColorField.HexToColor("fe8401", out c);
-          fluxTextValue.color = c;
-        }
-        else
-        {
-          Color32 c;
-          HexColorField.HexToColor("B4D455", out c);
-          fluxTextValue.color = c;
-        }
+        float pingPong = Mathf.PingPong(Time.time, 1f);
+        border.color = Color.Lerp(new Color(0, 0, 0, 0f), targetBorderColor, pingPong * pulseRate);
       }
     }
     public void ToggleOverlay()

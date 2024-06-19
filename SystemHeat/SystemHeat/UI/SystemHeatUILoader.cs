@@ -14,7 +14,6 @@ namespace SystemHeat.UI
     public static GameObject OverlayPanelPrefab { get { return overlayPanelPrefab; } }
     public static GameObject ToolbarPanelPrefab { get { return toolbarPanelPrefab; } }
     public static GameObject ToolbarPanelLoopPrefab { get { return toolbarPanelLoopPrefab; } }
-
     public static GameObject ReactorDataFieldPrefab { get { return reactorDataFieldPrefab; } }
     public static GameObject ReactorWidgetPrefab { get { return reactorWidgetPrefab; } }
     public static GameObject ReactorToolbarPanelPrefab { get { return reactorToolbarPanelPrefab; } }
