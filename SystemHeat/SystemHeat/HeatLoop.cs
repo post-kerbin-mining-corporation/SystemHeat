@@ -29,6 +29,14 @@ namespace SystemHeat
     /// </summary>
     public float NetFlux { get; set; }
     /// <summary>
+    /// The loop's total positive flux from all sources
+    /// </summary>
+    public float PositiveFlux { get; set; }
+    /// <summary>
+    /// The loop's total negative flux from all sources
+    /// </summary>
+    public float NegativeFlux { get; set; }
+    /// <summary>
     /// The loop's current coolant volume
     /// </summary>
     public float Volume { get; set; }
@@ -179,13 +187,26 @@ namespace SystemHeat
     /// </summary>
     protected float CalculatePositiveFlux()
     {
-      float currentNetFlux = 0f;
+      float currentPosFlux = 0f;
       for (int i = 0; i < modules.Count; i++)
       {
         if (modules[i].moduleUsed)
-          currentNetFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux + currentNetFlux : currentNetFlux;
+          currentPosFlux = modules[i].totalSystemFlux > 0 ? modules[i].totalSystemFlux + currentPosFlux : currentPosFlux;
       }
-      return currentNetFlux;
+      return currentPosFlux;
+    }
+    /// <summary>
+    /// Calculates the total positive flux of the loop
+    /// </summary>
+    protected float CalculateNegativeFlux()
+    {
+      float currentNegFlux = 0f;
+      for (int i = 0; i < modules.Count; i++)
+      {
+        if (modules[i].moduleUsed)
+          currentNegFlux = modules[i].totalSystemFlux < 0 ? modules[i].totalSystemFlux + currentNegFlux : currentNegFlux;
+      }
+      return currentNegFlux;
     }
     /// <summary>
     /// Simulates a single iteration of the heat loop. Broadly:
@@ -198,10 +219,11 @@ namespace SystemHeat
     {
       // Calculate the loop net flux
       float currentNetFlux = CalculateNetFlux();
-      float currentPositiveFlux = CalculatePositiveFlux();
+      PositiveFlux = CalculatePositiveFlux();
+      NegativeFlux = CalculatePositiveFlux();
       float absFlux = Mathf.Abs(currentNetFlux);
 
-      AllocateFlux(currentPositiveFlux);
+      AllocateFlux(PositiveFlux);
       NetFlux = currentNetFlux;
 
       // Determine the ideal change in temperature
@@ -223,7 +245,7 @@ namespace SystemHeat
           Temperature = Temperature + deltaTemperatureIdeal * scale;
         }
         // in a case of low abs flux and no positive flux, decay loop to nominal
-        if (absFlux == 0 && currentPositiveFlux == 0)
+        if (absFlux == 0 && PositiveFlux == 0)
         {
           float decayFlux = (Temperature - NominalTemperature) * SystemHeatSettings.HeatLoopDecayCoefficient;
           Temperature = Temperature - decayFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep; ;
@@ -233,7 +255,7 @@ namespace SystemHeat
       if (Temperature < NominalTemperature)
       {
         // Increase based on positive flux only
-        Temperature = Temperature + currentPositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
+        Temperature = Temperature + PositiveFlux * 1000f / (Volume * CoolantType.Density * CoolantType.HeatCapacity) * simTimeStep;
 
         /// clamp to nominal in case exceeded this iteration
         Temperature = Mathf.Clamp(Temperature, 0f, NominalTemperature);

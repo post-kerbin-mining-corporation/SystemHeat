@@ -27,9 +27,7 @@ namespace SystemHeat.UI
     /// </summary>
     public virtual Vector3[] GetDrawingCoords(float padding)
     {
-      Vector3[] coordsList = new Vector3[1] ;
-      coordsList[0] = coords;
-      return coordsList;
+      return new Vector3[] { coords };
     }
 
     /// <summary>
@@ -80,32 +78,62 @@ namespace SystemHeat.UI
     /// </summary>
     public override Vector3[] GetDrawingCoords(float padding)
     {
-      Vector3[] coordsList = new Vector3[6];
-
+      Vector3[] coordsList; //= new Vector3[6];
+      
       if (closestBounds == 0 || closestBounds == 3)
         padding = -padding;
-
-      if (closestBounds < 2)
+      if ((coords - coordsProjected).sqrMagnitude < 1.5f)
       {
-        coordsList[5] = coordsProjected + new Vector3(0, padding, 0);
-        coordsList[0] = coordsProjected + new Vector3(0, -padding, 0);
+        coordsList = new Vector3[4];
+        if (closestBounds < 2)
+        {
+          coordsList[3] = coordsProjected + new Vector3(0, padding, 0);
+          coordsList[0] = coordsProjected + new Vector3(0, -padding, 0);
 
-        coordsList[3] = coords + new Vector3(0, padding, 0);
-        coordsList[2] = coords + new Vector3(0, -padding, 0);
+          coordsList[2] = coords + new Vector3(0, padding, 0);
+          coordsList[1] = coords + new Vector3(0, -padding, 0);
 
-        coordsList[4] = new Vector3(coordsProjected.x, coordsProjected.y + padding, coords.z);
-        coordsList[1] = new Vector3(coordsProjected.x, coordsProjected.y - padding, coords.z);
+          //coordsList[4] = new Vector3(coordsProjected.x, coordsProjected.y + padding, coords.z);
+          //coordsList[1] = new Vector3(coordsProjected.x, coordsProjected.y - padding, coords.z);
 
-      } else
+        }
+        else
+        {
+          coordsList[3] = coordsProjected + new Vector3(padding, 0, 0);
+          coordsList[0] = coordsProjected + new Vector3(-padding, 0, 0);
+
+          coordsList[2] = coords + new Vector3(padding, 0, 0);
+          coordsList[1] = coords + new Vector3(-padding, 0, 0);
+
+          //coordsList[4] = new Vector3(coordsProjected.x + padding, coordsProjected.y, coords.z);
+          //coordsList[1] = new Vector3(coordsProjected.x - padding, coordsProjected.y, coords.z);
+        }
+      }
+      else
       {
-        coordsList[5] = coordsProjected + new Vector3(padding, 0, 0);
-        coordsList[0] = coordsProjected + new Vector3(-padding, 0, 0);
+        coordsList = new Vector3[6];
+        if (closestBounds < 2)
+        {
+          coordsList[5] = coordsProjected + new Vector3(0, padding, 0);
+          coordsList[0] = coordsProjected + new Vector3(0, -padding, 0);
 
-        coordsList[3] = coords + new Vector3(padding, 0, 0);
-        coordsList[2] = coords +  new Vector3(-padding, 0, 0);
+          coordsList[3] = coords + new Vector3(0, padding, 0);
+          coordsList[2] = coords + new Vector3(0, -padding, 0);
 
-        coordsList[4] = new Vector3(coordsProjected.x + padding, coordsProjected.y , coords.z);
-        coordsList[1] = new Vector3(coordsProjected.x - padding, coordsProjected.y, coords.z);
+          coordsList[4] = new Vector3(coordsProjected.x, coordsProjected.y + padding, coords.z);
+          coordsList[1] = new Vector3(coordsProjected.x, coordsProjected.y - padding, coords.z);
+
+        } else
+        {
+          coordsList[5] = coordsProjected + new Vector3(padding, 0, 0);
+          coordsList[0] = coordsProjected + new Vector3(-padding, 0, 0);
+
+          coordsList[3] = coords + new Vector3(padding, 0, 0);
+          coordsList[2] = coords + new Vector3(-padding, 0, 0);
+
+          coordsList[4] = new Vector3(coordsProjected.x + padding, coordsProjected.y, coords.z);
+          coordsList[1] = new Vector3(coordsProjected.x - padding, coordsProjected.y, coords.z);
+        }
       }
       return coordsList;
     }

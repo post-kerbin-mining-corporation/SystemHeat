@@ -84,8 +84,16 @@ namespace SystemHeat
     // Loop flux tolerance
     public static float AbsFluxThreshold = 0.5f;
 
-
+    // Overlay Stuff
     public static float OverlayBaseLineWidth = 4f;
+    public static int OverlayBaseLineQueue = 3000;
+    public static float OverlayOutlineLineWidth = 4f;
+    public static int OverlayOutlineLineQueue = 3025;
+
+
+    public static float OverlayWeldThreshold = 15f;
+    public static float OverlayLineBevel = 0.05f;
+    public static int  OverlayLineBevelIterations = 2;
 
     public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;

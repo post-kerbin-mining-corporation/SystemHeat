@@ -76,8 +76,8 @@ namespace SystemHeat.UI
     void PollLoopWidgets(SystemHeatSimulator simulator)
     {
 
-      loopPanelScrollBackground.gameObject.SetActive(!simulator.HeatLoops.Count == 0);
-      loopPanelScrollCarat.gameObject.SetActive(!simulator.HeatLoops.Count == 0);
+      loopPanelScrollBackground.gameObject.SetActive(!(simulator.HeatLoops.Count == 0));
+      loopPanelScrollCarat.gameObject.SetActive(!(simulator.HeatLoops.Count == 0));
 
       for (int i = loopPanelWidgets.Count - 1; i >= 0; i--)
       {
@@ -132,6 +132,7 @@ namespace SystemHeat.UI
       loopPanelScrollViewportRect.anchorMax = loopPanelScrollBackground.anchorMax = loopPanelScrollCarat.anchorMax = new Vector2(1, 1);
      
       loopPanelScrollCarat.anchoredPosition = new Vector2(-11, buttonYOffsetFromTop);
+      loopPanelScrollCarat.sizeDelta = new Vector2(17, 17);
 
       if (widgetTotalHeight < loopPanelMaxHeight)
       {

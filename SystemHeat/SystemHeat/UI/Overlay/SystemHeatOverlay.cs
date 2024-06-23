@@ -23,9 +23,8 @@ namespace SystemHeat.UI
 
     protected Transform overlayRoot;
     protected SystemHeatSimulator simulator;
-    protected List<OverlayLoop> overlayLoops;
+    public List<OverlayLoop> overlayLoops;
 
-    // protected Dictionary<int, bool> overlayLoopVisibility;
     protected List<OverlayPanel> overlayPanels;
 
     protected void Awake()
