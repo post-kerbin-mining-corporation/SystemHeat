@@ -203,9 +203,12 @@ namespace SystemHeat.UI
     {
       if (SystemHeatSettings.DebugUI)
         Utils.Log("[ReactorToolbar]: OnDestroy Fired");
+
       // Remove the stock toolbar button
+      GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherDestroyed);
       GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
       GameEvents.onVesselChange.Remove(OnVesselChanged);
+
       if (stockToolbarButton != null)
       {
         ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);

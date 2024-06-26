@@ -180,14 +180,6 @@ namespace SystemHeat.UI
           if (toolbarPanel != null && stockToolbarButton != null)
           {
             toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUL());
-            // TODO REALLY FIX ME
-            //if (toolbarPanel.loopPanel.activeSelf)
-            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
-
-            //toolbarPanel.SetToolbarPosition()
-            //toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
-            //  toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale,
-            //  toolbarPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
           }
         }
 
@@ -196,18 +188,7 @@ namespace SystemHeat.UI
         {
           if (stockToolbarButton != null)
           {
-            //toolbarPanel.rect.localScale = new Vector3(UIMasterController.Instance.appCanvas.scaleFactor,
-            // UIMasterController.Instance.appCanvas.scaleFactor, UIMasterController.Instance.appCanvas.scaleFactor);
-
-            //if (toolbarPanel.loopPanel.activeSelf)
-            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
-            //else
-            //  toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 200f);
-
             toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUR());
-              //.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0f, 0f);
-
-
           }
         }
       }
@@ -231,8 +212,6 @@ namespace SystemHeat.UI
 
     void ResetToolbarPanel()
     {
-      // Refresh reactors
-
       if (HasHeatModules(FlightGlobals.ActiveVessel))
       {
         Utils.Log($"[SystemHeatToolbar]: Found modules", LogType.UI);
@@ -274,6 +253,10 @@ namespace SystemHeat.UI
       {
         ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
       }
+      GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
+      GameEvents.onGUIApplicationLauncherDestroyed.Remove(OnGUIAppLauncherDestroyed);
+      GameEvents.onGUIApplicationLauncherUnreadifying.Remove(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
+      GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(OnVesselChanged));
     }
 
     protected void OnToolbarButtonToggle()

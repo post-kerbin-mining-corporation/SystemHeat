@@ -32,9 +32,13 @@ namespace SystemHeat.UI
       lineStraight = null;
       Utils.Log($"[OverlayLine]: building line for loop ID {id}");
 
-      lineWidth = SystemHeatSettings.OverlayBaseLineWidth;
-      lineWidthStraight = 6f;// SystemHeatSettings.OverlayBaseLineWidth;
+      lineWidth = SystemHeatSettings.OverlayActiveLineWidth;
+      lineWidthStraight = SystemHeatSettings.OverlayBaseLineWidth;
       outlineWidth = SystemHeatSettings.OverlayOutlineLineWidth;
+
+      textureScaleFactor = SystemHeatSettings.OverlayActiveLineTextureScaleFactor;
+      textureScrollRate = SystemHeatSettings.OverlayActiveLineTextureScrollRate;
+
 
       if (HighLogic.LoadedSceneIsEditor)
         VectorLine.SetCamera3D(EditorLogic.fetch.editorCamera);
@@ -67,7 +71,6 @@ namespace SystemHeat.UI
       lineOutline.material = new Material(Shader.Find("GUI/Text Shader"));
       lineOutline.texture = lineBox;
       lineOutline.continuousTexture = true;
-      //line.maxWeldDistance = SystemHeatSettings.OverlayWeldThreshold;
       lineOutline.material.renderQueue = SystemHeatSettings.OverlayOutlineLineQueue;
 
 

@@ -33,6 +33,40 @@ namespace SystemHeat.UI
       }
     }
   }
+  public class ImageProgressTickAnimator : MonoBehaviour
+  {
+    public bool Animate { get; set; }
+    public float TickRate = 3f;
+    public float Slices = 4f;
+    public float SlicesUsed = 1f;
+
+    protected Image image;
+    // Use this for initialization
+    void Start()
+    {
+      image = this.GetComponent<Image>();
+    }
+
+
+    // Update is called once per frame
+    void Update()
+    {
+      if (image != null)
+      {
+        if (Animate)
+        {
+          //.25
+
+          float loop = (int)(Mathf.Repeat(Time.time * TickRate, SlicesUsed + 1.95f) - 1f);
+          //Debug.Log($"{loop}, {SlicesUsed}, {loop / Slices}");
+          // snap to .25,.5, etc
+          image.fillAmount = loop / Slices;
+        }
+      }
+    }
+
+  }
+
   public class ImageFadeAnimator : MonoBehaviour
   {
     public float rate = 2f;

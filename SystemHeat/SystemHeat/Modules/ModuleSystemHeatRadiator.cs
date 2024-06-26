@@ -208,20 +208,29 @@ namespace SystemHeat
 
         if (HighLogic.LoadedSceneIsEditor)
         {
-          radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
-          convectiveFlux = 0f;
-
-          HeatLoop lp = heatModule.Loop;
-          if (lp != null)
+          if (base.IsCooling)
           {
-            float tDelta = lp.ConvectionTemperature - Mathf.Clamp(heatModule.LoopTemperature,
-              (float)PhysicsGlobals.SpaceTemperature, temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time);
+            radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
+            convectiveFlux = 0f;
 
-            convectiveFlux = Mathf.Clamp(
-               tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
-              float.MinValue, 0f);
+            HeatLoop lp = heatModule.Loop;
+            if (lp != null)
+            {
+              float tDelta = lp.ConvectionTemperature - Mathf.Clamp(
+                heatModule.LoopTemperature,
+                (float)PhysicsGlobals.SpaceTemperature,
+                temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time);
+
+              convectiveFlux = Mathf.Clamp(
+                 tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
+                float.MinValue, 0f);
+            }
+            heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
           }
-          heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
+          else
+          {
+            heatModule.AddFlux(moduleID, 0f, 0f, false);
+          }
         }
       }
     }
@@ -268,11 +277,11 @@ namespace SystemHeat
       {
         if (sunTracking)
         {
-          this.Events["ToggleEditorSunTracking"].guiName = "Disable Sun Tracking";
+          this.Events["ToggleEditorSunTracking"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_SunTracking_Disable");
         }
         else
         {
-          this.Events["ToggleEditorSunTracking"].guiName = "Enable Sun Tracking";
+          this.Events["ToggleEditorSunTracking"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_SunTracking_Enable");
         }
         ConvectionStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Running",
           Utils.ToSI(convectiveFlux, "F0"));

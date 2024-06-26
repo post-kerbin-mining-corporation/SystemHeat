@@ -49,7 +49,7 @@ namespace SystemHeat.UI
       fluxTextHeader = transform.FindDeepChild("FluxText").GetComponent<Text>();
       fluxTextValue = transform.FindDeepChild("FluxDataText").GetComponent<Text>();
 
-
+      border.raycastTarget = false;
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
       Localize();

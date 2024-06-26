@@ -1,7 +1,22 @@
-v0.6.1
+v0.7.0
 ------
-- Improved configuration of heat exhangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
+- Rebuilt the Toolbar Panel 
+-- Now looks better overall
+-- Data display is a bit more compact and easy on the eyes
+-- Enhanced communication: loops now flash when one of them is having issues
+-- Behaves better with UI size changes
+- Rebuilt the Overlay
+-- Overlay lines now animate when something in a loop is doing something 
+-- Overlay line drawing is cleaner and faster
+-- System icons have been simplified: the Panel has been removed as it wasn't giving much useful information
+-- System icons now animate when a system is doing something
+-- New animated temperature gauge helps see whether a system is in a good place temperature-wise
+-- New animated flux increase/decrease gauges show how whether a system is contributing heat or removing heat to a loop and qualitatively how much
+-- Improved visibility for system warning temperature flashes
+- Improved configuration of heat exchangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
 - Performance pass, mostly on string handling in various system heat modules, should improve performance in a lot of places
+- Fixed an inability to localize the sun tracking disable function for radiators
+- Hid an annoying coolant log message in normal use
 - Fixed a word order in Chinese localization (c6ForH66)
 - SystemHeatBoiloff: Fixed boiloff scale calculations which would negatively affect playing with the connections to stock thermal systems (Starstrider42)
 - SystemHeatBoiloff: Improved the balance of cooling costs for various tanks (Wyzard256)

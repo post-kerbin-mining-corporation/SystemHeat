@@ -15,6 +15,7 @@ namespace SystemHeat.UI
     public RectTransform loopPanelScrollRootRect;
     public RectTransform loopPanelScrollViewportRect;
 
+    protected ScrollRect loopPanelScrollRect;
     protected RectTransform loopPanelRootRect;
     protected RectTransform basePanelRootRect;
     protected List<ToolbarPanelLoopWidget> loopPanelWidgets;
@@ -25,10 +26,10 @@ namespace SystemHeat.UI
 
       loopPanelWidgets = new List<ToolbarPanelLoopWidget>();
 
-      //loopsTitle = root.FindDeepChild("LoopsHeaderText").GetComponent<Text>();
-      //noLoopsText = root.FindDeepChild("NoLoopText").GetComponent<Text>();
       loopPanel = root.FindDeepChild("PanelLoops").gameObject;
       loopPanelRootRect = loopPanel.GetComponent<RectTransform>();
+      loopPanelScrollRect = loopPanel.GetComponent<ScrollRect>();
+      
       basePanelRootRect = root.FindDeepChild("PanelBase").GetComponent<RectTransform>();
 
       loopPanelScrollRoot = root.FindDeepChild("Scrolly").gameObject;
@@ -38,8 +39,23 @@ namespace SystemHeat.UI
       loopPanelScrollCarat = root.FindDeepChild("LoopCarat").GetComponent<RectTransform>();
       loopPanelScrollBackground = root.FindDeepChild("LoopBackground").GetComponent<RectTransform>();
       SetVisible(shown);
+      loopPanelScrollRect.scrollSensitivity = SystemHeatSettings.UISrollSensitivity;
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        SetDirection(false);
+      }
     }
+    public void SetDirection(bool editor)
+    {
+      if (editor)
+      {
 
+      }
+      else
+      {
+        loopPanelRootRect.anchoredPosition = new Vector2(-200f, 0f);
+      }
+    }
     public void Update(SystemHeatSimulator simulator)
     {
       // Turn on the no loops text if there are no loops
@@ -49,19 +65,10 @@ namespace SystemHeat.UI
         {
           DestroyLoopWidgets();
         }
-
-        //if (!noLoopsText.gameObject.activeSelf)
-        //  noLoopsText.gameObject.SetActive(true);
-
       }
       else
       {
-
         PollLoopWidgets(simulator);
-        //if (noLoopsText.gameObject.activeSelf)
-        //  noLoopsText.gameObject.SetActive(false);
-
-
       }
     }
     void DestroyLoopWidgets()
@@ -121,34 +128,49 @@ namespace SystemHeat.UI
       VerticalLayoutGroup vlg = loopPanelScrollRootRect.GetComponent<VerticalLayoutGroup>();
 
       // TODO: don't hardcode
-      float buttonYOffsetFromTop = -120;
+      float buttonYOffsetFromTop = -107f;
       float loopPanelMaxHeight = basePanelRootRect.sizeDelta.y;
-      float widgetTotalHeight = vlg.preferredHeight;
+      float widgetTotalHeight = loopPanelWidgets.Count * 70f; //vlg.preferredHeight;
 
       Utils.Log($"Source data: buttonYOffsetFromTop={buttonYOffsetFromTop }, loopPanelMaxHeight={loopPanelMaxHeight} widgetTotalHeight={widgetTotalHeight}", LogType.UI);
       //loopPanelWidgets.Count * 68f + vlg.padding.top+vlg.padding.bottom+ 3f+7.5f*(loopPanelWidgets.Count-1);
       loopPanelRootRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, loopPanelMaxHeight);
-      loopPanelScrollViewportRect.anchorMin = loopPanelScrollBackground.anchorMin = loopPanelScrollCarat.anchorMin = new Vector2(0, 0);
-      loopPanelScrollViewportRect.anchorMax = loopPanelScrollBackground.anchorMax = loopPanelScrollCarat.anchorMax = new Vector2(1, 1);
-     
-      loopPanelScrollCarat.anchoredPosition = new Vector2(-11, buttonYOffsetFromTop);
-      loopPanelScrollCarat.sizeDelta = new Vector2(17, 17);
+      loopPanelScrollViewportRect.anchorMin = loopPanelScrollBackground.anchorMin = new Vector2(0, 0);
+      loopPanelScrollViewportRect.anchorMax = loopPanelScrollBackground.anchorMax = new Vector2(1, 0);
+      loopPanelScrollCarat.anchorMin = new Vector2(0, 1);
+      loopPanelScrollCarat.anchorMax = new Vector2(0, 1);
+
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        loopPanelScrollCarat.localEulerAngles = new Vector3(0f, 0f, 180f);
+        loopPanelScrollCarat.anchoredPosition = new Vector2(200, buttonYOffsetFromTop);
+        loopPanelScrollCarat.sizeDelta = new Vector2(17, 17);
+
+      }
+      else
+      {
+        loopPanelScrollCarat.anchoredPosition = new Vector2(-11, buttonYOffsetFromTop);
+        loopPanelScrollCarat.sizeDelta = new Vector2(17, 17);
+      }
 
       if (widgetTotalHeight < loopPanelMaxHeight)
       {
-        Utils.Log($"Setting scroll viewport rect position anchors to {new Vector2(0, buttonYOffsetFromTop + widgetTotalHeight / 2f) }");
+        float topY = Mathf.Min(loopPanelMaxHeight + buttonYOffsetFromTop + widgetTotalHeight / 2f, loopPanelMaxHeight);
+        Utils.Log($"Setting scroll viewport rect position anchors to {new Vector2(0, topY) }");
         /// there will be no scrolling, set the position of the scroll rect to the top and have fun
-        loopPanelScrollViewportRect.anchoredPosition = new Vector2(0, buttonYOffsetFromTop + widgetTotalHeight / 2f);
-        loopPanelScrollViewportRect.sizeDelta = loopPanelScrollBackground.sizeDelta = new Vector2(195, widgetTotalHeight);
-        loopPanelScrollBackground.anchoredPosition = Vector2.zero;
-        loopPanelScrollBackground.offsetMin = new Vector2(loopPanelScrollBackground.offsetMin.x,
-          loopPanelMaxHeight - widgetTotalHeight);
+        loopPanelScrollViewportRect.anchoredPosition = new Vector2(0, topY);
+        loopPanelScrollViewportRect.sizeDelta = new Vector2(0, widgetTotalHeight);
+        loopPanelScrollBackground.anchoredPosition = new Vector2(0, topY);
+        loopPanelScrollBackground.sizeDelta = new Vector2(0, widgetTotalHeight);
       }
       else
       {
         /// set height to max
-        loopPanelScrollViewportRect.anchoredPosition = loopPanelScrollBackground.anchoredPosition = new Vector2(0, 0);
-        loopPanelScrollViewportRect.sizeDelta = loopPanelScrollBackground.sizeDelta = new Vector2(195, loopPanelMaxHeight);
+        loopPanelScrollViewportRect.anchoredPosition = new Vector2(0, loopPanelMaxHeight);
+        loopPanelScrollViewportRect.sizeDelta = new Vector2(0, loopPanelMaxHeight);
+        loopPanelScrollBackground.anchoredPosition = new Vector2(0, loopPanelMaxHeight);
+
+        loopPanelScrollBackground.sizeDelta = new Vector2(0, loopPanelMaxHeight);
       }
     }
 

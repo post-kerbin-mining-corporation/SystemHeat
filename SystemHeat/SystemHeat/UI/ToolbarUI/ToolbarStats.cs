@@ -20,26 +20,29 @@ namespace SystemHeat.UI
     protected RectTransform dataPanel;
     protected Button loopButton;
     protected Text loopButtonText;
+    protected RectTransform loopButtonRect;
 
     public void Initialize(Transform root, ToolbarLoops loopPanel)
     {
+      craftStatsTitle = Utils.FindChildOfType<Text>("StatsHeaderText", root);
+      dataPanel = Utils.FindChildOfType<RectTransform>("StatsDataPanel", root);
 
-      craftStatsTitle = root.FindDeepChild("StatsHeaderText").GetComponent<Text>();
+      /// Data
+      totalIncomingFluxTitle = Utils.FindChildOfType<Text>("HeatGenerationTitle", root);
+      totalOutgoingFluxTitle = Utils.FindChildOfType<Text>("HeatRejectionTitle", root);
+      totalLoopsTitle = Utils.FindChildOfType<Text>("LoopCountTitle", root);
 
-      dataPanel = root.FindDeepChild("StatsDataPanel").GetComponent<RectTransform>();
-      
-      totalIncomingFluxTitle = root.FindDeepChild("HeatGenerationTitle").GetComponent<Text>();
-      totalOutgoingFluxTitle = root.FindDeepChild("HeatRejectionTitle").GetComponent<Text>();
-      totalLoopsTitle = root.FindDeepChild("LoopCountTitle").GetComponent<Text>();
+      totalIncomingFluxValue = Utils.FindChildOfType<Text>("HeatGenerationValue", root);
+      totalOutgoingFluxValue = Utils.FindChildOfType<Text>("HeatRejectionValue", root);
+      totalLoopsValue = Utils.FindChildOfType<Text>("LoopCountValue", root);
 
-      totalIncomingFluxValue = root.FindDeepChild("HeatGenerationValue").GetComponent<Text>();
-      totalOutgoingFluxValue = root.FindDeepChild("HeatRejectionValue").GetComponent<Text>();
-      totalLoopsValue = root.FindDeepChild("LoopCountValue").GetComponent<Text>();
+      /// Show loops button
+      loopButton = Utils.FindChildOfType<Button>("MoreButton", root);
+      loopButtonRect = loopButton.GetComponent<RectTransform>();
+      loopButtonText = Utils.FindChildOfType<Text>("MoreButtonText", root);
 
-      loopButton = root.FindDeepChild("MoreButton").GetComponent<Button>();
-      loopButtonText = root.FindDeepChild("MoreButtonText").GetComponent<Text>();
-      
       loopButton.onClick.AddListener(delegate { loopPanel.ToggleLoopPanel(); });
+      
       if (HighLogic.LoadedSceneIsEditor)
       {
         SetButtonDirection(true);
@@ -48,6 +51,7 @@ namespace SystemHeat.UI
       {
         SetButtonDirection(false);
       }
+      Localize();
     }
 
     protected void Localize()
@@ -59,16 +63,21 @@ namespace SystemHeat.UI
 
     }
 
+    /// <summary>
+    /// Sets what direction the loop button should point in. Default is Right/true, aka in editor mode
+    /// </summary>
+    /// <param name="direction"></param>
     protected void SetButtonDirection(bool direction)
     {
       if (direction)
       {
         loopButtonText.text = "▶";
-        //dataPanel.offsetMax
       }
       else
       {
-        loopButtonText.text = "◂";
+        loopButtonText.text = "◀";
+        dataPanel.anchoredPosition = new Vector2(112f, dataPanel.anchoredPosition.y);
+        loopButtonRect.anchoredPosition = new Vector2(15f, loopButtonRect.anchoredPosition.y);
       }
     }
     public void Update(SystemHeatSimulator simulator)
@@ -77,6 +86,5 @@ namespace SystemHeat.UI
       totalOutgoingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OutgoingFluxValue", Utils.ToSI(simulator.TotalHeatRejection, "F0"));
       totalIncomingFluxValue.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_IncomingFluxValue", Utils.ToSI(simulator.TotalHeatGeneration, "F0"));
     }
-
   }
 }

@@ -16,8 +16,8 @@ namespace SystemHeat.UI
 
     protected Transform root;
     public OverlayLine overlayLine;
-    public float bevel1 = 0.1f;
-    public float bevel2 = 0.03f;
+    protected float bevel1 = 0.1f;
+    protected float bevel2 = 0.03f;
 
     protected List<OverlayPoint> overlayPoints;
     protected List<OverlayPanel> overlayPanels;
@@ -26,6 +26,8 @@ namespace SystemHeat.UI
 
     public OverlayLoop(HeatLoop loop, Transform overlayRoot, bool startVisible)
     {
+      bevel1 = SystemHeatSettings.OverlayLineBevel;
+      bevel2 = SystemHeatSettings.OverlayLineBevel * SystemHeatSettings.OverlayLineBevelScale;
       root = overlayRoot;
       heatLoop = loop;
       overlayLine = new OverlayLine(root, loop.ID);

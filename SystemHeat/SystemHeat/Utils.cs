@@ -89,6 +89,20 @@ namespace SystemHeat
       return scaled.ToString(format) + " " + prefix;
     }
 
+    public static T FindChildOfType<T>(string name, Transform parent)
+    {
+      T result = default(T);
+      try
+      {
+        result = parent.FindDeepChild(name).GetComponent<T>();
+      }
+      catch (NullReferenceException e)
+      {
+        Debug.LogError($"Couldn't find {name} in children of {parent.name}");
+      }
+      return result;
+    }
+
   }
 
   public static class TransformDeepChildExtension
