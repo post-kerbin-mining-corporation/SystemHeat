@@ -604,7 +604,7 @@ namespace SystemHeat
 
       if (ShortwaveFluxAffectsBoiloff || LongwaveFluxAffectsBoiloff)
       {
-        fluxScale = Math.Max((planetFlux / LongwaveFluxBaseline + (solarFlux * Albedo) / ShortwaveFluxBaseline) / 2.0f, MinimumBoiloffScale);
+        fluxScale = Math.Min(Math.Max((planetFlux / LongwaveFluxBaseline + (solarFlux * Albedo) / ShortwaveFluxBaseline) / 2.0f, MinimumBoiloffScale), MaximumBoiloffScale);
       }
       else
       {
