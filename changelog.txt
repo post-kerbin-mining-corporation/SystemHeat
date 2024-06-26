@@ -2,18 +2,19 @@ v0.7.0
 ------
 - Rebuilt the Toolbar Panel 
 -- Now looks better overall
--- Data display is a bit more compact and easy on the eyes
+-- Data display is a bit more compact and easy on the eyes (less clipped stuff)
 -- Enhanced communication: loops now flash when one of them is having issues
 -- Behaves better with UI size changes
 - Rebuilt the Overlay
 -- Overlay lines now animate when something in a loop is doing something 
 -- Overlay line drawing is cleaner and faster
--- System icons have been simplified: the Panel has been removed as it wasn't giving much useful information
+-- System icons have been simplified: the Panel has been removed as it wasn't giving much useful information beyond the PAW
 -- System icons now animate when a system is doing something
 -- New animated temperature gauge helps see whether a system is in a good place temperature-wise
 -- New animated flux increase/decrease gauges show how whether a system is contributing heat or removing heat to a loop and qualitatively how much
 -- Improved visibility for system warning temperature flashes
 - Improved configuration of heat exchangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
+- Radiators in the Editor now respect the on/off status of the system to avoid mistakes like going to flight with inactive radiators
 - Performance pass, mostly on string handling in various system heat modules, should improve performance in a lot of places
 - Fixed an inability to localize the sun tracking disable function for radiators
 - Hid an annoying coolant log message in normal use

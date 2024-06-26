@@ -32,7 +32,19 @@ namespace SystemHeat.UI
     public Canvas parentCanvas;
     public HeatLoop loop;
 
-    public Gradient temperatureGradient;
+    protected Gradient temperatureGradient;
+
+    protected Color fluxIncreasingColor = new Color(1f, 0.424f, 0f);
+    public Color fluxDecreasingColor = new Color(0f, 0.756f, 1f);
+
+    protected float tempDeltaForMaxTemperatureColor = 500f;
+    protected float maxTemperatureBarValue = 2000f;
+
+    protected float barFractionMax = 0.331f;
+    protected float barFractionBackgroundOffset = 0.015f;
+
+    protected int fluxBarTicks = 4;
+    protected float fluxPerBarTick = 50f;
 
     public void SetupComponents()
     {
@@ -67,6 +79,10 @@ namespace SystemHeat.UI
       heatIconGlow = Utils.FindChildOfType<Image>("FireGlow", transform);
       heatIconGlow.gameObject.AddComponent<ImageFadeAnimator>();
 
+      fluxPerBarTick = SystemHeatSettings.OverlayPanelFluxTickSize;
+      tempDeltaForMaxTemperatureColor = SystemHeatSettings.OverlayPanelTemperatureDeltaForMaxColor;
+      maxTemperatureBarValue = SystemHeatSettings.OverlayPanelMaxTemperatureValue;
+
       tempBarCarat.color = Color.white;
 
       heatIconGlow.enabled = false;
@@ -76,17 +92,6 @@ namespace SystemHeat.UI
     }
 
 
-    public Color fluxIncreasingColor = new Color(1f, 0.424f, 0f);
-    public Color fluxDecreasingColor = new Color(0f, 0.756f, 1f);
-
-    public float tempDeltaForMaxTemperatureColor = 500f;
-    public float maxTemperatureBarValue = 2000f;
-
-    public float barFractionMax = 0.331f;
-    public float barFractionBackgroundOffset = 0.015f;
-
-    public int fluxBarTicks = 4;
-    public float fluxPerBarTick = 50f;
 
     public void LateUpdate()
     {

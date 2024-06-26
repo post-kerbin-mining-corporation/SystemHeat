@@ -91,20 +91,18 @@ namespace SystemHeat
     public static float OverlayActiveLineWidth = 6f;
     public static float OverlayBaseLineWidth = 4f;
     public static int OverlayBaseLineQueue = 3000;
-
-
     public static float OverlayOutlineLineWidth = 4f;
     public static int OverlayOutlineLineQueue = 3025;
-
     public static float OverlayActiveLineTextureScaleFactor = 10f;
     public static float OverlayActiveLineTextureScrollRate = 2.5f;
-
     public static float OverlayLineBevel = 0.1f;
     public static float OverlayLineBevelScale = 0.3f;
-
     public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;
 
+    public static float OverlayPanelFluxTickSize = 500f;
+    public static float OverlayPanelTemperatureDeltaForMaxColor = 500f;
+    public static float OverlayPanelMaxTemperatureValue = 2000f;
     public static Dictionary<string, CoolantType> CoolantData;
 
     public static Dictionary<int, Color> ColorData = new Dictionary<int, Color> {
@@ -169,6 +167,10 @@ namespace SystemHeat
 
         settingsNode.TryGetValue("OverlayPadding", ref OverlayPadding);
         settingsNode.TryGetValue("OverlayBoundsPadding", ref OverlayBoundsPadding);
+
+        settingsNode.TryGetValue("OverlayPanelFluxTickSize", ref OverlayPanelFluxTickSize);
+        settingsNode.TryGetValue("OverlayPanelTemperatureDeltaForMaxColor", ref OverlayPanelTemperatureDeltaForMaxColor);
+        settingsNode.TryGetValue("OverlayPanelMaxTemperatureValue", ref OverlayPanelMaxTemperatureValue);
       }
       else
       {

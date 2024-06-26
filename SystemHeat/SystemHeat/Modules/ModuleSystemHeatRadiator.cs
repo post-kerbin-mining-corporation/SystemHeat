@@ -208,7 +208,7 @@ namespace SystemHeat
 
         if (HighLogic.LoadedSceneIsEditor)
         {
-          if (base.IsCooling)
+          if (base.IsCooling || base._depRad.deployState == ModuleDeployablePart.DeployState.EXTENDED)
           {
             radiativeFlux = -temperatureCurve.Evaluate(heatModule.LoopTemperature);
             convectiveFlux = 0f;
