@@ -14,10 +14,14 @@ namespace SystemHeat.UI
     public Transform scrollRoot;
     public Text windowTitle;
     public Text noReactorsObject;
-
+    public ScrollRect scrollView;
+    public RectTransform scrollViewport;
 
     private List<PartModule> reactorModules;
     private List<ReactorWidget> reactorWidgets;
+    private float widgetSize = 86f;
+    private float widgetSizeMinimized = 25f;
+    private float viewportMax = 345f;
 
     public void Awake()
     {
@@ -29,9 +33,13 @@ namespace SystemHeat.UI
       reactorWidgets = new List<ReactorWidget>();
       reactorModules = new List<PartModule>();
       rect = this.transform as RectTransform;
-      scrollRoot = transform.FindDeepChild("PanelScroll");
-      windowTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
-      noReactorsObject = transform.FindDeepChild("NoReactorsObject").GetComponent<Text>();
+      scrollRoot = Utils.FindChildOfType<Transform>("PanelScroll", transform);
+      scrollViewport = Utils.FindChildOfType<RectTransform>("ScrollViewPort", transform);
+      scrollView = transform.GetComponent<ScrollRect>();
+      windowTitle = Utils.FindChildOfType < Text>("PanelTitleText", transform);
+      noReactorsObject = Utils.FindChildOfType<Text>("NoReactorsObject", transform);
+
+      scrollView.scrollSensitivity = SystemHeatSettings.UISrollSensitivity;
 
       Localize();
     }
@@ -66,19 +74,33 @@ namespace SystemHeat.UI
       {
         reactorModules.Add(pm);
 
-        GameObject newWidget = (GameObject)Instantiate(SystemHeatUILoader.ReactorWidgetPrefab, Vector3.zero, Quaternion.identity);
+        GameObject newWidget = (GameObject)Instantiate(SystemHeatAssets.ReactorWidgetPrefab, Vector3.zero, Quaternion.identity);
         newWidget.transform.SetParent(scrollRoot);
         newWidget.transform.localPosition = Vector3.zero;
         ReactorWidget w = newWidget.AddComponent<ReactorWidget>();
         w.SetReactor(pm);
         reactorWidgets.Add(w);
       }
-
     }
 
-    public void FixedUpdate()
+    public void Update()
     {
-
+      if (scrollViewport != null && reactorWidgets != null)
+      {
+        if (reactorWidgets.Count == 0)
+        {
+          scrollViewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 25);
+        }
+        else
+        {
+          float totalH = 0f;
+          for (int i = 0; i < reactorWidgets.Count; i++)
+          {
+            totalH += reactorWidgets[i].Minimized ? widgetSizeMinimized : widgetSize;
+          }
+          scrollViewport.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Min(totalH, viewportMax));
+        }
+      }
     }
   }
 

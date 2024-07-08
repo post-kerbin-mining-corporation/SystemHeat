@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 
@@ -89,6 +87,13 @@ namespace SystemHeat
       return scaled.ToString(format) + " " + prefix;
     }
 
+    /// <summary>
+    /// Get a reference in a child of a type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="name"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
     public static T FindChildOfType<T>(string name, Transform parent)
     {
       T result = default(T);
@@ -107,7 +112,12 @@ namespace SystemHeat
 
   public static class TransformDeepChildExtension
   {
-    //Breadth-first search
+    /// <summary>
+    /// Find a child recursively by name
+    /// </summary>
+    /// <param name="aParent"></param>
+    /// <param name="aName"></param>
+    /// <returns></returns>
     public static Transform FindDeepChild(this Transform aParent, string aName)
     {
       Queue<Transform> queue = new Queue<Transform>();
@@ -122,22 +132,5 @@ namespace SystemHeat
       }
       return null;
     }
-
-
-    /*
-    //Depth-first search
-    public static Transform FindDeepChild(this Transform aParent, string aName)
-    {
-        foreach(Transform child in aParent)
-        {
-            if(child.name == aName )
-                return child;
-            var result = child.FindDeepChild(aName);
-            if (result != null)
-                return result;
-        }
-        return null;
-    }
-    */
   }
 }

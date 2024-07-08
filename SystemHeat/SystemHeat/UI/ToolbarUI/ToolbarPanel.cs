@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using KSP.UI;
+using KSP.UI.Screens;
 using KSP.Localization;
 
 namespace SystemHeat.UI
@@ -40,6 +41,8 @@ namespace SystemHeat.UI
     {
       get { return loopUI; }
     }
+
+
     protected ToolbarSettings settingsUI;
     protected ToolbarSituation situationUI;
     protected ToolbarStats statsUI;
@@ -63,12 +66,12 @@ namespace SystemHeat.UI
     public void Awake()
     {
       renderedLoops = new List<int>();
-      // Find all the components
 
+      // Find all the components
       rect = this.GetComponent<RectTransform>();
-      panelTitle = transform.FindDeepChild("PanelTitleText").GetComponent<Text>();
-      overlayToggle = transform.FindDeepChild("OverlayToggle").GetComponent<Toggle>();
-      overlayToggleTitle = transform.FindDeepChild("OverlayLabel").GetComponent<Text>();
+      panelTitle = Utils.FindChildOfType<Text>("PanelTitleText", transform);
+      overlayToggle = Utils.FindChildOfType<Toggle>("OverlayToggle", transform);
+      overlayToggleTitle = Utils.FindChildOfType<Text>("OverlayLabel", transform);
 
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
@@ -87,15 +90,6 @@ namespace SystemHeat.UI
       // Settings
       settingsUI = new ToolbarSettings();
       settingsUI.Initialize(transform);
-
-     
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        //float panelSize = 215;
-        //rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize);
-        //loopPanelScrollViewportRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, panelSize - 45f);
-        //loopPanelScrollRootRect.GetComponent<LayoutElement>().minHeight = panelSize - 45f;
-      }
 
       Localize();
     }

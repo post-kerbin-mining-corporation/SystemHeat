@@ -53,7 +53,7 @@ namespace SystemHeat.UI
       {
 
           Utils.Log("[ReactorToolbar]: Creating toolbar panel", LogType.UI);
-        GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ReactorToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
+        GameObject newUIPanel = (GameObject)Instantiate(SystemHeatAssets.ReactorToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
         newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
         newUIPanel.transform.localPosition = Vector3.zero;
         reactorPanel = newUIPanel.AddComponent<ReactorPanel>();
@@ -84,16 +84,14 @@ namespace SystemHeat.UI
         if (HighLogic.LoadedSceneIsFlight)
         {
           if (reactorPanel && stockToolbarButton)
-            reactorPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
-              reactorPanel.rect.rect.width * UIMasterController.Instance.uiScale, 
-              reactorPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
+            reactorPanel.rect.position = stockToolbarButton.GetAnchorUL();
         }
         if (HighLogic.LoadedSceneIsEditor)
         {
           if (stockToolbarButton != null)
           {
             reactorPanel.rect.position = stockToolbarButton.GetAnchorUL();
-            reactorPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(reactorPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0,0);
+            //reactorPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(reactorPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0,0);
           }
 
         }

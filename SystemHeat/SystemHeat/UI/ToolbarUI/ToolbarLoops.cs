@@ -109,7 +109,7 @@ namespace SystemHeat.UI
         if (generateWidget)
         {
           Utils.Log("[UI]: Generating a new loop widget", LogType.UI);
-          GameObject newObj = (GameObject)GameObject.Instantiate(SystemHeatUILoader.ToolbarPanelLoopPrefab, Vector3.zero, Quaternion.identity);
+          GameObject newObj = (GameObject)GameObject.Instantiate(SystemHeatAssets.ToolbarPanelLoopPrefab, Vector3.zero, Quaternion.identity);
           newObj.transform.SetParent(loopPanelScrollRoot.transform, false);
           //newWidget.transform.localPosition = Vector3.zero;
           ToolbarPanelLoopWidget newWidget = newObj.AddComponent<ToolbarPanelLoopWidget>();

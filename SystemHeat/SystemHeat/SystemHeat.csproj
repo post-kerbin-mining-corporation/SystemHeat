@@ -124,7 +124,8 @@
     <Compile Include="UI\ReactorUI\ReactorToolbar.cs" />
     <Compile Include="UI\ReactorUI\ReactorWidget.cs" />
     <Compile Include="UI\SystemHeatUI.cs" />
-    <Compile Include="UI\SystemHeatUILoader.cs" />
+    <Compile Include="UI\SystemHeatAssets.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarIconTag.cs" />
     <Compile Include="UI\ToolbarUI\ToolbarPanel.cs" />
     <Compile Include="UI\ToolbarUI\ToolbarPanelLoopWidget.cs" />
     <Compile Include="UI\ToolbarUI\ToolbarLoops.cs" />

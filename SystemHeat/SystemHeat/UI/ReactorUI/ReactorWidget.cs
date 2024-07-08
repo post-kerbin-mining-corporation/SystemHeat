@@ -11,19 +11,28 @@ namespace SystemHeat.UI
 {
   public class ReactorWidget : MonoBehaviour
   {
+    public bool Minimized {get; set;}
+
     public RectTransform rect;
     public Text reactorName;
     public Toggle onToggle;
-    public Text onToggleLabel;
     public Toggle chargeToggle;
+
+    public Text lifetimeText;
+    public Text powerText;
+    public Text heatText;
+    public Text temperatureText;
 
     public GameObject spacer;
 
-    public GameObject chargeElement;
-    public Slider chargeSlider;
-    public Image sliderFill;
+    public Image chargeBar;
+    public Image chargeGlow;
+    public ImageFadeAnimator chargeAnimator;
 
     public Image warningIcon;
+    public Image warningGlow;
+
+    public ImageFadeAnimator warningAnimator;
     public RectTransform iconRoot;
     public RectTransform dataRoot;
     public RectTransform infoRoot;
@@ -40,20 +49,27 @@ namespace SystemHeat.UI
     {
       rect = this.transform as RectTransform;
 
-      reactorName = transform.FindDeepChild("ReactorName").GetComponent<Text>();
-      onToggle = transform.FindDeepChild("OnToggle").GetComponent<Toggle>();
-      headerButton = transform.FindDeepChild("Header").GetComponent<Button>();
-      warningIcon = transform.FindDeepChild("WarningIcon").GetComponent<Image>();
-      iconRoot = transform.FindDeepChild("Icons") as RectTransform;
-      dataRoot = transform.FindDeepChild("DataPanel") as RectTransform;
-      infoRoot = transform.FindDeepChild("InfoPanel") as RectTransform;
-      onToggleLabel = transform.FindDeepChild("OnLabel").GetComponent<Text>();
+      reactorName = Utils.FindChildOfType<Text>("ReactorName", transform);
+      
+      onToggle = Utils.FindChildOfType<Toggle>("OnToggle",transform);
+      headerButton = Utils.FindChildOfType<Button>("Header", transform);
+      warningIcon = Utils.FindChildOfType<Image>("WarningIcon", transform);
+      warningGlow = Utils.FindChildOfType<Image>("WarningGlow", transform);
+      warningAnimator = warningGlow.gameObject.AddComponent<ImageFadeAnimator>();
+      iconRoot = Utils.FindChildOfType<RectTransform>("Icons", transform);
+      dataRoot = Utils.FindChildOfType<RectTransform>("DataPanel", transform);
+      infoRoot = Utils.FindChildOfType<RectTransform>("InfoPanel", transform);
 
-      spacer = transform.FindDeepChild("Space").gameObject;
-      chargeElement = transform.FindDeepChild("ChargeArea").gameObject;
-      chargeToggle = transform.FindDeepChild("ChargeArea").GetComponent<Toggle>();
-      chargeSlider = transform.FindDeepChild("Slider").GetComponent<Slider>();
-      sliderFill = transform.FindDeepChild("Fill").GetComponent<Image>();
+      heatText = Utils.FindChildOfType<Text>("HeatValue", transform);
+      powerText = Utils.FindChildOfType<Text>("PowerValue", transform);
+      lifetimeText = Utils.FindChildOfType<Text>("LifetimeValue", transform);
+      temperatureText = Utils.FindChildOfType<Text>("TemperatureValue", transform);
+
+      //spacer = Utils.FindChildOfType<GameObject>("Space", transform);
+      chargeToggle = Utils.FindChildOfType<Toggle>("ChargePanel", transform);
+      chargeBar = Utils.FindChildOfType<Image>("FillRing", transform);
+      chargeGlow = Utils.FindChildOfType<Image>("ChargeGlow", transform);
+      chargeAnimator = chargeGlow.gameObject.AddComponent<ImageFadeAnimator>();
 
       headerButton.onClick.RemoveAllListeners();
       onToggle.onValueChanged.RemoveAllListeners();
@@ -63,13 +79,10 @@ namespace SystemHeat.UI
       onToggle.onValueChanged.AddListener(delegate { ToggleReactor(); });
       chargeToggle.onValueChanged.AddListener(delegate { ToggleCharge(); });
 
-      Localize();
+      chargeGlow.enabled = false;
+      warningGlow.enabled = false;
     }
 
-    void Localize()
-    {
-      onToggleLabel.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_ReactorOnToggleLabel");
-    }
     public void SetReactor(PartModule m)
     {
       if (rect == null)
@@ -85,99 +98,56 @@ namespace SystemHeat.UI
       heatModule = module.GetComponent<ModuleSystemHeat>();
 
 
-      Utils.Log($"[ReactorWidget]: Setting up specifc properties for for PM {m}", LogType.UI);
-      if (m.moduleName == "ModuleSystemHeatFissionReactor")
+      Utils.Log($"[ReactorWidget]: Setting up specific properties for for PM {m}", LogType.UI);
+      if (m.moduleName == "ModuleSystemHeatFissionReactor" || m.moduleName == "ModuleSystemHeatFissionEngine")
       {
         iconRoot.gameObject.SetActive(true);
-        iconRoot.FindDeepChild("FissionReactorIcon").gameObject.SetActive(true);
-        AddDataWidget("heatGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGeneratedTitle"));
-        AddDataWidget("powerGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGeneratedTitle"));
-        AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
-        AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
-        bool isOn = false;
-        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
-        onToggle.isOn = isOn;
 
-
-        spacer.SetActive(false);
-        chargeElement.SetActive(false);
-
-      }
-      if (m.moduleName == "ModuleSystemHeatFissionEngine")
-      {
-        iconRoot.gameObject.SetActive(true);
-        iconRoot.FindDeepChild("FissionEngineIcon").gameObject.SetActive(true);
-        AddDataWidget("heatGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGeneratedTitle"));
-        AddDataWidget("powerGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGeneratedTitle"));
-        AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
-        AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
-        bool isOn = false;
-        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
-        onToggle.isOn = isOn;
-
-        spacer.SetActive(false);
-        chargeElement.SetActive(false);
-
-      }
-      if (m.moduleName == "ModuleFusionEngine")
-      {
-        iconRoot.gameObject.SetActive(true);
-        iconRoot.FindDeepChild("FusionEngineIcon").gameObject.SetActive(true);
-        AddDataWidget("heatGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGeneratedTitle"));
-        AddDataWidget("powerGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGeneratedTitle"));
-        AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
-        AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
-        bool isOn = false;
-
-        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
-        onToggle.isOn = isOn;
-
-        bool chargeOn = false;
-        bool.TryParse(module.Fields.GetValue("Charging").ToString(), out chargeOn);
-
-        spacer.SetActive(true);
-        chargeElement.SetActive(true);
-        if (chargeOn)
+        
+        if (m.moduleName == "ModuleSystemHeatFissionEngine")
         {
-          chargeToggle.isOn = chargeOn;
+          Utils.FindChildOfType<Image>("FissionEngineIcon", transform).gameObject.SetActive(true);
         }
+        else
+        {
+          Utils.FindChildOfType<Image>("FissionReactorIcon", transform).gameObject.SetActive(true);
+        }
+        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out bool isOn);
+
+        onToggle.isOn = isOn;
+        chargeToggle.gameObject.SetActive(false);
+
       }
-      if (m.moduleName == "FusionReactor")
+      if (m.moduleName == "ModuleFusionEngine" || m.moduleName == "FusionReactor")
       {
         iconRoot.gameObject.SetActive(true);
-        iconRoot.FindDeepChild("FusionReactorIcon").gameObject.SetActive(true);
-        AddDataWidget("heatGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGeneratedTitle"));
-        AddDataWidget("powerGenerated", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGeneratedTitle"));
-        AddDataWidget("lifetime", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLifeTitle"));
-        AddDataWidget("temperature", Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureTitle"));
-       
+        if (m.moduleName == "ModuleFusionEngine")
+        {
+          Utils.FindChildOfType<Image>("FusionEngineIcon", transform).gameObject.SetActive(true);
+        }
+        else
+        {
+          Utils.FindChildOfType<Image>("FusionReactorIcon", transform).gameObject.SetActive(true);
+        }
         bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out bool isOn);
         onToggle.isOn = isOn;
 
         bool.TryParse(module.Fields.GetValue("Charging").ToString(), out bool chargeOn);
-        
-        spacer.SetActive(true);
-        chargeElement.SetActive(true);
+
+        chargeToggle.gameObject.SetActive(true);
         if (chargeOn)
         {
           chargeToggle.isOn = chargeOn;
         }
       }
     }
-
-    protected void AddDataWidget(string name, string displayName)
-    {
-      GameObject newWidget = (GameObject)Instantiate(SystemHeatUILoader.ReactorDataFieldPrefab, Vector3.zero, Quaternion.identity);
-      newWidget.transform.SetParent(dataRoot);
-      newWidget.transform.localPosition = Vector3.zero;
-      ReactorDataField field = newWidget.AddComponent<ReactorDataField>();
-      field.Initialize(displayName);
-      datafields.Add(name, field);
-    }
+    
     public void ToggleReactor()
     {
+      Debug.Log($"State click to {onToggle.isOn}");
       if (onToggle.isOn)
       {
+        
         if (module.moduleName == "FusionReactor" || module.moduleName == "ModuleFusionEngine")
         {
           module.Invoke("EnableReactor", 0f);
@@ -219,79 +189,95 @@ namespace SystemHeat.UI
       }
 
     }
-    protected void FixedUpdate()
+    protected void Update()
     {
       float nominalTemp = 0f;
       if (module.moduleName == "FusionReactor" || module.moduleName == "ModuleFusionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("SystemOutletTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated",
-          Utils.ToSI(float.Parse(module.Fields.GetValue("SystemPower").ToString()), "F0")));
-        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentPowerProduced").ToString()).ToString("F0")));
-        datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelInput")));
-        datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", heatModule.LoopTemperature.ToString("F0")));
 
+        heatText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated", Utils.ToSI(float.Parse(module.Fields.GetValue("SystemPower").ToString()), "F0"));
+        powerText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentPowerProduced").ToString()).ToString("F0"));
+        lifetimeText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelInput"));
+        temperatureText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", nominalTemp, heatModule.LoopTemperature.ToString("F0"));
 
-        if (heatModule.LoopTemperature > nominalTemp)
-          datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureAlert", heatModule.LoopTemperature.ToString("F0")), Color.red);
-        else
-          datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", heatModule.LoopTemperature.ToString("F0")), new Color(0.705f, 0.83f, 0.33f));
-
-
-        bool isOn = false;
-        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
+        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out bool isOn);
         if (isOn != onToggle.isOn)
+        {
+          Debug.Log($"State forced to {isOn}");
           onToggle.SetIsOnWithoutNotify(isOn);
+        }
 
-        //onToggle.isOn = isOn;
-
-
-        bool isCharge = false;
-        bool.TryParse(module.Fields.GetValue("Charging").ToString(), out isCharge);
+        bool.TryParse(module.Fields.GetValue("Charging").ToString(), out bool isCharge);
         chargeToggle.SetIsOnWithoutNotify(isCharge);
-        //chargeToggle.isOn = isCharge;
         float chargeVal = (float)module.Fields.GetValue("CurrentCharge") / (float)module.Fields.GetValue("ChargeGoal");
-        chargeSlider.value = chargeVal;
+        chargeBar.fillAmount = chargeVal;
         Color32 fillColor;
         if (chargeVal < 1.0f)
           HexColorField.HexToColor("#F67A28", out fillColor);
         else
           HexColorField.HexToColor("#B4D455", out fillColor);
+        
+        if (chargeVal >= 1.0 && !onToggle.enabled)
+        {
+          if (chargeGlow != enabled)
+          {
+            chargeGlow.enabled = true;
+          }
 
-        sliderFill.color = fillColor;
+        }
+        else
+        {
+          if (chargeGlow == enabled)
+          {
+            chargeGlow.enabled = false;
+          }
+        }
+        chargeBar.color = fillColor;
 
       }
       if (module.moduleName == "ModuleSystemHeatFissionReactor" || module.moduleName == "ModuleSystemHeatFissionEngine")
       {
         nominalTemp = float.Parse(module.Fields.GetValue("NominalTemperature").ToString());
-        datafields["heatGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated",
-          Utils.ToSI(float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()), "F0")));
-        datafields["powerGenerated"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentElectricalGeneration").ToString()).ToString("F0")));
-        datafields["lifetime"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelStatus")));
+        heatText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_HeatGenerated",
+          Utils.ToSI(float.Parse(module.Fields.GetValue("CurrentHeatGeneration").ToString()), "F0"));
+        powerText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_PowerGenerated", float.Parse(module.Fields.GetValue("CurrentElectricalGeneration").ToString()).ToString("F0"));
+        lifetimeText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreLife", module.Fields.GetValue("FuelStatus"));
+        temperatureText.text = Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", nominalTemp, heatModule.LoopTemperature.ToString("F0"));
 
-        if (heatModule.LoopTemperature > nominalTemp)
-          datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperatureAlert", heatModule.LoopTemperature.ToString("F0")), Color.red);
-        else
-          datafields["temperature"].SetValue(Localizer.Format("#LOC_SystemHeat_ReactorPanel_Field_CoreTemperature", heatModule.LoopTemperature.ToString("F0")), new Color(0.705f, 0.83f, 0.33f));
-
-        bool isOn = false;
-        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out isOn);
-        onToggle.isOn = isOn;
+        bool.TryParse(module.Fields.GetValue("Enabled").ToString(), out bool isOn);
+        if (isOn != onToggle.isOn)
+        {
+          Debug.Log($"State forced to {isOn}");
+          onToggle.SetIsOnWithoutNotify(isOn);
+        }
+        
       }
-
-
       if (heatModule.LoopTemperature > nominalTemp)
       {
-        warningIcon.enabled = true;
+        if (warningIcon.enabled != true)
+        {
+          warningGlow.enabled = true;
+          warningIcon.enabled = true;
+        }
+        HexColorField.HexToColor("fe8401", out Color32 c);
+        temperatureText.color = c;
+        
       }
       else
       {
-        warningIcon.enabled = false;
+        if (warningIcon.enabled == true)
+        {
+          warningGlow.enabled = false;
+          warningIcon.enabled = false;
+        }
+        HexColorField.HexToColor("B4D455", out Color32 c);
+        temperatureText.color = c;
       }
     }
     public void ToggleData()
     {
-
+      Minimized = !Minimized;
       infoRoot.gameObject.SetActive(!infoRoot.gameObject.activeSelf);
     }
     public void SetVisible(bool state) { }
