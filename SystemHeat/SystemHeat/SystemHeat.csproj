@@ -107,12 +107,6 @@
     <Compile Include="SystemHeatGameSettings.cs" />
     <Compile Include="SystemHeatSimulator.cs" />
     <Compile Include="SystemHeatVessel.cs" />
-    <Compile Include="UI\DebugUI\SystemHeatDebugUI.cs" />
-    <Compile Include="UI\DebugUI\UIBaseWindow.cs" />
-    <Compile Include="UI\DebugUI\UIDebugLoopsView.cs" />
-    <Compile Include="UI\DebugUI\UIResources.cs" />
-    <Compile Include="UI\DebugUI\UIUtils.cs" />
-    <Compile Include="UI\DebugUI\UIWidget.cs" />
     <Compile Include="UI\Overlay\OverlayAnimators.cs" />
     <Compile Include="UI\Overlay\OverlayLine.cs" />
     <Compile Include="UI\Overlay\OverlayLoop.cs" />

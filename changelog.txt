@@ -7,7 +7,7 @@ v0.7.0
 -- More dynamicism including flashing stuff/color changes when things are good (and bad)
 -- Behaves better with UI size changes
 -- Mouseover enables the toolbar
--- Toolbar icon has dynamic states that communicate when something's up with a loop
+-- Toolbar icon has dynamic badging that communicates when something's up with a loop
 - Rebuilt the Overlay
 -- Overlay lines now animate when something in a loop is doing something 
 -- Overlay line drawing is cleaner and faster
@@ -16,10 +16,11 @@ v0.7.0
 -- New animated temperature gauge helps see whether a system is in a good place temperature-wise
 -- New animated flux increase/decrease gauges show how whether a system is contributing heat or removing heat to a loop and qualitatively how much
 -- Improved visibility for system warning temperature flashes
+-- Behaves better with UI size changes
 - Rebuilt the Reactors Panel 
 -- Now looks better and is more communicative
+-- Behaves better with UI size changes
 -- Scrolling actually works
--- Mouseover enables the toolbar
 - Improved configuration of heat exchangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
 - Radiators in the Editor now respect the on/off status of the system to avoid mistakes like going to flight with inactive radiators
 - Performance pass, mostly on string handling in various system heat modules, should improve performance in a lot of places
