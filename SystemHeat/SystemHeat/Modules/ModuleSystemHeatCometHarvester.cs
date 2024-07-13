@@ -8,9 +8,9 @@ using KSP.Localization;
 namespace SystemHeat
 {
   /// <summary>
-  /// The connection between a stock ModuleAsteroidDrill and the SystemHeat system
+  /// The connection between a stock ModuleCometDrill and the SystemHeat system
   /// </summary>
-  public class ModuleSystemHeatAsteroidHarvester : ModuleAsteroidDrill
+  public class ModuleSystemHeatCometHarvester : ModuleCometDrill
   {
     // This should be unique on the part
     [KSPField(isPersistant = false)]
@@ -88,7 +88,7 @@ namespace SystemHeat
         //this.CurrentSafetyOverride = this.NominalTemperature;
       }
 
-      Utils.Log("[ModuleSystemHeatAsteroidHarvester] Setup completed", LogType.Modules);
+      Utils.Log("[ModuleSystemHeatCometHarvester] Setup completed", LogType.Modules);
 
       Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);
       Fields["HarvesterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency", base.ConverterName);
