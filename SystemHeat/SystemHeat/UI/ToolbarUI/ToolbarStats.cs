@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using KSP.Localization;
+using KSP.UI.TooltipTypes;
 
 namespace SystemHeat.UI
 {
@@ -52,6 +51,7 @@ namespace SystemHeat.UI
         SetButtonDirection(false);
       }
       Localize();
+      SetupTooltips(root, Tooltips.FindTextTooltipPrefab());
     }
 
     protected void Localize()
@@ -62,7 +62,13 @@ namespace SystemHeat.UI
       totalLoopsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_LoopCountTitle");
 
     }
-
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(root.FindDeepChild("GenerationData").gameObject, prefab, "Total vessel heat generation");
+      Tooltips.AddTooltip(root.FindDeepChild("RejectionData").gameObject, prefab, "Total vessel heat rejection");
+      Tooltips.AddTooltip(root.FindDeepChild("LoopCountData").gameObject, prefab, "Number of Heat Loops on the vessel");
+      Tooltips.AddTooltip(loopButton.gameObject, prefab, "Heat loop details");
+    }
     /// <summary>
     /// Sets what direction the loop button should point in. Default is Right/true, aka in editor mode
     /// </summary>

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using KSP.Localization;
+using KSP.UI.TooltipTypes;
 
 namespace SystemHeat.UI
 {
@@ -34,6 +35,7 @@ namespace SystemHeat.UI
       simRateLabel = root.FindDeepChild("SimRateSlider").GetChild(1).GetComponent<Text>();
 
       Localize();
+      SetupTooltips(root, Tooltips.FindTextTooltipPrefab());
 
       if (HighLogic.LoadedSceneIsEditor)
       {
@@ -51,11 +53,14 @@ namespace SystemHeat.UI
     }
     protected void Localize()
     {
-
       settingsTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SettingsTitle");
       simRateTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_SimulationRateTitle");
     }
 
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(simRateTitle.gameObject, prefab, "Change the rate of the editor's simulation");
+    }
     public void SetVisible(bool visibility)
     {
       settingsHeaderObj.SetActive(visibility);

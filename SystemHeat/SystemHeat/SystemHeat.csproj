@@ -126,6 +126,7 @@
     <Compile Include="UI\ToolbarUI\ToolbarSettings.cs" />
     <Compile Include="UI\ToolbarUI\ToolbarSituation.cs" />
     <Compile Include="UI\ToolbarUI\ToolbarStats.cs" />
+    <Compile Include="UI\Tooltips.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

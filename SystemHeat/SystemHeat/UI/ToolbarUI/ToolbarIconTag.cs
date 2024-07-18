@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using KSP.UI.Screens;
 
@@ -24,7 +19,6 @@ namespace SystemHeat.UI
     public ToolbarIconTag() { }
     public void Position(ApplicationLauncherButton button)
     {
-
       alertToolbarBackgroundRect.SetParent(button.toggleButton.transform, false);
       alertToolbarBackgroundRect.anchorMin = Vector2.zero;
       alertToolbarBackgroundRect.anchorMax = Vector3.one;
@@ -45,8 +39,6 @@ namespace SystemHeat.UI
       alertToolbarRect.pivot = Vector2.zero;
       alertToolbarRect.offsetMin = new Vector2(0, 0);
       alertToolbarRect.offsetMax = new Vector2(0, 0);
-
-
     }
     public void Initialize()
     {

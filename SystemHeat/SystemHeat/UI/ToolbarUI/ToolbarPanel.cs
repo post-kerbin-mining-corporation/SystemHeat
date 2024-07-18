@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using KSP.UI;
-using KSP.UI.Screens;
+using KSP.UI.TooltipTypes;
 using KSP.Localization;
 
 namespace SystemHeat.UI
@@ -92,13 +87,17 @@ namespace SystemHeat.UI
       settingsUI.Initialize(transform);
 
       Localize();
+      SetupTooltips(transform, Tooltips.FindTextTooltipPrefab());
     }
     void Localize()
     {
       panelTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_Title");
       overlayToggleTitle.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_OverlayToggle");
     }
-
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, "Toggle the heat loop overlay");
+    }
     protected void Update()
     {
       if (simulator != null)

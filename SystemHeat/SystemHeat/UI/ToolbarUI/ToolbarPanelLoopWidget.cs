@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 using UnityEngine;
 using KSP.Localization;
+using KSP.UI.TooltipTypes;
 
 namespace SystemHeat.UI
 {
@@ -53,10 +50,17 @@ namespace SystemHeat.UI
       overlayToggle.onValueChanged.AddListener(delegate { ToggleOverlay(); });
 
       Localize();
+      SetupTooltips(transform, Tooltips.FindTextTooltipPrefab());
     }
     void Localize()
     {
 
+    }
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(temperatureTextHeader.gameObject, prefab, "Loop temperature and nominal temperatures");
+      Tooltips.AddTooltip(fluxTextHeader.gameObject, prefab, "Net loop heat flux");
+      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, "Show this loop in the Overlay");
     }
     public void SetVisible(bool state)
     {

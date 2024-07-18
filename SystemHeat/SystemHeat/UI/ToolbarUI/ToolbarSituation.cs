@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using KSP.UI.TooltipTypes;
 using KSP.Localization;
 
 namespace SystemHeat.UI
@@ -67,7 +68,8 @@ namespace SystemHeat.UI
 
 
       situationData = situationDataObj.GetComponent<RectTransform>();
-
+      Localize();
+      SetupTooltips(root, Tooltips.FindTextTooltipPrefab());
       if (HighLogic.LoadedSceneIsEditor)
       {
         currentBody = FlightGlobals.GetHomeBody();
@@ -109,7 +111,14 @@ namespace SystemHeat.UI
       velocityLabel.text = Localizer.Format("#LOC_SystemHeat_ToolbarPanel_VelocityUnits");
     }
 
-
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(velocityTitle.gameObject, prefab, "Vessel velocity in atmosphere");
+      Tooltips.AddTooltip(altitudeTitle.gameObject, prefab, "Altitude above sea level");
+      Tooltips.AddTooltip(bodyTitle.gameObject, prefab, "Celestial body to simulate at");
+      Tooltips.AddTooltip(sitationButtonVac.gameObject, prefab, "Set Vacuum");
+      Tooltips.AddTooltip(sitationButtonSeaLevel.gameObject, prefab, "Set Sea Level");
+    }
     void SetBody(CelestialBody b)
     {
 
