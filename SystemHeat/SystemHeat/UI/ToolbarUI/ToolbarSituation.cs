@@ -113,11 +113,11 @@ namespace SystemHeat.UI
 
     protected void SetupTooltips(Transform root, Tooltip_Text prefab)
     {
-      Tooltips.AddTooltip(velocityTitle.gameObject, prefab, "Vessel velocity in atmosphere");
-      Tooltips.AddTooltip(altitudeTitle.gameObject, prefab, "Altitude above sea level");
-      Tooltips.AddTooltip(bodyTitle.gameObject, prefab, "Celestial body to simulate at");
-      Tooltips.AddTooltip(sitationButtonVac.gameObject, prefab, "Set Vacuum");
-      Tooltips.AddTooltip(sitationButtonSeaLevel.gameObject, prefab, "Set Sea Level");
+      Tooltips.AddTooltip(velocityTitle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SituationVelocity"));
+      Tooltips.AddTooltip(altitudeTitle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SituationAltitude"));
+      Tooltips.AddTooltip(bodyTitle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SituationBody"));
+      Tooltips.AddTooltip(sitationButtonVac.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SituationSetVacuum"));
+      Tooltips.AddTooltip(sitationButtonSeaLevel.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SituationSetSealevel"));
     }
     void SetBody(CelestialBody b)
     {

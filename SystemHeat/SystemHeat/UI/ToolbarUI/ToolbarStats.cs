@@ -64,10 +64,10 @@ namespace SystemHeat.UI
     }
     protected void SetupTooltips(Transform root, Tooltip_Text prefab)
     {
-      Tooltips.AddTooltip(root.FindDeepChild("GenerationData").gameObject, prefab, "Total vessel heat generation");
-      Tooltips.AddTooltip(root.FindDeepChild("RejectionData").gameObject, prefab, "Total vessel heat rejection");
-      Tooltips.AddTooltip(root.FindDeepChild("LoopCountData").gameObject, prefab, "Number of Heat Loops on the vessel");
-      Tooltips.AddTooltip(loopButton.gameObject, prefab, "Heat loop details");
+      Tooltips.AddTooltip(root.FindDeepChild("GenerationData").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_StatsGeneration"));
+      Tooltips.AddTooltip(root.FindDeepChild("RejectionData").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_StatsRejection"));
+      Tooltips.AddTooltip(root.FindDeepChild("LoopCountData").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_StatsLoopCount"));
+      Tooltips.AddTooltip(loopButton.gameObject, prefab, Localizer.Format("Heat loop details"));
     }
     /// <summary>
     /// Sets what direction the loop button should point in. Default is Right/true, aka in editor mode

@@ -96,7 +96,7 @@ namespace SystemHeat.UI
     }
     protected void SetupTooltips(Transform root, Tooltip_Text prefab)
     {
-      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, "Toggle the heat loop overlay");
+      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_OverlayToggle"));
     }
     protected void Update()
     {

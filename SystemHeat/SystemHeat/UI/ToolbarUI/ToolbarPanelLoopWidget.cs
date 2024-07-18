@@ -58,9 +58,9 @@ namespace SystemHeat.UI
     }
     protected void SetupTooltips(Transform root, Tooltip_Text prefab)
     {
-      Tooltips.AddTooltip(temperatureTextHeader.gameObject, prefab, "Loop temperature and nominal temperatures");
-      Tooltips.AddTooltip(fluxTextHeader.gameObject, prefab, "Net loop heat flux");
-      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, "Show this loop in the Overlay");
+      Tooltips.AddTooltip(temperatureTextHeader.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_LoopTemperature"));
+      Tooltips.AddTooltip(fluxTextHeader.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_LoopFlux"));
+      Tooltips.AddTooltip(overlayToggle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_LoopToggle"));
     }
     public void SetVisible(bool state)
     {

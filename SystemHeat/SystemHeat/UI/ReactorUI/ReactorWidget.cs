@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using KSP.UI;
 using KSP.Localization;
-using System.Reflection;
+using KSP.UI.TooltipTypes;
 
 namespace SystemHeat.UI
 {
@@ -65,7 +62,6 @@ namespace SystemHeat.UI
       lifetimeText = Utils.FindChildOfType<Text>("LifetimeValue", transform);
       temperatureText = Utils.FindChildOfType<Text>("TemperatureValue", transform);
 
-      //spacer = Utils.FindChildOfType<GameObject>("Space", transform);
       chargeToggle = Utils.FindChildOfType<Toggle>("ChargePanel", transform);
       chargeBar = Utils.FindChildOfType<Image>("FillRing", transform);
       chargeGlow = Utils.FindChildOfType<Image>("ChargeGlow", transform);
@@ -81,8 +77,20 @@ namespace SystemHeat.UI
 
       chargeGlow.enabled = false;
       warningGlow.enabled = false;
+      SetupTooltips(transform, Tooltips.FindTextTooltipPrefab());
+      
     }
 
+    protected void SetupTooltips(Transform root, Tooltip_Text prefab)
+    {
+      Tooltips.AddTooltip(onToggle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_Toggle"));
+      Tooltips.AddTooltip(chargeBar.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_CapacitorCharge"));
+      Tooltips.AddTooltip(chargeToggle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_CapacitorToggle"));
+      Tooltips.AddTooltip(root.FindDeepChild("TemperatureField").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_Temperature"));
+      Tooltips.AddTooltip(root.FindDeepChild("PowerField").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_Power"));
+      Tooltips.AddTooltip(root.FindDeepChild("HeatField").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_Heat"));
+      Tooltips.AddTooltip(root.FindDeepChild("LifetimeField").gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_ReactorPanel_Lifetime"));
+    }
     public void SetReactor(PartModule m)
     {
       if (rect == null)

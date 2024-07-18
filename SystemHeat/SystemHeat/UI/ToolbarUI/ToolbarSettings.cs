@@ -59,7 +59,7 @@ namespace SystemHeat.UI
 
     protected void SetupTooltips(Transform root, Tooltip_Text prefab)
     {
-      Tooltips.AddTooltip(simRateTitle.gameObject, prefab, "Change the rate of the editor's simulation");
+      Tooltips.AddTooltip(simRateTitle.gameObject, prefab, Localizer.Format("#LOC_SystemHeat_Tooltip_SystemHeatPanel_SettingsSimRate"));
     }
     public void SetVisible(bool visibility)
     {
