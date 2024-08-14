@@ -19,26 +19,29 @@ namespace SystemHeat.UI
     public ToolbarIconTag() { }
     public void Position(ApplicationLauncherButton button)
     {
-      alertToolbarBackgroundRect.SetParent(button.toggleButton.transform, false);
-      alertToolbarBackgroundRect.anchorMin = Vector2.zero;
-      alertToolbarBackgroundRect.anchorMax = Vector3.one;
-      alertToolbarBackgroundRect.pivot = Vector2.zero;
-      alertToolbarBackgroundRect.offsetMin = new Vector2(22, 20);
-      alertToolbarBackgroundRect.offsetMax = new Vector2(0, 0);
+      if (button != null)
+      {
+        alertToolbarBackgroundRect.SetParent(button.toggleButton.transform, false);
+        alertToolbarBackgroundRect.anchorMin = Vector2.zero;
+        alertToolbarBackgroundRect.anchorMax = Vector3.one;
+        alertToolbarBackgroundRect.pivot = Vector2.zero;
+        alertToolbarBackgroundRect.offsetMin = new Vector2(22, 20);
+        alertToolbarBackgroundRect.offsetMax = new Vector2(0, 0);
 
-      alertToolbarGlowRect.SetParent(alertToolbarBackgroundRect.transform, false);
-      alertToolbarGlowRect.anchorMin = Vector2.zero;
-      alertToolbarGlowRect.anchorMax = Vector3.one;
-      alertToolbarGlowRect.pivot = Vector2.one * 0.5f;
-      alertToolbarGlowRect.offsetMin = new Vector2(-5, -5);
-      alertToolbarGlowRect.offsetMax = new Vector2(5, 5);
+        alertToolbarGlowRect.SetParent(alertToolbarBackgroundRect.transform, false);
+        alertToolbarGlowRect.anchorMin = Vector2.zero;
+        alertToolbarGlowRect.anchorMax = Vector3.one;
+        alertToolbarGlowRect.pivot = Vector2.one * 0.5f;
+        alertToolbarGlowRect.offsetMin = new Vector2(-5, -5);
+        alertToolbarGlowRect.offsetMax = new Vector2(5, 5);
 
-      alertToolbarRect.SetParent(alertToolbarBackgroundRect.transform, false);
-      alertToolbarRect.anchorMin = Vector2.zero;
-      alertToolbarRect.anchorMax = Vector3.one;
-      alertToolbarRect.pivot = Vector2.zero;
-      alertToolbarRect.offsetMin = new Vector2(0, 0);
-      alertToolbarRect.offsetMax = new Vector2(0, 0);
+        alertToolbarRect.SetParent(alertToolbarBackgroundRect.transform, false);
+        alertToolbarRect.anchorMin = Vector2.zero;
+        alertToolbarRect.anchorMax = Vector3.one;
+        alertToolbarRect.pivot = Vector2.zero;
+        alertToolbarRect.offsetMin = new Vector2(0, 0);
+        alertToolbarRect.offsetMax = new Vector2(0, 0);
+      }
     }
     public void Initialize()
     {

@@ -1,3 +1,8 @@
+v0.7.1
+------
+- Fix a null reference exception when loading a vessel with no SystemHeat parts
+- Fixed an issue where a player could disable a tank in the UI, thus disabling boiloff
+
 v0.7.0
 ------
 - Updated ModuleManager to 4.2.3
