@@ -1,11 +1,12 @@
 v0.7.0
 ------
-- New icons for toolbar panels
+- Updated ModuleManager to 4.2.3
+- Major UI update
 - Rebuilt the System Heat Panel 
--- Now looks better overall with 
+-- Now looks better overall
 -- Data display is a bit more compact and easy on the eyes (less clipped stuff), pushes key info to the front 
 -- More dynamicism including flashing stuff/color changes when things are good (and bad)
--- Behaves better with UI size changes
+-- Behaves better with UI scale changes
 -- Mouseover enables the toolbar
 -- Toolbar icon has dynamic badging that communicates when something's up with a loop
 - Rebuilt the Overlay
@@ -32,6 +33,7 @@ v0.7.0
 - Add support for VABOrganizer
 - SystemHeatBoiloff: Fixed boiloff scale calculations which would negatively affect playing with the connections to stock thermal systems (Starstrider42)
 - SystemHeatBoiloff: Improved the balance of cooling costs for various tanks (Wyzard256)
+- SystemHeatBoiloff: Fix deuterium FuelName in SystemHeatBoiloff patch [#110] (Wyzard256)
 
 v0.6.0
 ------
