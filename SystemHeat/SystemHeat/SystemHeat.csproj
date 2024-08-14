@@ -107,12 +107,6 @@
     <Compile Include="SystemHeatGameSettings.cs" />
     <Compile Include="SystemHeatSimulator.cs" />
     <Compile Include="SystemHeatVessel.cs" />
-    <Compile Include="UI\DebugUI\SystemHeatDebugUI.cs" />
-    <Compile Include="UI\DebugUI\UIBaseWindow.cs" />
-    <Compile Include="UI\DebugUI\UIDebugLoopsView.cs" />
-    <Compile Include="UI\DebugUI\UIResources.cs" />
-    <Compile Include="UI\DebugUI\UIUtils.cs" />
-    <Compile Include="UI\DebugUI\UIWidget.cs" />
     <Compile Include="UI\Overlay\OverlayAnimators.cs" />
     <Compile Include="UI\Overlay\OverlayLine.cs" />
     <Compile Include="UI\Overlay\OverlayLoop.cs" />
@@ -124,9 +118,15 @@
     <Compile Include="UI\ReactorUI\ReactorToolbar.cs" />
     <Compile Include="UI\ReactorUI\ReactorWidget.cs" />
     <Compile Include="UI\SystemHeatUI.cs" />
-    <Compile Include="UI\SystemHeatUILoader.cs" />
-    <Compile Include="UI\ToolbarPanel.cs" />
-    <Compile Include="UI\ToolbarPanelLoopWidget.cs" />
+    <Compile Include="UI\SystemHeatAssets.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarIconTag.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarPanel.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarPanelLoopWidget.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarLoops.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarSettings.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarSituation.cs" />
+    <Compile Include="UI\ToolbarUI\ToolbarStats.cs" />
+    <Compile Include="UI\Tooltips.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

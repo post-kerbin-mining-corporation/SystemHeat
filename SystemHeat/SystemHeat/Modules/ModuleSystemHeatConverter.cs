@@ -131,7 +131,6 @@ namespace SystemHeat
 
     protected void GenerateHeatFlight()
     {
-
         if (base.ModuleIsActive())
         {
           heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);

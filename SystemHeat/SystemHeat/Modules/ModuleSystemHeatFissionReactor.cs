@@ -362,9 +362,9 @@ namespace SystemHeat
     }
     public virtual void SetManualControl(bool state)
     {
-     
+
       Fields["CurrentSafetyOverride"].guiActive = allowManualShutdownTemperatureControl;
-      
+
       if (allowManualControl)
       {
         ManualControl = state;
@@ -459,10 +459,7 @@ namespace SystemHeat
             this.CurrentSafetyOverride = this.CriticalTemperature;
             FirstLoad = false;
           }
-
-
         }
-
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
@@ -587,6 +584,73 @@ namespace SystemHeat
           Events["DisableHibernate"].active = false;
           Events["EnableHibernate"].active = false;
         }
+        if (part.IsPAWVisible())
+        {
+          UpdatePAW();
+        }
+      }
+    }
+
+    protected void UpdatePAW()
+    {
+
+      // Update reactor core integrity readout
+      if (CoreIntegrity > 0)
+      {
+        CoreStatus = String.Format("{0:F2} %", CoreIntegrity);
+      }
+      else
+      {
+        CoreStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreStatus_Meltdown");
+      }
+
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        CoreTemp = String.Format("{0:F0}/{1:F0} {2}", InternalCoreTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
+
+        if (CoreIntegrity <= 0f)
+        {
+          FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Meltdown");
+          ReactorOutput = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput_Meltdown");
+        }
+        else
+        {
+          ReactorOutput = String.Format("{0:F1} {1}", Utils.ToSI(CurrentHeatGeneration, "F0"), "W");
+        }
+
+        if (Enabled)
+        {
+          if (GeneratesElectricity)
+          {
+            if (fuelCheckPassed)
+            {
+              GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Normal", CurrentElectricalGeneration.ToString("F1"));
+            }
+            else
+            {
+              GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Offline");
+            }
+          }
+
+          // Find the time remaining at current rate
+          FuelStatus = FindTimeRemaining(
+            this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount,
+            burnRate);
+        }
+        else
+        {
+          GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Offline");
+          // Update UI
+          if (CoreIntegrity <= 0f)
+          {
+            FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Meltdown");
+            ReactorOutput = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput_Meltdown");
+          }
+          else
+          {
+            FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Offline");
+          }
+        }
       }
     }
 
@@ -597,7 +661,9 @@ namespace SystemHeat
         CurrentThrottle = CurrentReactorThrottle;
         HandleHeatGenerationEditor();
         if (GeneratesElectricity)
+        {
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
+        }
 
       }
       if (HighLogic.LoadedSceneIsFlight)
@@ -606,11 +672,6 @@ namespace SystemHeat
         {
           LastUpdateTime = Planetarium.GetUniversalTime();
         }
-        // Update reactor core integrity readout
-        if (CoreIntegrity > 0)
-          CoreStatus = String.Format("{0:F2} %", CoreIntegrity);
-        else
-          CoreStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_CoreStatus_Meltdown");
 
         HandleCore();
         HandleThrottle();
@@ -634,17 +695,6 @@ namespace SystemHeat
         else
         {
           CurrentElectricalGeneration = 0f;
-          GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Offline");
-          // Update UI
-          if (CoreIntegrity <= 0f)
-          {
-            FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Meltdown");
-            ReactorOutput = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput_Meltdown");
-          }
-          else
-          {
-            FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Offline");
-          }
         }
       }
     }
@@ -659,7 +709,6 @@ namespace SystemHeat
       {
         CurrentThrottle = Mathf.MoveTowards(CurrentThrottle, CurrentReactorThrottle, TimeWarp.fixedDeltaTime * ThrottleIncreaseRate);
       }
-      CoreTemp = String.Format("{0:F0}/{1:F0} {2}", InternalCoreTemperature, NominalTemperature, Localizer.Format("#LOC_SystemHeat_Units_K"));
     }
     protected virtual float CalculateWasteHeatGeneration()
     {
@@ -679,29 +728,24 @@ namespace SystemHeat
 
       // Determine heat to be generated
       CurrentHeatGeneration = CalculateWasteHeatGeneration();
-
-      if (CoreIntegrity <= 0f)
-      {
-        FuelStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_Meltdown");
-        ReactorOutput = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_ReactorOutput_Meltdown");
-      }
-      else
-      {
-        ReactorOutput = String.Format("{0:F1} {1}", Utils.ToSI(CurrentHeatGeneration, "F0"), "W");
-      }
-
       if (heatModule)
+      {
         if (Enabled)
+
           heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
         else
+        {
           heatModule.AddFlux(moduleID, 0f, CurrentHeatGeneration, false);
-
+        }
+      }
     }
     protected virtual void HandleHeatGenerationEditor()
     {
       CurrentHeatGeneration = CalculateHeatGenerationEditor();
       if (heatModule)
+      {
         heatModule.AddFlux(moduleID, NominalTemperature, CurrentHeatGeneration, true);
+      }
     }
 
 
@@ -734,7 +778,7 @@ namespace SystemHeat
       if (critExceedance > 0f && TimeWarp.CurrentRate < 100f)
       {
         if (SystemHeatGameSettings_ReactorDamage.ReactorDamage)
-        // core is damaged by Rate * temp exceedance * time
+          // core is damaged by Rate * temp exceedance * time
           CoreIntegrity = Mathf.MoveTowards(CoreIntegrity, 0f, CoreDamageRate * critExceedance * TimeWarp.fixedDeltaTime);
       }
     }
@@ -763,17 +807,18 @@ namespace SystemHeat
       return true;
     }
 
+    protected double burnRate = 0d;
+    protected bool fuelCheckPassed = false;
+
     private void HandleResourceActivities(float timeStep)
     {
 
       if (!ManualControl)
         CurrentReactorThrottle = CalculateGoalThrottle(timeStep);
 
-
-      double burnRate = 0d;
+      fuelCheckPassed = true;
+      burnRate = 0d;
       float fuelThrottle = CurrentReactorThrottle / 100f;
-
-      bool fuelCheckPassed = true;
 
       // Check for full-ness
       foreach (ResourceRatio ratio in outputs)
@@ -813,7 +858,7 @@ namespace SystemHeat
           }
         }
         if (ratio.ResourceName == FuelName)
-          burnRate = fuelThrottle* ratio.Ratio;
+          burnRate = fuelThrottle * ratio.Ratio;
       }
       // If fuel consumed, add waste
       if (fuelCheckPassed)
@@ -827,24 +872,15 @@ namespace SystemHeat
       if (GeneratesElectricity)
       {
         if (HighLogic.LoadedSceneIsEditor)
+        {
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentReactorThrottle);
+        }
         if (fuelCheckPassed)
         {
           CurrentElectricalGeneration = ElectricalGeneration.Evaluate(CurrentThrottle);
           this.part.RequestResource(PartResourceLibrary.ElectricityHashcode, -CurrentElectricalGeneration * timeStep, ResourceFlowMode.ALL_VESSEL);
-
-          GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Normal", CurrentElectricalGeneration.ToString("F1"));
-        }
-        else
-        {
-          GeneratorStatus = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_GeneratorStatus_Offline");
         }
       }
-
-      // Find the time remaining at current rate
-      FuelStatus = FindTimeRemaining(
-        this.part.Resources.Get(PartResourceLibrary.Instance.GetDefinition(FuelName).id).amount,
-        burnRate);
 
     }
     public bool CheckFull(string nm, double eps)
@@ -869,9 +905,9 @@ namespace SystemHeat
       {
         return SystemHeatSettings.SpaceTemperature;
       }
-        return Mathf.Clamp((float)part.vessel.mainBody.GetTemperature(part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
-      
-      
+      return Mathf.Clamp((float)part.vessel.mainBody.GetTemperature(part.vessel.altitude), SystemHeatSettings.SpaceTemperature, 50000f);
+
+
     }
 
     #region Repair

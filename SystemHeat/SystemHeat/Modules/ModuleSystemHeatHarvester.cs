@@ -62,12 +62,10 @@ namespace SystemHeat
         return info;
       else
         return info.Substring(0, pos) + Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_PartInfoAdd",
-          Utils.ToSI(systemPower,"F0"),
+          Utils.ToSI(systemPower, "F0"),
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0")
           ) + info.Substring(pos);
-
-
     }
     public void Start()
     {
@@ -77,19 +75,13 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsFlight)
       {
         SetupResourceRatios();
-
       }
       else
       {
-
         SetupResourceRatios();
-
-        //this.CurrentSafetyOverride = this.NominalTemperature;
       }
 
       Utils.Log("[ModuleSystemHeatHarvester] Setup completed", LogType.Modules);
-
-
       Events["ToggleEditorThermalSim"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_SimulateEditor", base.ConverterName);
       Fields["HarvesterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency", base.ConverterName);
     }

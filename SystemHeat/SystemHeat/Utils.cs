@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 
 namespace SystemHeat
 {
-
   public enum LogType
   {
     UI,
@@ -20,7 +17,6 @@ namespace SystemHeat
   public static class Utils
   {
     public static string logTag = "SystemHeat";
-
 
     /// <summary>
     /// Log a message with the mod name tag prefixed
@@ -55,6 +51,15 @@ namespace SystemHeat
     }
 
 
+    // <summary>
+    /// Return true if the Part Action Window for this part is shown, false otherwise
+    /// </summary>
+    public static bool IsPAWVisible(this Part part)
+    {
+      return part.PartActionWindow != null && part.PartActionWindow.isActiveAndEnabled;
+    }
+
+
     public static string ToSI(float d, string format = null, float factor= 1000f)
     {
       if (d == 0.0)
@@ -82,11 +87,37 @@ namespace SystemHeat
       return scaled.ToString(format) + " " + prefix;
     }
 
+    /// <summary>
+    /// Get a reference in a child of a type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="name"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
+    public static T FindChildOfType<T>(string name, Transform parent)
+    {
+      T result = default(T);
+      try
+      {
+        result = parent.FindDeepChild(name).GetComponent<T>();
+      }
+      catch (NullReferenceException e)
+      {
+        Debug.LogError($"Couldn't find {name} in children of {parent.name}");
+      }
+      return result;
+    }
+
   }
 
   public static class TransformDeepChildExtension
   {
-    //Breadth-first search
+    /// <summary>
+    /// Find a child recursively by name
+    /// </summary>
+    /// <param name="aParent"></param>
+    /// <param name="aName"></param>
+    /// <returns></returns>
     public static Transform FindDeepChild(this Transform aParent, string aName)
     {
       Queue<Transform> queue = new Queue<Transform>();
@@ -101,22 +132,5 @@ namespace SystemHeat
       }
       return null;
     }
-
-
-    /*
-    //Depth-first search
-    public static Transform FindDeepChild(this Transform aParent, string aName)
-    {
-        foreach(Transform child in aParent)
-        {
-            if(child.name == aName )
-                return child;
-            var result = child.FindDeepChild(aName);
-            if (result != null)
-                return result;
-        }
-        return null;
-    }
-    */
   }
 }

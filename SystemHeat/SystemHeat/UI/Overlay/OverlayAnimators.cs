@@ -8,24 +8,66 @@ using UnityEngine.UI;
 
 namespace SystemHeat.UI
 {
-  public class ImageRotateAnimator: MonoBehaviour
+  public class ImageRotateAnimator : MonoBehaviour
   {
-    public float rate = 270f;
-    RectTransform xform;
+    public bool Animate { get; set; }
+    public float SpinRate = 100f;
+
+    protected RectTransform xform;
     // Use this for initialization
     void Start()
     {
       xform = this.transform as RectTransform;
     }
 
+
     // Update is called once per frame
     void Update()
     {
-
-      xform.Rotate(Vector3.forward, Time.deltaTime * rate, Space.Self);
+      if (xform != null)
+      {
+        if (Animate)
+        {
+          xform.Rotate(Vector3.forward, Time.deltaTime * SpinRate, Space.Self);
+        }
+      }
     }
   }
-  public class ImageFadeAnimator: MonoBehaviour
+  public class ImageProgressTickAnimator : MonoBehaviour
+  {
+    public bool Animate { get; set; }
+    public float TickRate = 3f;
+    public float Slices = 4f;
+    public float SlicesUsed = 1f;
+
+    protected Image image;
+    // Use this for initialization
+    void Start()
+    {
+      image = this.GetComponent<Image>();
+    }
+
+
+    // Update is called once per frame
+    void Update()
+    {
+      if (image != null)
+      {
+        if (Animate)
+        {
+          //.25
+
+          float loop = (int)(Mathf.Repeat(Time.time * TickRate, SlicesUsed + 1.95f) - 1f);
+          //Debug.Log($"{loop}, {SlicesUsed}, {loop / Slices}");
+          // snap to .25,.5, etc
+          image.fillAmount = loop / Slices;
+        }
+      }
+    }
+
+  }
+
+  public class ImageFadeAnimator : MonoBehaviour
   {
     public float rate = 2f;
     protected Image image;

@@ -7,6 +7,11 @@ using KSP.Localization;
 
 namespace SystemHeat
 {
+  /// <summary>
+  /// Plug a fuel container into the SystemHeat system to allow it to boil off
+  /// if not cooled
+  /// Mostly ripped from CryoTanks
+  /// </summary>
   public class ModuleSystemHeatCryoTank : PartModule
   {
 
@@ -599,7 +604,7 @@ namespace SystemHeat
 
       if (ShortwaveFluxAffectsBoiloff || LongwaveFluxAffectsBoiloff)
       {
-        fluxScale = Math.Max((planetFlux / LongwaveFluxBaseline + (solarFlux * Albedo) / ShortwaveFluxBaseline) / 2.0f, MinimumBoiloffScale);
+        fluxScale = Math.Min(Math.Max((planetFlux / LongwaveFluxBaseline + (solarFlux * Albedo) / ShortwaveFluxBaseline) / 2.0f, MinimumBoiloffScale), MaximumBoiloffScale);
       }
       else
       {

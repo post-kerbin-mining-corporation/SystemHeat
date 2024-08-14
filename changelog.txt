@@ -1,3 +1,40 @@
+v0.7.0
+------
+- Updated ModuleManager to 4.2.3
+- Major UI update
+- Rebuilt the System Heat Panel 
+-- Now looks better overall
+-- Data display is a bit more compact and easy on the eyes (less clipped stuff), pushes key info to the front 
+-- More dynamicism including flashing stuff/color changes when things are good (and bad)
+-- Behaves better with UI scale changes
+-- Mouseover enables the toolbar
+-- Toolbar icon has dynamic badging that communicates when something's up with a loop
+- Rebuilt the Overlay
+-- Overlay lines now animate when something in a loop is doing something 
+-- Overlay line drawing is cleaner and faster
+-- System icons have been simplified: the Panel has been removed as it wasn't giving much useful information beyond the PAW
+-- System icons now animate when a system is doing something
+-- New animated temperature gauge helps see whether a system is in a good place temperature-wise
+-- New animated flux increase/decrease gauges show how whether a system is contributing heat or removing heat to a loop and qualitatively how much
+-- Improved visibility for system warning temperature flashes
+-- Behaves better with UI size changes
+- Rebuilt the Reactors Panel 
+-- Now looks better and is more communicative
+-- Behaves better with UI size changes
+-- Scrolling actually works
+- Improved configuration of heat exchangers so they have a power cost proportionate to the amount of heat moved, not just temperature changes
+- Radiators in the Editor now respect the on/off status of the system to avoid mistakes like going to flight with inactive radiators
+- Performance pass, mostly on string handling in various system heat modules, should improve performance in a lot of places
+- Removed some un-cleaned up allocations in the toolbar UI that could leak memory
+- Fixed an inability to localize the sun tracking disable function for radiators
+- Fixed inability to localize ingame settings
+- Hid an annoying coolant log message that would come up constantly in normal mod use
+- Fixed a word order in Chinese localization (c6ForH66)
+- Add support for VABOrganizer
+- SystemHeatBoiloff: Fixed boiloff scale calculations which would negatively affect playing with the connections to stock thermal systems (Starstrider42)
+- SystemHeatBoiloff: Improved the balance of cooling costs for various tanks (Wyzard256)
+- SystemHeatBoiloff: Fix deuterium FuelName in SystemHeatBoiloff patch [#110] (Wyzard256)
+
 v0.6.0
 ------
 - Most UI fields now report in SI-prefixed units for flux (W, kW, MW, etc). This is not (yet) true for all modules though. 

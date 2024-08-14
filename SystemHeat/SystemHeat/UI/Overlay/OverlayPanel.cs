@@ -5,119 +5,167 @@ using System.Data;
 
 namespace SystemHeat.UI
 {
-  public class OverlayPanel:MonoBehaviour
+  public class OverlayPanel : MonoBehaviour
   {
     public bool active = true;
     public bool panelOpen = false;
     public RectTransform rect;
-    public GameObject infoPanel;
+
     public GameObject icon;
-    public RectTransform infoPanelTop;
     public Image colorRing;
     public Image colorRingAnimated;
+    public ImageRotateAnimator colorRingAnimator;
     public Image systemIcon;
     public Image systemIconBackground;
-    public Image heatIcon;
-    public Image heatIconBackground;
     public Image heatIconGlow;
 
-    public Button iconButton;
-    
-    public Text infoPanelTitle;
-    public Text infoPanelUpperText;
-    public Text infoPanelLowerText;
+    public Image tempBarBackground;
+    public Image tempBar;
+    public Image tempBarCarat;
+    public RectTransform tempBarCaratRect;
+
+    public Image fluxImage;
+    public ImageProgressTickAnimator fluxImageAnimator;
+
 
     public ModuleSystemHeat heatModule;
     public Canvas parentCanvas;
     public HeatLoop loop;
 
+    protected Gradient temperatureGradient;
+
+    protected Color fluxIncreasingColor = new Color(1f, 0.424f, 0f);
+    public Color fluxDecreasingColor = new Color(0f, 0.756f, 1f);
+
+    protected float tempDeltaForMaxTemperatureColor = 500f;
+    protected float maxTemperatureBarValue = 2000f;
+
+    protected float barFractionMax = 0.331f;
+    protected float barFractionBackgroundOffset = 0.015f;
+
+    protected int fluxBarTicks = 4;
+    protected float fluxPerBarTick = 50f;
+
     public void SetupComponents()
     {
       // Find all the components
       rect = this.GetComponent<RectTransform>();
+
       icon = transform.FindDeepChild("Icon").gameObject;
-      infoPanel = transform.FindDeepChild("InfoPanel").gameObject;
 
-      colorRing = transform.FindDeepChild("IconRing").GetComponent<Image>();
-      colorRingAnimated = transform.FindDeepChild("IconRingSpin").GetComponent<Image>();
+      colorRing = Utils.FindChildOfType<Image>("IconColorRing", transform);
+      colorRingAnimated = Utils.FindChildOfType<Image>("IconSpin", transform);
+      colorRingAnimator = colorRingAnimated.gameObject.AddComponent<ImageRotateAnimator>();
+      colorRingAnimator.SpinRate = 100f;
 
-      colorRingAnimated.gameObject.AddComponent<ImageRotateAnimator>();
+      systemIcon = Utils.FindChildOfType<Image>("IconForeground", transform);
+      tempBarBackground = Utils.FindChildOfType<Image>("TempBarOutline", transform);
+      tempBar = Utils.FindChildOfType<Image>("TempBar", transform);
+      tempBarCarat = Utils.FindChildOfType<Image>("BarCarat", transform);
+      tempBarCaratRect = tempBarCarat.GetComponent<RectTransform>();
 
-      systemIcon = transform.FindDeepChild("IconForeground").GetComponent<Image>();
-      heatIconBackground = transform.FindDeepChild("FireButton").GetComponent<Image>();
-      heatIcon = transform.FindDeepChild("ThermoIcon").GetComponent<Image>();
-      heatIconGlow = transform.FindDeepChild("FireGlow").GetComponent<Image>();
+      temperatureGradient = new Gradient();
+      temperatureGradient.colorKeys = new GradientColorKey[]
+        {
+          new GradientColorKey(new Color(0f, 1f, 0f), 0f),
+          new GradientColorKey(new Color(0.98f, 0.91f, 0f), 0.33f),
+          new GradientColorKey(new Color(0.98f, 0.54f, 0f), 0.66f),
+          new GradientColorKey(new Color(1f, 0f, 0f), 1f)
+        };
+
+      fluxImage = Utils.FindChildOfType<Image>("FluxTriangles", transform);
+      fluxImageAnimator = fluxImage.gameObject.AddComponent<ImageProgressTickAnimator>();
+
+      heatIconGlow = Utils.FindChildOfType<Image>("FireGlow", transform);
       heatIconGlow.gameObject.AddComponent<ImageFadeAnimator>();
 
-      systemIconBackground = transform.FindDeepChild("InfoIconBackground").GetComponent<Image>();
-      iconButton = transform.FindDeepChild("InfoIconBackground").GetComponent<Button>();
+      fluxPerBarTick = SystemHeatSettings.OverlayPanelFluxTickSize;
+      tempDeltaForMaxTemperatureColor = SystemHeatSettings.OverlayPanelTemperatureDeltaForMaxColor;
+      maxTemperatureBarValue = SystemHeatSettings.OverlayPanelMaxTemperatureValue;
 
-      infoPanelTop = transform.FindDeepChild("InfoPanelTop").GetComponent<RectTransform>();
+      tempBarCarat.color = Color.white;
 
-      infoPanelTitle = transform.FindDeepChild("InfoPanelTitleText").GetComponent<Text>();
-      infoPanelUpperText = transform.FindDeepChild("InfoPanelTopText").GetComponent<Text>();
-      infoPanelLowerText = transform.FindDeepChild("InfoPanelBottomText").GetComponent<Text>();
-
-      iconButton.onClick.AddListener(delegate { OnButtonClick(); });
-      SetPanel(panelOpen);
-
-      heatIconBackground.enabled = false;
       heatIconGlow.enabled = false;
-      heatIcon.enabled = false;
-      colorRingAnimated.enabled = false;
+      fluxImage.fillAmount = 0f;
+      fluxImage.enabled = false;
+
     }
 
-    public void OnButtonClick()
-    {
-      SetPanel(!panelOpen);
-    }
+
 
     public void LateUpdate()
     {
       if (active && loop != null && heatModule != null)
       {
-        if (panelOpen)
-        {
-          if (heatModule.totalSystemFlux <= 0f)
-          {
-            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperTextNoTemp", Utils.ToSI(heatModule.totalSystemFlux,"F0"));
-            infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 26f);
-          } else
-          {
-            infoPanelUpperText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_UpperText", heatModule.systemNominalTemperature.ToString("F0"), Utils.ToSI(heatModule.totalSystemFlux, "F0"));
-            infoPanelTop.sizeDelta = new Vector2(infoPanelTop.sizeDelta.x, 48f);
-          }
-          
-          infoPanelLowerText.text = Localizer.Format("#LOC_SystemHeat_OverlayPanel_LowerText", loop.Temperature.ToString("F0"), loop.NominalTemperature.ToString("F0"), Utils.ToSI(loop.NetFlux,"F0"), loop.Volume.ToString("F2"));
-        }
+        float nominalLoopTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;
+        float nominalSystemTempDelta = loop.Temperature - heatModule.systemNominalTemperature;
 
-        float nominalTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;
-        float tempDelta = loop.Temperature - heatModule.systemNominalTemperature;
+        float caratRotation = 330f - (90f / maxTemperatureBarValue) * heatModule.systemNominalTemperature;
+        float barFractionPerKelvin = barFractionMax / maxTemperatureBarValue;
+        tempBarBackground.fillAmount = Mathf.Min(heatModule.systemNominalTemperature * barFractionPerKelvin + barFractionBackgroundOffset, barFractionMax);
+        tempBar.fillAmount = Mathf.Min(loop.Temperature * barFractionPerKelvin, barFractionMax);
+        float nominalTempDelta = (loop.Temperature - heatModule.systemNominalTemperature) / (tempDeltaForMaxTemperatureColor);
+
         if (heatModule.systemNominalTemperature <= 0f)
         {
-          if (heatIconBackground.enabled)
+          if (tempBarBackground.enabled)
           {
-            heatIconBackground.enabled = false;
+            tempBarBackground.enabled = false;
+            tempBar.enabled = false;
+            tempBarCarat.enabled = false;
+          }
+          if (heatIconGlow.enabled)
+          {
             heatIconGlow.enabled = false;
-            heatIcon.enabled = false;
           }
         }
         else
         {
-          if ((nominalTempDelta > 10f || tempDelta > 10f) && !heatIconBackground.enabled)
+          if (!tempBarBackground.enabled)
           {
-            heatIconBackground.enabled = true;
-            heatIconGlow.enabled = true;
-            heatIcon.enabled = true;
+            tempBarBackground.enabled = true;
+            tempBar.enabled = true;
+            tempBarCarat.enabled = true;
           }
+          tempBarCarat.transform.localEulerAngles = new Vector3(0f, 0f, caratRotation);
+          tempBar.color = temperatureGradient.Evaluate(nominalTempDelta);
 
-          if ((nominalTempDelta <= 10f && tempDelta <= 10f) && heatIconBackground.enabled)
+
+          if ((nominalLoopTempDelta > 10f || nominalSystemTempDelta > 10f) && !heatIconGlow.enabled)
           {
-            heatIconBackground.enabled = false;
+            heatIconGlow.enabled = true;
+          }
+          if ((nominalLoopTempDelta <= 10f && nominalSystemTempDelta <= 10f) && heatIconGlow.enabled)
+          {
             heatIconGlow.enabled = false;
-            heatIcon.enabled = false;
           }
         }
+        bool running = Mathf.Abs(heatModule.totalSystemFlux) > 0.1f;
+        colorRingAnimator.Animate = fluxImageAnimator.Animate = running;
+
+        if (running && !fluxImage.enabled)
+        {
+          fluxImage.enabled = true;
+        }
+        if (!running && fluxImage.enabled)
+        {
+          fluxImage.enabled = false;
+        }
+        if (heatModule.totalSystemFlux <= 0.0001f)
+        {
+          fluxImage.transform.localEulerAngles = new Vector3(0, 0, 180f);
+          fluxImage.color = fluxDecreasingColor;
+        }
+        else
+        {
+          fluxImage.transform.localEulerAngles = new Vector3(0, 0, 0);
+          fluxImage.color = fluxIncreasingColor;
+        }
+        fluxImageAnimator.SlicesUsed = Mathf.Min(
+          Mathf.Round(
+            Mathf.Abs(heatModule.totalSystemFlux) / fluxPerBarTick),
+          fluxBarTicks) + 1;
+
         Vector2 screenPoint = Camera.main.WorldToScreenPoint(heatModule.part.transform.position);
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.GetComponent<RectTransform>(), screenPoint, parentCanvas.worldCamera, out localPoint);
@@ -126,7 +174,7 @@ namespace SystemHeat.UI
       if (heatModule == null)
       {
         Destroy(this.gameObject);
-      }      
+      }
     }
 
     public Vector3 worldToUISpace(Canvas parentCanvas, Vector3 worldPos)
@@ -146,8 +194,6 @@ namespace SystemHeat.UI
       SetupComponents();
       loop = lp;
       heatModule = sh;
-     // Utils.Log($"{loop} {heatModule}, {colorRing}, {infoPanelTitle}");
-      infoPanelTitle.text = heatModule.part.partInfo.title;
       colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
       Transform xform = transform.FindDeepChild(heatModule.iconName);
       if (xform != null)
@@ -164,7 +210,6 @@ namespace SystemHeat.UI
       Transform xform;
       if (heatModule != null && heatModule.part != null)
       {
-        infoPanelTitle.text = heatModule.part.partInfo.title;
         xform = transform.FindDeepChild(heatModule.iconName);
 
         if (xform != null)
@@ -172,16 +217,10 @@ namespace SystemHeat.UI
           systemIcon.sprite = xform.GetComponent<Image>().sprite;
         }
       }
-      
-      colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
-      
-      SetVisibility(visible);
-    }
 
-    public void SetPanel(bool state)
-    {
-      infoPanel.SetActive(state);
-      panelOpen = state;
+      colorRing.color = SystemHeatSettings.GetLoopColor(loop.ID);
+
+      SetVisibility(visible);
     }
 
     public void SetVisibility(bool state)
@@ -189,12 +228,9 @@ namespace SystemHeat.UI
       active = state;
       icon.SetActive(state);
 
-      if (!state)
-        SetPanel(state);
 
-      
     }
-    
+
 
   }
 }

@@ -84,12 +84,25 @@ namespace SystemHeat
     // Loop flux tolerance
     public static float AbsFluxThreshold = 0.5f;
 
+    // UI Stuff
+    public static float UISrollSensitivity = 25f;
 
+    // Overlay Stuff
+    public static float OverlayActiveLineWidth = 6f;
     public static float OverlayBaseLineWidth = 4f;
-
+    public static int OverlayBaseLineQueue = 3000;
+    public static float OverlayOutlineLineWidth = 4f;
+    public static int OverlayOutlineLineQueue = 3025;
+    public static float OverlayActiveLineTextureScaleFactor = 10f;
+    public static float OverlayActiveLineTextureScrollRate = 2.5f;
+    public static float OverlayLineBevel = 0.1f;
+    public static float OverlayLineBevelScale = 0.3f;
     public static float OverlayPadding = 0.2f;
     public static float OverlayBoundsPadding = 1f;
 
+    public static float OverlayPanelFluxTickSize = 500f;
+    public static float OverlayPanelTemperatureDeltaForMaxColor = 500f;
+    public static float OverlayPanelMaxTemperatureValue = 2000f;
     public static Dictionary<string, CoolantType> CoolantData;
 
     public static Dictionary<int, Color> ColorData = new Dictionary<int, Color> {
@@ -133,6 +146,8 @@ namespace SystemHeat
         settingsNode.TryGetValue("ConvectionBaseCoefficient", ref ConvectionBaseCoefficient);
 
         settingsNode.TryGetValue("UIUpdateInterval", ref UIUpdateInterval);
+
+
         settingsNode.TryGetValue("TimeWarpLimit", ref TimeWarpLimit);
         settingsNode.TryGetValue("MaxDeltaTPerStep", ref MaxDeltaTPerStep);
         settingsNode.TryGetValue("MinSteps", ref MinSteps);
@@ -140,15 +155,27 @@ namespace SystemHeat
 
         settingsNode.TryGetValue("SimulationRateEditor", ref SimulationRateEditor);
         settingsNode.TryGetValue("AbsFluxThreshold", ref AbsFluxThreshold);
+
+        settingsNode.TryGetValue("UIScrollSensitivity", ref UISrollSensitivity);
+
+        settingsNode.TryGetValue("OverlayActiveLineWidth", ref OverlayActiveLineWidth);
+        settingsNode.TryGetValue("OverlayActiveLineTextureScaleFactor", ref OverlayActiveLineTextureScaleFactor);
+        settingsNode.TryGetValue("OverlayActiveLineTextureScrollRate", ref OverlayActiveLineTextureScrollRate);
         settingsNode.TryGetValue("OverlayBaseLineWidth", ref OverlayBaseLineWidth);
+        settingsNode.TryGetValue("OverlayLineBevel", ref OverlayLineBevel);
+        settingsNode.TryGetValue("OverlayLineBevelScale", ref OverlayLineBevelScale);
+
         settingsNode.TryGetValue("OverlayPadding", ref OverlayPadding);
         settingsNode.TryGetValue("OverlayBoundsPadding", ref OverlayBoundsPadding);
+
+        settingsNode.TryGetValue("OverlayPanelFluxTickSize", ref OverlayPanelFluxTickSize);
+        settingsNode.TryGetValue("OverlayPanelTemperatureDeltaForMaxColor", ref OverlayPanelTemperatureDeltaForMaxColor);
+        settingsNode.TryGetValue("OverlayPanelMaxTemperatureValue", ref OverlayPanelMaxTemperatureValue);
       }
       else
       {
         Utils.Log("[Settings]: Couldn't find settings file, using defaults", LogType.Settings);
       }
-
 
       Utils.Log("[Settings]: Loading coolant types ", LogType.Settings);
       ConfigNode[] coolantNodes = GameDatabase.Instance.GetConfigNodes("COOLANTTYPE");
@@ -175,7 +202,7 @@ namespace SystemHeat
       }
       else
       {
-        Utils.LogWarning(String.Format("[Settings] {0} not found, using default coolant", name));
+        Utils.Log(String.Format("[Settings] {0} not found, using default coolant", name), LogType.Simulator);
         return new CoolantType();
       }
     }

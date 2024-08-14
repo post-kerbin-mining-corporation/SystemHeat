@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using KSP.UI;
 using KSP.UI.Screens;
-using KSP.Localization;
 
 namespace SystemHeat.UI
 {
@@ -26,6 +21,7 @@ namespace SystemHeat.UI
 
     // Panel
     public ToolbarPanel toolbarPanel;
+    public ToolbarIconTag toolbarTag;
 
     // Stock toolbar button
     protected string toolbarUIIconURLOff = "SystemHeat/UI/toolbar_off";
@@ -60,12 +56,16 @@ namespace SystemHeat.UI
     protected void CreateToolbarPanel()
     {
       Utils.Log("[SystemHeatUI]: Creating toolbar panel", LogType.UI);
-      GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
+      GameObject newUIPanel = (GameObject)Instantiate(SystemHeatAssets.ToolbarPanelPrefab, Vector3.zero, Quaternion.identity);
       newUIPanel.transform.SetParent(UIMasterController.Instance.appCanvas.transform);
       newUIPanel.transform.localScale = Vector3.one;
       newUIPanel.transform.localPosition = Vector3.zero;
+
       toolbarPanel = newUIPanel.AddComponent<ToolbarPanel>();
       toolbarPanel.SetVisible(false);
+      toolbarTag = new ToolbarIconTag();
+      toolbarTag.Initialize();
+      toolbarTag.Position(stockToolbarButton);
     }
     protected void DestroyToolbarPanel()
     {
@@ -76,19 +76,33 @@ namespace SystemHeat.UI
       }
     }
 
-    public void ToggleAppLauncher()
+    bool pinnedOn = false;
+
+    /// <summary>
+    /// Hover state 
+    /// </summary>
+    public void SetHoverState(bool on)
     {
-      showWindow = !showWindow;
+      if (pinnedOn)
+        return;
+
+      showWindow = on;
+      toolbarPanel.SetVisible(showWindow);
+    }
+    public void SetClickedState(bool on)
+    {
+      pinnedOn = on;
+      showWindow = pinnedOn;
+
       toolbarPanel.SetVisible(showWindow);
       if (showWindow)
       {
-        SystemHeatOverlay.Instance.SetVisible(toolbarPanel.overlayToggle.isOn);
+        SystemHeatOverlay.Instance.SetVisible(toolbarPanel.OverlayMasterState);
       }
       else
       {
         SystemHeatOverlay.Instance.SetVisible(false);
       }
-
     }
 
     protected void FindSimulator()
@@ -161,7 +175,6 @@ namespace SystemHeat.UI
     {
       if (showWindow)
       {
-
         if (HighLogic.LoadedSceneIsFlight)
         {
           /// TODO: Handle refresh of application launcher when switching ships
@@ -179,33 +192,22 @@ namespace SystemHeat.UI
 
           if (toolbarPanel != null && stockToolbarButton != null)
           {
-            if (toolbarPanel.loopPanel.activeSelf)
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
+            toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUL());
 
-            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUL() - new Vector3(
-              toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 
-              toolbarPanel.rect.rect.height * UIMasterController.Instance.uiScale, 0f);
           }
         }
-        
-         
+
         if (HighLogic.LoadedSceneIsEditor)
         {
           if (stockToolbarButton != null)
           {
-            //toolbarPanel.rect.localScale = new Vector3(UIMasterController.Instance.appCanvas.scaleFactor,
-             // UIMasterController.Instance.appCanvas.scaleFactor, UIMasterController.Instance.appCanvas.scaleFactor);
-
-            if (toolbarPanel.loopPanel.activeSelf)
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 400f);
-            else
-              toolbarPanel.rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 200f);
-
-            toolbarPanel.rect.position = stockToolbarButton.GetAnchorUR() - new Vector3(toolbarPanel.rect.rect.width * UIMasterController.Instance.uiScale, 0f, 0f);
-            
-            
+            toolbarPanel.SetToolbarPosition(stockToolbarButton.GetAnchorUR());
           }
         }
+      }
+      if (toolbarTag != null && simulator != null)
+      {
+        toolbarTag.Update(simulator);
       }
     }
     public void OnVesselChanged(Vessel v)
@@ -227,8 +229,6 @@ namespace SystemHeat.UI
 
     void ResetToolbarPanel()
     {
-      // Refresh reactors
-
       if (HasHeatModules(FlightGlobals.ActiveVessel))
       {
         Utils.Log($"[SystemHeatToolbar]: Found modules", LogType.UI);
@@ -236,10 +236,10 @@ namespace SystemHeat.UI
         {
           Utils.Log($"[SystemHeatToolbar]: Creating toolbar button", LogType.UI);
           stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-              OnToolbarButtonToggle,
-              OnToolbarButtonToggle,
-              DummyVoid,
-              DummyVoid,
+              OnToolbarButtonOn,
+              OnToolbarButtonOff,
+              OnToolbarButtonHover,
+              OnToolbarButtonHoverOut,
               DummyVoid,
               DummyVoid,
               ApplicationLauncher.AppScenes.FLIGHT,
@@ -270,14 +270,45 @@ namespace SystemHeat.UI
       {
         ApplicationLauncher.Instance.RemoveModApplication(stockToolbarButton);
       }
+      GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
+      GameEvents.onGUIApplicationLauncherDestroyed.Remove(OnGUIAppLauncherDestroyed);
+      GameEvents.onGUIApplicationLauncherUnreadifying.Remove(new EventData<GameScenes>.OnEvent(OnGUIAppLauncherUnreadifying));
+      GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(OnVesselChanged));
     }
+    protected void OnToolbarButtonHover()
+    {
+      Utils.Log("[UI]: Toolbar Button Hover On", LogType.UI);
 
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetHoverState(true);
+    }
+    protected void OnToolbarButtonHoverOut()
+    {
+      Utils.Log("[UI]: Toolbar Button Hover Out", LogType.UI);
+
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetHoverState(false);
+    }
+    protected void OnToolbarButtonOn()
+    {
+      Utils.Log("[UI]: Toolbar Button  On", LogType.UI);
+
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetClickedState(true);
+    }
+    protected void OnToolbarButtonOff()
+    {
+      Utils.Log("[UI]: Toolbar Button Off", LogType.UI);
+
+      stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
+      SetClickedState(false);
+    }
     protected void OnToolbarButtonToggle()
     {
       Utils.Log("[UI]: Toolbar Button Toggled", LogType.UI);
 
       stockToolbarButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(showWindow ? toolbarUIIconURLOn : toolbarUIIconURLOff, false));
-      ToggleAppLauncher();
+      //SetAppState(!showWindow, !showWindow);
     }
 
 
@@ -290,10 +321,10 @@ namespace SystemHeat.UI
       {
         if (HighLogic.LoadedSceneIsFlight && HasHeatModules(FlightGlobals.ActiveVessel) || HighLogic.LoadedSceneIsEditor)
           stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-              OnToolbarButtonToggle,
-              OnToolbarButtonToggle,
-              DummyVoid,
-              DummyVoid,
+              OnToolbarButtonOn,
+              OnToolbarButtonOff,
+              OnToolbarButtonHover,
+              OnToolbarButtonHoverOut,
               DummyVoid,
               DummyVoid,
               ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
@@ -335,14 +366,13 @@ namespace SystemHeat.UI
     {
 
       Utils.Log("[UI]: Reset App Launcher", LogType.UI);
-      //FindData();
       if (stockToolbarButton == null)
       {
         stockToolbarButton = ApplicationLauncher.Instance.AddModApplication(
-            OnToolbarButtonToggle,
-            OnToolbarButtonToggle,
-            DummyVoid,
-            DummyVoid,
+              OnToolbarButtonOn,
+              OnToolbarButtonOff,
+              OnToolbarButtonHover,
+              OnToolbarButtonHoverOut,
             DummyVoid,
             DummyVoid,
             ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,

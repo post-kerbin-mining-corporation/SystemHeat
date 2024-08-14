@@ -54,29 +54,20 @@ namespace SystemHeat
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0")
           ) + info.Substring(pos);
-
-
     }
     public void Start()
     {
-
       heatModule = ModuleUtils.FindHeatModule(this.part, systemHeatModuleID);
 
       if (HighLogic.LoadedSceneIsFlight)
       {
         SetupResourceRatios();
-
       }
       else
       {
-
         SetupResourceRatios();
-
-        //this.CurrentSafetyOverride = this.NominalTemperature;
       }
-
       Utils.Log("[ModuleSystemHeatAsteroidHarvester] Setup completed", LogType.Modules);
-
       Fields["HarvesterEfficiency"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatHarvester_Field_Efficiency", base.ConverterName);
     }
     public override void FixedUpdate()
@@ -100,9 +91,13 @@ namespace SystemHeat
     protected void GenerateHeatEditor()
     {
       if (base.IsActivated)
+      {
         heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
+      }
       else
+      {
         heatModule.AddFlux(moduleID, 0f, 0f, false);
+      }
     }
 
     protected void GenerateHeatFlight()
@@ -129,17 +124,13 @@ namespace SystemHeat
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           ToggleResourceConverterAction(new KSPActionParam(0, KSPActionType.Activate));
-
           Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired", LogType.Modules);
-
         }
-        //base.recipe = ModuleUtils.RecalculateRatios(systemEfficiency.Evaluate(heatModule.currentLoopTemperature), inputs, outputs, inputList, outputList, base.recipe);
       }
     }
 
     private void SetupResourceRatios()
     {
-
       inputs = new List<ResourceBaseRatio>();
       outputs = new List<ResourceBaseRatio>();
 

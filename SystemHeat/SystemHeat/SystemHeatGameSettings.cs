@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using KSP.Localization;
 
 namespace SystemHeat
 {
@@ -10,44 +6,50 @@ namespace SystemHeat
   public class SystemHeatGameSettings_ReactorDamage : GameParameters.CustomParameterNode
   {
 
-    [GameParameters.CustomParameterUI("Allow Reactor Damage",
-      toolTip = "If enabled, overheated reactors will take damage",
+    [GameParameters.CustomParameterUI("AllowReactorDamage",
+      title = "#LOC_SystemHeat_Settings_AllowReactorDamage_Title",
+      toolTip = "#LOC_SystemHeat_Settings_AllowReactorDamage_Tooltip",
       autoPersistance = true)]
     public bool reactorDamage = true;
 
-    [GameParameters.CustomParameterUI("Allow Reactor Repairs",
-      toolTip = "If enabled, damaged fission reactors can be repaired",
+    [GameParameters.CustomParameterUI("AllowReactorRepairs",
+      title = "#LOC_SystemHeat_Settings_AllowReactorRepair_Title",
+      toolTip = "#LOC_SystemHeat_Settings_AllowReactorRepair_Tooltip",
       autoPersistance = true)]
     public bool reactorRepairs = true;
 
-    [GameParameters.CustomIntParameterUI("Engineer Level Required",
+    [GameParameters.CustomIntParameterUI("EngineerLevelRequired",
+      title = "#LOC_SystemHeat_Settings_EngineerLevelNeeded_Title",
       maxValue = 5, minValue = 1, stepSize = 1,
-      toolTip = "Engineer level needed to repair a reactor",
+      toolTip = "#LOC_SystemHeat_Settings_EngineerLevelNeeded_Tooltip",
       autoPersistance = true)]
     public int engineerLevel = 5;
 
 
-    [GameParameters.CustomFloatParameterUI("Amount Repaired per Repair Kit",
-      maxValue = 100f, minValue = 5f, asPercentage = true, stepCount = 20,
-      toolTip = "The amount of repairs a single kit makes", autoPersistance = true)]
-    public float repairPerKit = 25f;
+    [GameParameters.CustomFloatParameterUI("AmountRepairedPerKit",
+      title = "#LOC_SystemHeat_Settings_RepairAmoutPerKit_Title",
+      maxValue = 1f, minValue = 0.05f, asPercentage = true, stepCount = 20,
+      toolTip = "#LOC_SystemHeat_Settings_RepairAmoutPerKit_Tooltip", autoPersistance = true)]
+    public float repairPerKit = 0.25f;
 
-    [GameParameters.CustomFloatParameterUI("Minimum Repairable level",
-      maxValue = 100f, minValue = 5f, asPercentage = true, stepCount = 20,
-      toolTip = "If a reactor is below this level it can't be repaired", autoPersistance = true)]
-    public float repairThreshold = 10f;
+    [GameParameters.CustomFloatParameterUI("MinimumRepairableLevel",
+      title = "#LOC_SystemHeat_Settings_MinimumRepair_Title",
+      maxValue = 1f, minValue = 0.05f, asPercentage = true, stepCount = 20,
+      toolTip = "#LOC_SystemHeat_Settings_MinimumRepair_Tooltip ", autoPersistance = true)]
+    public float repairThreshold = 0.10f;
 
 
     [GameParameters.CustomFloatParameterUI("Maximum Allowed Repair Amount",
-      maxValue = 100f, minValue = 5f, asPercentage = true, stepCount = 20,
-      toolTip = "The maximum amount you are allowed to repair a reactor", autoPersistance = true)]
-    public float repairMax = 75f;
+      title = "#LOC_SystemHeat_Settings_MaximumRepair_Title",
+      maxValue = 1f, minValue = 0.05f, asPercentage = true, stepCount = 20,
+      toolTip = "#LOC_SystemHeat_Settings_MaximumRepair_Tooltip", autoPersistance = true)]
+    public float repairMax = 0.75f;
 
     public override string DisplaySection
     {
       get
       {
-        return Section;
+        return "#LOC_SystemHeat_Settings_MainSection_Title";
       }
     }
 
@@ -55,7 +57,7 @@ namespace SystemHeat
     {
       get
       {
-        return "System Heat";
+        return "SystemHeat";
       }
     }
 
@@ -63,7 +65,7 @@ namespace SystemHeat
     {
       get
       {
-        return "Fission Reactor Damage";
+        return Localizer.Format("#LOC_SystemHeat_Settings_ReactorDamage_Section_Title");
       }
     }
 
@@ -181,14 +183,16 @@ namespace SystemHeat
 
 public class SystemHeatGameSettings_NuclearFuel : GameParameters.CustomParameterNode
 {
-  [GameParameters.CustomParameterUI("Nuclear Fuel Transfer Needs Engineers",
-    toolTip = "If enabled, nuclear fuel transfer needs experienced engineers",
+  [GameParameters.CustomParameterUI("NuclearFuelTransferNeedsEngineers",
+    title = "#LOC_SystemHeat_Settings_FissionFuelNeedsEngineers_Title",
+    toolTip = "#LOC_SystemHeat_Settings_FissionFuelNeedsEngineers_Tooltip",
     autoPersistance = true)]
   public bool requireEngineersForTransfer = true;
 
-  [GameParameters.CustomIntParameterUI("Engineer Level Required",
+  [GameParameters.CustomIntParameterUI("NuclearTransferEngineerLevelRequired",
+    title = "#LOC_SystemHeat_Settings_FissionFuelEngineerLevelNeeded_Title",
     maxValue = 5, minValue = 1, stepSize = 1,
-    toolTip = "Engineer level needed to transfer",
+    toolTip = "#LOC_SystemHeat_Settings_FissionFuelEngineerLevelNeeded_Tooltip",
     autoPersistance = true)]
   public int engineerLevel = 3;
 
@@ -196,7 +200,7 @@ public class SystemHeatGameSettings_NuclearFuel : GameParameters.CustomParameter
   {
     get
     {
-      return Section;
+      return "#LOC_SystemHeat_Settings_MainSection_Title";
     }
   }
 
@@ -204,7 +208,7 @@ public class SystemHeatGameSettings_NuclearFuel : GameParameters.CustomParameter
   {
     get
     {
-      return "System Heat";
+      return "SystemHeat";
     }
   }
 
@@ -212,9 +216,10 @@ public class SystemHeatGameSettings_NuclearFuel : GameParameters.CustomParameter
   {
     get
     {
-      return "Nuclear Fuel";
+      return Localizer.Format("#LOC_SystemHeat_Settings_FissionFuel_Section_Title");
     }
   }
+  
 
   public override int SectionOrder
   {
@@ -284,20 +289,22 @@ public class SystemHeatGameSettings_NuclearFuel : GameParameters.CustomParameter
 
 public class SystemHeatGameSettings_Boiloff : GameParameters.CustomParameterNode
 {
-  [GameParameters.CustomParameterUI("Fuel Boiloff",
-    toolTip = "If enabled, configured fuels that need coolin", autoPersistance = true)]
+  [GameParameters.CustomParameterUI("FuelBoiloff",
+    title = "#LOC_SystemHeat_Settings_AllowCryogenicBoiloff_Title",
+    toolTip = "#LOC_SystemHeat_Settings_AllowCryogenicBoiloff_Tooltip", autoPersistance = true)]
   public bool boiloffEnabled = true;
 
-  [GameParameters.CustomFloatParameterUI("Fuel Boiloff Rate",
+  [GameParameters.CustomFloatParameterUI("FuelBoiloffRate",
+    title = "#LOC_SystemHeat_Settings_ScaledCryogenicBoiloff_Title",
     maxValue = 5.0f, minValue = 0.01f, asPercentage = true, stepCount = 100,
-    toolTip = "Modifies base boiloff rate", autoPersistance = true)]
+    toolTip = "#LOC_SystemHeat_Settings_ScaledCryogenicBoiloff_Tooltip", autoPersistance = true)]
   public float boiloffRate = 1.0f;
 
   public override string DisplaySection
   {
     get
     {
-      return Section;
+      return "#LOC_SystemHeat_Settings_MainSection_Title";
     }
   }
 
@@ -305,7 +312,7 @@ public class SystemHeatGameSettings_Boiloff : GameParameters.CustomParameterNode
   {
     get
     {
-      return "System Heat";
+      return "SystemHeat";
     }
   }
 
@@ -313,7 +320,7 @@ public class SystemHeatGameSettings_Boiloff : GameParameters.CustomParameterNode
   {
     get
     {
-      return "Boiloff";
+      return Localizer.Format("#LOC_SystemHeat_Settings_Cryogenics_Section_Title");
     }
   }
 

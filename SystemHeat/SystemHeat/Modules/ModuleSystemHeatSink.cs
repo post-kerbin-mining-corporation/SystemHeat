@@ -6,7 +6,7 @@ using KSP.Localization;
 namespace SystemHeat
 {
   /// <summary>
-  /// A module to provide a heat sink
+  /// A module to provide a heat sink. A heat sink can store heat and then can dump it
   /// </summary>
   public class ModuleSystemHeatSink : PartModule
   {
@@ -86,6 +86,8 @@ namespace SystemHeat
       storageEnabled = false;
     }
 
+    protected bool storingHeat = false;
+
     protected Gradient ramp;
     protected Renderer onLight;
     protected Renderer rampLight;
@@ -141,17 +143,12 @@ namespace SystemHeat
     }
     void SetupUI()
     {
-
       var range = (UI_FloatRange)this.Fields["heatStorageDumpRate"].uiControlFlight;
       range.minValue = 0f;
       range.maxValue = maxHeatRate;
-
     }
 
-    public void ChangeResource(BaseField field, object oldFieldValueObj)
-    {
-
-    }
+    public void ChangeResource(BaseField field, object oldFieldValueObj) { }
     public void Update()
     {
       if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
@@ -174,6 +171,33 @@ namespace SystemHeat
           rampLight.material.SetColor("_TintColor", ramp.Evaluate(heatStored / heatStorageMaximum));
         }
 
+        if (heatModule != null && part.IsPAWVisible())
+        {
+          if (HighLogic.LoadedSceneIsEditor)
+          {
+            systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
+            systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
+            systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
+              Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
+              Utils.ToSI(maxHeatRate, "F0"));
+          }
+          else
+          {
+            if (storingHeat)
+            {
+              Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration");
+            }
+            else
+            {
+              Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Dump");
+            }
+            systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
+            systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
+            systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
+              Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
+              Utils.ToSI(maxHeatRate, "F0"));
+          }
+        }
       }
     }
 
@@ -186,21 +210,10 @@ namespace SystemHeat
       if (HighLogic.LoadedSceneIsFlight)
       {
         GenerateHeatFlight();
-        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
-        systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
-          Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
-          Utils.ToSI(maxHeatRate, "F0"));
-
       }
       if (HighLogic.LoadedSceneIsEditor)
       {
         GenerateHeatEditor();
-        systemTemperature = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemTemperature_Running", storageTemperature.ToString("F0"));
-        systemHeatStored = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatStored_Fraction", (heatStored / heatStorageMaximum * 100f).ToString("F0"));
-        systemHeatGeneration = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Storing",
-          Utils.ToSI((-heatModule.consumedSystemFlux), "F0"),
-          Utils.ToSI(maxHeatRate, "F0"));
       }
     }
 
@@ -213,8 +226,9 @@ namespace SystemHeat
 
       if (storageEnabled && heatStored < heatStorageMaximum)
       {
+        storingHeat = true;
         heatModule.AddFlux(moduleID, 0f, -maxHeatRate, false);
-        Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration");
+        
         if (heatModule.currentLoopTemperature >= heatModule.nominalLoopTemperature)
         {
           storageTemperature = Mathf.Clamp(storageTemperature + (-heatModule.consumedSystemFlux * TimeWarp.fixedDeltaTime) / (heatStorageSpecificHeat * heatStorageMass), 0f, 5000f); // Q = mcT
@@ -223,7 +237,7 @@ namespace SystemHeat
       }
       else if (!storageEnabled && heatStored > 0f)
       {
-        Fields["systemHeatGeneration"].guiName = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatSink_Field_SystemHeatGeneration_Dump");
+        storingHeat = false;
         heatModule.AddFlux(moduleID, storageTemperature, heatStorageDumpRate, true);
         heatStored = Mathf.Clamp(heatStored - heatStorageDumpRate * TimeWarp.fixedDeltaTime, 0f, heatStorageMaximum);
         storageTemperature = storageTemperature - heatStorageDumpRate * TimeWarp.fixedDeltaTime / (heatStorageSpecificHeat * heatStorageMass); // Q = mcT
@@ -249,6 +263,5 @@ namespace SystemHeat
         heatModule.AddFlux(moduleID, 0f, 0f, false);
       }
     }
-
   }
 }

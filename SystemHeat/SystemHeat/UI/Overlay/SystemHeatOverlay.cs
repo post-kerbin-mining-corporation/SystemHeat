@@ -23,9 +23,8 @@ namespace SystemHeat.UI
 
     protected Transform overlayRoot;
     protected SystemHeatSimulator simulator;
-    protected List<OverlayLoop> overlayLoops;
+    public List<OverlayLoop> overlayLoops;
 
-    // protected Dictionary<int, bool> overlayLoopVisibility;
     protected List<OverlayPanel> overlayPanels;
 
     protected void Awake()
@@ -250,7 +249,7 @@ namespace SystemHeat.UI
               {
                 Utils.Log($"[SystemHeatOverlay]: Building new OverlayPanel for system {system.moduleID}", LogType.Overlay);
                 // new panel instance
-                GameObject newUIPanel = (GameObject)Instantiate(SystemHeatUILoader.OverlayPanelPrefab, Vector3.zero, Quaternion.identity);
+                GameObject newUIPanel = (GameObject)Instantiate(SystemHeatAssets.OverlayPanelPrefab, Vector3.zero, Quaternion.identity);
                 newUIPanel.transform.SetParent(UIMasterController.Instance.actionCanvas.transform);
                 newUIPanel.transform.localPosition = Vector3.zero;
                 OverlayPanel panel = newUIPanel.AddComponent<OverlayPanel>();
