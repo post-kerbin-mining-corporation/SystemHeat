@@ -1,6 +1,10 @@
 v0.7.1
 ------
-- Fix a null reference exception when loading a vessel with no SystemHeat parts
+- Fixed the coolant tank being renamed for no particular reason (ghosts??)
+
+v0.7.1
+------
+- Fixed a null reference exception when loading a vessel with no SystemHeat parts
 - Fixed an issue where a player could disable a tank in the UI, thus disabling boiloff
 
 v0.7.0
