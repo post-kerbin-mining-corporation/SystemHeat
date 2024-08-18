@@ -16,9 +16,9 @@
         { "name": "SystemHeat"   }
     ],
     "suggests": [
-        { "name": "SystemHeatFissionReactors"   },
-        { "name": "SystemHeatFissionEngines"   },
-        { "name": "SystemHeatHarvesters"   }
+        { "name": "SystemHeat-FissionReactors"   },
+        { "name": "SystemHeat-FissionEngines"   },
+        { "name": "SystemHeat-Harvesters"   }
     ],
     "install": [ {
         "find":       "SystemHeatConverters",
