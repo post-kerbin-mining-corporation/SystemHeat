@@ -73,10 +73,10 @@ namespace SystemHeat.UI
       if (HighLogic.LoadedSceneIsEditor)
       {
         currentBody = FlightGlobals.GetHomeBody();
-        bodyDopdown.AddOptions(FlightGlobals.Bodies.Select(x => x.name).ToList());
+        bodyDopdown.AddOptions(FlightGlobals.Bodies.Select(x => x.bodyDisplayName.LocalizeRemoveGender()).ToList());
         for (int i = 0; i < bodyDopdown.options.Count; i++)
         {
-          if (bodyDopdown.options[i].text == currentBody.name)
+          if (bodyDopdown.options[i].text ==  currentBody.bodyDisplayName.LocalizeRemoveGender())
             bodyDopdown.SetValueWithoutNotify(i);
         }
 
@@ -189,7 +189,7 @@ namespace SystemHeat.UI
       Utils.Log($"[ToolbarPanel]: Selected body {bodyDopdown.options[bodyDopdown.value].text}", LogType.UI);
       foreach (CelestialBody body in FlightGlobals.Bodies)
       {
-        if (body.name == bodyDopdown.options[bodyDopdown.value].text)
+        if (body.bodyDisplayName.LocalizeRemoveGender() == bodyDopdown.options[bodyDopdown.value].text)
         {
           currentBody = body;
           SetBody(currentBody);

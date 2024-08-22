@@ -517,7 +517,7 @@ namespace SystemHeat
           if (elapsedTime > 0d)
           {
             Utils.Log($"[SystemHeatFissionReactor] Catching up {elapsedTime} s of time on load", LogType.Modules);
-            float fuelThrottle = CurrentReactorThrottle / 100f;
+            double fuelThrottle = CurrentReactorThrottle / 100f;
 
             foreach (ResourceRatio ratio in inputs)
             {
@@ -818,7 +818,7 @@ namespace SystemHeat
 
       fuelCheckPassed = true;
       burnRate = 0d;
-      float fuelThrottle = CurrentReactorThrottle / 100f;
+      double fuelThrottle = CurrentReactorThrottle / 100f;
 
       // Check for full-ness
       foreach (ResourceRatio ratio in outputs)
@@ -834,7 +834,7 @@ namespace SystemHeat
       // Check for fuel and consume
       foreach (ResourceRatio ratio in inputs)
       {
-        double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * timeStep, ratio.FlowMode);
+        double amt = this.part.RequestResource(ratio.ResourceName, fuelThrottle * ratio.Ratio * (double)timeStep, ratio.FlowMode);
 
         if (MinimumThrottle > 0)
         {
@@ -858,7 +858,10 @@ namespace SystemHeat
           }
         }
         if (ratio.ResourceName == FuelName)
+        {          
           burnRate = fuelThrottle * ratio.Ratio;
+          Debug.Log($"Fuels: {fuelThrottle:E5}, {ratio.Ratio:E5}, {burnRate:E5}");
+        }
       }
       // If fuel consumed, add waste
       if (fuelCheckPassed)
@@ -981,7 +984,7 @@ namespace SystemHeat
     // Finds time remaining at specified fuel burn rates
     public string FindTimeRemaining(double amount, double rate)
     {
-      if (rate < 0.0000001)
+      if (rate < 1E-15)
       {
         return Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatFissionReactor_Field_FuelStatus_VeryLong");
       }
