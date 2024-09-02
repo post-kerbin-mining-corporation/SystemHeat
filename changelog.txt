@@ -1,3 +1,16 @@
+v0.7.4
+------
+- Fixed a config oversight that made the heat exchanger always cost power no matter its settings
+- Fixed a relatively harmless NRE on editor scene loads
+- Fixed UI null reference spam when switching away from a vessel with SH modules in flight
+- Fixed UI null reference spam when to a vessel with SH modules in flight after switching to one with none ;)
+- Added a few null checks/guards in places that might have bad things happen
+- Ensure all debug flags are set to OFF by default and added examples of the hidden ones to the settings file
+- Added an adapter module for ModuleCometDrill
+- Adjustments to EXTRAS patches to fix a few issues
+-- Unnecesary SH modules for some NTRs
+-- Harvester patches now support Asteroid/Comet drills
+
 v0.7.3
 ------
 - Fixed an issue where static radiators would create exceptions in the editor

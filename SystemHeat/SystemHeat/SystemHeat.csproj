@@ -84,6 +84,7 @@
     <Compile Include="Modules\BoiloffFuel.cs" />
     <Compile Include="Modules\ModuleSystemHeat.cs" />
     <Compile Include="Modules\ModuleSystemHeatAnimateHeat.cs" />
+    <Compile Include="Modules\ModuleSystemHeatCometHarvester.cs" />
     <Compile Include="Modules\ModuleSystemHeatConverter.cs" />
     <Compile Include="Modules\ModuleSystemHeatBaseConverterAdapter.cs" />
     <Compile Include="Modules\ModuleSystemHeatCryoTank.cs" />

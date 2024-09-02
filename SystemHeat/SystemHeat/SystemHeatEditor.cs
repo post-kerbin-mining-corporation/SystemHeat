@@ -43,10 +43,12 @@ namespace SystemHeat
     {
       if (simulator != null)
       {
-        simulator.SimulationBody = SystemHeatUI.Instance.toolbarPanel.SimSituationBody;
-        simulator.SimulationAltitude = SystemHeatUI.Instance.toolbarPanel.SimSituationAltitude;
-        simulator.SimulationSpeed = SystemHeatUI.Instance.toolbarPanel.SimSituationVelocity;
-
+        if (SystemHeatUI.Instance.toolbarPanel != null)
+        {
+          simulator.SimulationBody = SystemHeatUI.Instance.toolbarPanel.SimSituationBody;
+          simulator.SimulationAltitude = SystemHeatUI.Instance.toolbarPanel.SimSituationAltitude;
+          simulator.SimulationSpeed = SystemHeatUI.Instance.toolbarPanel.SimSituationVelocity;
+        }
         simulator.SimulateEditor();
         
       }
