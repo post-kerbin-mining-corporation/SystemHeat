@@ -18,6 +18,7 @@ namespace SystemHeat.UI
     public bool OverlayLoopState(int loopID) { return toolbarPanel.OverlayLoopState(loopID); }
     // Control Vars
     protected static bool showWindow = false;
+    protected bool heatModules = false;
 
     // Panel
     public ToolbarPanel toolbarPanel;
@@ -122,11 +123,7 @@ namespace SystemHeat.UI
     }
     protected bool HasHeatModules(Vessel ves)
     {
-
-
       Utils.Log($"[SystemHeatToolbar]: Detecting modules on {ves}", LogType.UI);
-
-
       // Get all parts
       List<Part> allParts = ves.parts;
       for (int i = 0; i < allParts.Count; i++)
@@ -135,10 +132,12 @@ namespace SystemHeat.UI
         {
           if (allParts[i].Modules[j].moduleName == "ModuleSystemHeat")
           {
+            heatModules = true;
             return true;
           }
         }
       }
+      heatModules = false;
       return false;
     }
     protected void FindSimulator(Vessel v)
@@ -205,7 +204,7 @@ namespace SystemHeat.UI
           }
         }
       }
-      if (toolbarTag != null && simulator != null)
+      if (toolbarTag != null && simulator != null && heatModules)
       {
         toolbarTag.Update(simulator);
       }

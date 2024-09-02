@@ -13,6 +13,7 @@ namespace SystemHeat.UI
     public RectTransform alertToolbarGlowRect;
     public RectTransform alertToolbarBackgroundRect;
 
+
     bool warningMode = false;
     bool dangerMode = false;
 
@@ -61,8 +62,11 @@ namespace SystemHeat.UI
       alertToolbarGlow.sprite = SystemHeatAssets.Sprites["icon_glow"];
       alertToolbarGlow.color = new Color(0.996f, 0.083f, 0.0039f, 0.0f);
 
-      glowObj.AddComponent<ImageFadeAnimator>();
+      alertToolbarIcon.enabled = false;
+      alertToolbarGlow.enabled = false;
+      alertToolbarBackground.enabled = false;
 
+      glowObj.AddComponent<ImageFadeAnimator>();
     }
 
     public void SetWarningTemperature()
@@ -115,44 +119,47 @@ namespace SystemHeat.UI
     }
     public void Update(SystemHeatSimulator simulator)
     {
-      // Turn on the no loops text if there are no loops
-      if (simulator.HeatLoops.Count == 0)
+      if (alertToolbarIcon != null)
       {
-        SetWarningNone();
+        // Turn on the no loops text if there are no loops
+        if (simulator.HeatLoops.Count == 0)
+        {
+          SetWarningNone();
 
-      }
-      else
-      {
-        bool loopOverheated = false;
-        bool loopFluxNotBalanced = false;
-        for (int i = 0; i < simulator.HeatLoops.Count; i++)
-        {
-          if (loopOverheated || loopFluxNotBalanced)
-          {
-            /// get outta here
-            break;
-          }
-          if (simulator.HeatLoops[i].Temperature > (simulator.HeatLoops[i].NominalTemperature+1.05f)  )
-          {
-            loopOverheated = true;
-          }
-          else if (simulator.HeatLoops[i].NetFlux > 0f)
-          {
-            loopFluxNotBalanced = true;
-          }
-
-        }
-        if (loopOverheated)
-        {
-          SetWarningTemperature();
-        }
-        else if (loopFluxNotBalanced)
-        {
-          SetWarningFlux();
         }
         else
         {
-          SetWarningNone();
+          bool loopOverheated = false;
+          bool loopFluxNotBalanced = false;
+          for (int i = 0; i < simulator.HeatLoops.Count; i++)
+          {
+            if (loopOverheated || loopFluxNotBalanced)
+            {
+              /// get outta here
+              break;
+            }
+            if (simulator.HeatLoops[i].Temperature > (simulator.HeatLoops[i].NominalTemperature + 1.05f))
+            {
+              loopOverheated = true;
+            }
+            else if (simulator.HeatLoops[i].NetFlux > 0f)
+            {
+              loopFluxNotBalanced = true;
+            }
+
+          }
+          if (loopOverheated)
+          {
+            SetWarningTemperature();
+          }
+          else if (loopFluxNotBalanced)
+          {
+            SetWarningFlux();
+          }
+          else
+          {
+            SetWarningNone();
+          }
         }
       }
     }

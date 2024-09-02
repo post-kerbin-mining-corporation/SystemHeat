@@ -27,16 +27,26 @@ namespace SystemHeat
   /// </summary>
   public static class SystemHeatSettings
   {
-    // Emit UI debug messages
-    public static bool DebugUI = true;
-    // Emit Overlay debug messages
-    public static bool DebugOverlay = true;
-    // Emit simulation debug messages
-    public static bool DebugSimulation = true;
-    // Emit module  debug messages
-    public static bool DebugModules = true;
-    // Emit module  debug messages
-    public static bool DebugSettings = true;
+    /// <summary>
+    /// Emit log messages about the UI
+    /// </summary>
+    public static bool DebugUI = false;
+    /// <summary>
+    /// Emit log messages about the overlay
+    /// </summary>
+    public static bool DebugOverlay = false;    
+    /// <summary>
+    /// Emit log messages about simulations
+    /// </summary>
+    public static bool DebugSimulation = false;
+    /// <summary>
+    /// Emit log messages about modules
+    /// </summary>
+    public static bool DebugModules = false;
+    /// <summary>
+    /// Emit log messages about settings
+    /// </summary>
+    public static bool DebugSettings = false;
  
     /// <summary>
     ///  Show debug info in PAW UIs

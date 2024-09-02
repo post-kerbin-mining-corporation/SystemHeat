@@ -31,7 +31,7 @@ Similarly, parts that consume heat have special properties. They specifically co
 
 When parts are connected into a Heat Loop , the members of the loop contribute their Input/Output Flux and Output Temperature into it. If all the fluxes going into the loop are positive, it heats up and increases its Loop Temperature. If the flux is negative, it cools down. If the Loop Temperature gets too high, systems in the loop will be negatively affected, in proportion to how different the Loop Temperature is to their Output Temperature.
 
-Your job, as the spacecraft engineer, is to construct Heat Loops such that they are well-balanced and basically don't heat up and . There can be several different Heat Loops on a vessel with different parts assigned to them (though a part can currently only belong to one loop at a time).
+Your job, as the spacecraft engineer, is to construct Heat Loops such that they are well-balanced and basically don't heat up and melt things. There can be several different Heat Loops on a vessel with different parts assigned to them (though a part can currently only belong to one loop at a time).
 
 
 ## Dependencies
