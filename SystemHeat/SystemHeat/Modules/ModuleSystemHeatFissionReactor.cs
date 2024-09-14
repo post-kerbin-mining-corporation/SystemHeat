@@ -851,7 +851,7 @@ namespace SystemHeat
           {
             if (amt < 0.0000000000001)
             {
-              Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!");
+              Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!", LogType.Modules);
               ReactorDeactivated();
               fuelCheckPassed = false;
             }
@@ -860,7 +860,6 @@ namespace SystemHeat
         if (ratio.ResourceName == FuelName)
         {          
           burnRate = fuelThrottle * ratio.Ratio;
-          Debug.Log($"Fuels: {fuelThrottle:E5}, {ratio.Ratio:E5}, {burnRate:E5}");
         }
       }
       // If fuel consumed, add waste
