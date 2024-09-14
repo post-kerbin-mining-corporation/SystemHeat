@@ -851,7 +851,7 @@ namespace SystemHeat
           {
             if (amt < 0.0000000000001)
             {
-              Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!");
+              Utils.Log($"[ModuleSystemHeatFissionReactor]: Reactor has no fuel!", LogType.Modules);
               ReactorDeactivated();
               fuelCheckPassed = false;
             }
