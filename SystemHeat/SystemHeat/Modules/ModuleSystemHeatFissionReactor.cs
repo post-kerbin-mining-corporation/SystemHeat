@@ -860,7 +860,6 @@ namespace SystemHeat
         if (ratio.ResourceName == FuelName)
         {          
           burnRate = fuelThrottle * ratio.Ratio;
-          Debug.Log($"Fuels: {fuelThrottle:E5}, {ratio.Ratio:E5}, {burnRate:E5}");
         }
       }
       // If fuel consumed, add waste

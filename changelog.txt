@@ -1,3 +1,7 @@
+v0.7.5
+------
+- Fixed a fission reactor related logging incident
+
 v0.7.4
 ------
 - Fixed a config oversight that made the heat exchanger always cost power no matter its settings
