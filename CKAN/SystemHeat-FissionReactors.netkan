@@ -20,10 +20,9 @@
         { "name": "NearFutureElectrical"   }
     ],
     "suggests": [
-        { "name": "SystemHeatConverters"   },
-        { "name": "SystemHeatFissionEngines"   },
-        { "name": "SystemHeatHarvesters"   }
-        
+        { "name": "SystemHeat-Converters"   },
+        { "name": "SystemHeat-FissionEngines"   },
+        { "name": "SystemHeat-Harvesters"   }
     ],
     "install": [ {
         "find":       "SystemHeatFissionReactors",
