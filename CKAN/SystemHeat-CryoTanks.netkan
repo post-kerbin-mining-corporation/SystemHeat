@@ -17,9 +17,9 @@
         { "name": "CommunityResourcePack"   }
     ],
     "suggests": [
-        { "name": "SystemHeatConverters"   },
-        { "name": "SystemHeatFissionReactors"   },
-        { "name": "SystemHeatHarvesters"   },
+        { "name": "SystemHeat-Converters"   },
+        { "name": "SystemHeat-FissionReactors"   },
+        { "name": "SystemHeat-Harvesters"   },
         { "name": "NearFuturePropulsion"   }
     ],
     "install": [ {

@@ -18,10 +18,10 @@
         { "name": "HeatControl"   }
     ],
     "suggests": [
-        { "name": "SystemHeatConverters"   },
-        { "name": "SystemHeatFissionReactors"   },
-        { "name": "SystemHeatFissionEngines"   },
-        { "name": "SystemHeatHarvesters"   }
+        { "name": "SystemHeat-Converters"   },
+        { "name": "SystemHeat-FissionReactors"   },
+        { "name": "SystemHeat-FissionEngines"   },
+        { "name": "SystemHeat-Harvesters"   }
     ],
     "install": [ {
         "find":       "SystemHeat",
