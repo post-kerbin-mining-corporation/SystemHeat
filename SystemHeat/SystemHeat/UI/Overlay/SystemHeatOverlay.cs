@@ -61,18 +61,14 @@ namespace SystemHeat.UI
 
       Utils.Log("[SystemHeatOverlay]: Unsubscribing to events", LogType.Overlay);
       GameEvents.onGameSceneLoadRequested.Remove(onSceneChange);
+      GameEvents.onEditorScreenChange.Remove(onEditorScreenChange);
+      GameEvents.onEditorPartDeleted.Remove(onEditorPartDeleted);
+      GameEvents.onEditorPartPicked.Remove(onEditorPartPicked);
+      GameEvents.onEditorRestart.Remove(onEditorReset);
+      GameEvents.onEditorStarted.Remove(onEditorStart);
+      GameEvents.OnMapEntered.Remove(onEnterMapView);
+      GameEvents.OnMapExited.Remove(onExitMapView);
 
-      if (HighLogic.LoadedSceneIsEditor)
-      {
-        GameEvents.onEditorScreenChange.Remove(onEditorScreenChange);
-        GameEvents.onEditorPartDeleted.Remove(onEditorPartDeleted);
-        GameEvents.onEditorPartPicked.Remove(onEditorPartPicked);
-      }
-      else
-      {
-        GameEvents.OnMapEntered.Remove(onEnterMapView);
-        GameEvents.OnMapExited.Remove(onExitMapView);
-      }
     }
     protected void Start()
     {

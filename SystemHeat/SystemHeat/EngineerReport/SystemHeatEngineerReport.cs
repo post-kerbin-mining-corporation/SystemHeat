@@ -16,7 +16,11 @@ namespace SystemHeat
       GameEvents.onGUIEngineersReportReady.Add(ReportReady);
       GameEvents.onGUIEngineersReportDestroy.Add(ReportDestroyed);
     }
-
+    public void OnDestroy()
+    {
+      GameEvents.onGUIEngineersReportReady.Remove(ReportReady);
+      GameEvents.onGUIEngineersReportDestroy.Remove(ReportDestroyed);
+    }
     private void AddTest()
     {
       //Wait for DeltaV simulation to be instantiated and to finish.

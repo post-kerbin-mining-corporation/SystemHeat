@@ -29,7 +29,27 @@ namespace SystemHeat
     [KSPField(isPersistant = false)]
     public FloatCurve temperatureCurve = new FloatCurve();
 
-
+    /// <summary>
+    /// Whether to scale by atmosphere depth
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public bool affectedByAtmosphere = false;
+    
+    /// <summary>
+    /// This should scale heat radiated by atmosphere depth
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public FloatCurve atmosphereCurve = new FloatCurve();
+    /// <summary>
+    /// Whether to scale by acceleration
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public bool affectedByAcceleration = false;
+    /// <summary>
+    /// This should scale heat radiated by vessel acceleration
+    /// </summary>
+    [KSPField(isPersistant = false)]
+    public FloatCurve accelerationCurve = new FloatCurve();
     /// <summary>
     /// Convective area
     /// </summary>
@@ -43,7 +63,7 @@ namespace SystemHeat
     public string RadiatorStatus = "Offline";
 
     /// <summary>
-    /// UI: Current status
+    /// UI: Current status of convection
     /// </summary>
     [KSPField(isPersistant = false, guiActive = true, guiActiveEditor = true, guiName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_ConvectionStatus_Title", groupName = "sysheatradiator", groupDisplayName = "#LOC_SystemHeat_ModuleSystemHeatRadiator_GroupName")]
     public string ConvectionStatus = "Offline";
@@ -133,7 +153,6 @@ namespace SystemHeat
         {
           this.Events["ToggleEditorSunTracking"].guiActiveEditor = true;
         }
-
       }
       else
       {
@@ -152,12 +171,29 @@ namespace SystemHeat
     public override string GetInfo()
     {
 
-      string message = Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo",
+      string message = Localizer.Format(
+        "#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo",
         Utils.ToSI(temperatureCurve.Curve.keys[0].time, "F0"),
-       temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
+        temperatureCurve.Evaluate(temperatureCurve.Curve.keys[0].time).ToString("F0"),
         Utils.ToSI(temperatureCurve.Evaluate(temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time), "F0"),
         temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time.ToString("F0")
         );
+      if (affectedByAtmosphere)
+      {
+        message += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo_Atmosphere",
+        (accelerationCurve.Evaluate(0f) * 100f).ToString("F0"),
+        0f,
+        (accelerationCurve.Evaluate(1f) * 100f).ToString("F0"),
+        1f);
+      }
+      if (affectedByAcceleration)
+      {
+        message += Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatRadiator_PartInfo_Acceleration",
+        (accelerationCurve.Evaluate(0f) * 100f).ToString("F0"),
+        0f,
+        (accelerationCurve.Evaluate(1f) * 100f).ToString("F0"),
+        1f);
+      }
       message += base.GetInfo();
       return message;
     }
@@ -178,6 +214,12 @@ namespace SystemHeat
 
             if (vessel.atmDensity > 0d)
             {
+              float densityScale = 1f;
+              if (affectedByAtmosphere)
+              {
+                densityScale = atmosphereCurve.Evaluate((float)vessel.atmDensity); 
+              }
+              radiativeFlux *= densityScale;
               HeatLoop lp = heatModule.Loop;
               if (lp != null)
               {
@@ -185,9 +227,14 @@ namespace SystemHeat
               (float)PhysicsGlobals.SpaceTemperature, temperatureCurve.Curve.keys[temperatureCurve.Curve.keys.Length - 1].time);
 
                 convectiveFlux = Mathf.Clamp(
-                   tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f,
+                   tDelta * heatModule.Loop.ConvectionFlux * (float)part.heatConvectiveConstant * convectiveArea * 0.5f * densityScale,
                   float.MinValue, 0f);
               }
+            }
+            if (affectedByAcceleration)
+            {
+              float accelScale = accelerationCurve.Evaluate((float)vessel.acceleration.magnitude);
+              radiativeFlux *= accelScale;
             }
             heatModule.AddFlux(moduleID, 0f, radiativeFlux + convectiveFlux, false);
 

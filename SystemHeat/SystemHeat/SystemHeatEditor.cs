@@ -65,6 +65,7 @@ namespace SystemHeat
       GameEvents.onEditorPartDeleted.Add(new EventData<Part>.OnEvent(onEditorPartDeleted));
       GameEvents.onEditorPodDeleted.Add(new EventVoid.OnEvent(onEditorVesselReset));
       GameEvents.onEditorLoad.Add(new EventData<ShipConstruct, KSP.UI.Screens.CraftBrowserDialog.LoadType>.OnEvent(onEditorVesselLoad));
+      GameEvents.onAboutToSaveShip.Add(new EventData<ShipConstruct>.OnEvent(onEditorSave));
 
       GameEvents.onPartRemove.Add(new EventData<GameEvents.HostTargetAction<Part, Part>>.OnEvent(onEditorVesselPartRemoved));
 
@@ -129,6 +130,20 @@ namespace SystemHeat
       if (!HighLogic.LoadedSceneIsEditor) { return; }
 
       InitializeEditorConstruct(ship, false);
+    }
+    public void onEditorSave(ShipConstruct ship)
+    {
+
+      Utils.Log("[SystemHeatEditor]: Editor Save", LogType.Simulator);
+      if (!HighLogic.LoadedSceneIsEditor) { return; }
+
+      if (ship != null)
+      {
+        if (simulator != null)
+        {
+          simulator.ResetTemperatures();
+        } 
+      }
     }
     public void onEditorPartDeleted(Part part)
     {
