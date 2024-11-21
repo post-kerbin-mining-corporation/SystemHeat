@@ -1,9 +1,9 @@
 v0.8.0
 ------
 - Updates to zn-ch localization
-- Added the ability for radiators to have their output scaled by atmosphere depth and acceleration
 - Corrected an issue where the heat simulation would not be reset when using the Hangar mod to launch ships. Note that if you are experiencing this you will need to re-save the ship in the editor 
-- Additional performance improvements
+- Additional performance improvements and code cleanup
+- Added the ability for radiators to have their output scaled by atmosphere depth and/or acceleration
    
 v0.7.5
 ------
