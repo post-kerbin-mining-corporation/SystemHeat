@@ -196,7 +196,7 @@ namespace SystemHeat
       return currentPosFlux;
     }
     /// <summary>
-    /// Calculates the total positive flux of the loop
+    /// Calculates the total negative flux of the loop
     /// </summary>
     protected float CalculateNegativeFlux()
     {
@@ -220,7 +220,7 @@ namespace SystemHeat
       // Calculate the loop net flux
       float currentNetFlux = CalculateNetFlux();
       PositiveFlux = CalculatePositiveFlux();
-      NegativeFlux = CalculatePositiveFlux();
+      NegativeFlux = CalculateNegativeFlux();
       float absFlux = Mathf.Abs(currentNetFlux);
 
       AllocateFlux(PositiveFlux);
