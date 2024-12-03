@@ -104,7 +104,12 @@ namespace SystemHeat
     {
       if (base.ModuleIsActive())
       {
-        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
+        float fluxScale = 1f;
+        if (base.lastTimeFactor == 0d)
+        {
+          fluxScale = 0f;
+        }
+        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower * fluxScale, true);
       }
       else
       {
