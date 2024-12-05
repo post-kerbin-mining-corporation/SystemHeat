@@ -111,7 +111,12 @@ namespace SystemHeat
     {
       if (converterModule.ModuleIsActive())
       {
-        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
+        float fluxScale = 1f;
+        if (converterModule.lastTimeFactor == 0d)
+        {
+          fluxScale = 0f;
+        }
+        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower * fluxScale, true);
       }
       else
       {

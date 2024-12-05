@@ -165,6 +165,7 @@ namespace SystemHeat
 
         settingsNode.TryGetValue("SimulationRateEditor", ref SimulationRateEditor);
         settingsNode.TryGetValue("AbsFluxThreshold", ref AbsFluxThreshold);
+        settingsNode.TryGetValue("HeatLoopDecayCoefficient", ref HeatLoopDecayCoefficient);
 
         settingsNode.TryGetValue("UIScrollSensitivity", ref UISrollSensitivity);
 

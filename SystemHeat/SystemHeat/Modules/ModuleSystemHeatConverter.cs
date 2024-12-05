@@ -27,7 +27,7 @@ namespace SystemHeat
 
     // Map system outlet temperature (K) to heat generation (kW)
     [KSPField(isPersistant = false)]
-    public float systemPower =0f;
+    public float systemPower = 0f;
 
 
     // 
@@ -65,7 +65,7 @@ namespace SystemHeat
         return info;
       else
         return info.Substring(0, pos) + Localizer.Format("#LOC_SystemHeat_ModuleSystemHeatConverter_PartInfoAdd",
-          Utils.ToSI(systemPower,"F0"),
+          Utils.ToSI(systemPower, "F0"),
           systemOutletTemperature.ToString("F0"),
           shutdownTemperature.ToString("F0")
           ) + info.Substring(pos);
@@ -131,14 +131,19 @@ namespace SystemHeat
 
     protected void GenerateHeatFlight()
     {
-        if (base.ModuleIsActive())
+      if (base.ModuleIsActive())
+      {
+        float fluxScale = 1f;
+        if (base.lastTimeFactor == 0d)
         {
-          heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower, true);
+          fluxScale = 0f;
         }
-        else
-        {
-          heatModule.AddFlux(moduleID, 0f, 0f, false);
-        }
+        heatModule.AddFlux(moduleID, systemOutletTemperature, systemPower * fluxScale, true);
+      }
+      else
+      {
+        heatModule.AddFlux(moduleID, 0f, 0f, false);
+      }
     }
     protected void UpdateSystemHeatFlight()
     {
@@ -153,9 +158,9 @@ namespace SystemHeat
                                                              3.0f,
                                                              ScreenMessageStyle.UPPER_CENTER));
           ToggleResourceConverterAction(new KSPActionParam(0, KSPActionType.Activate));
-         
-            Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired", LogType.Modules);
-          
+
+          Utils.Log("[ModuleSystemHeatConverter]: Overheated, shutdown fired", LogType.Modules);
+
         }
         base._recipe = ModuleUtils.RecalculateRatios(systemEfficiency.Evaluate(heatModule.currentLoopTemperature), inputs, outputs, inputList, outputList, base._recipe);
       }

@@ -1,3 +1,10 @@
+v0.8.1
+------
+- Fixed an issue which would cause the heat loop animation in the overlay not to play if there was a loop with only negative fluxes (#125)
+- Behavior of things based on stock Converter code (converters, drills, harvesters) should now be more consistent
+- Tweaked reporting of Fission Reactor power generation (related to DBS bug)
+- Added configurable HeatLoopDecayCoefficient to Settings.cfg
+
 v0.8.0
 ------
 - Updates to zn-ch localization
