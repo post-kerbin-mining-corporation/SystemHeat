@@ -87,6 +87,7 @@ namespace SystemHeat
       }
       else
       {
+        UpdateConverterStatus();
         UpdateFlux();
         Fields["ConverterEfficiency"].guiActiveEditor = editorThermalSim;
       }
