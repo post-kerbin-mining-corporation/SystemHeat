@@ -1,11 +1,9 @@
+
 ## Unreleased
 - Improved performance
-  - SystemHeat resource converters now fully disable themselves when inactive.
-  - Several other optimizations to make resource converters faster.
   - Color animations no longer update all materials when they haven't changed.
 
-## 0.9.0 - 2026-05-08
-
+## 0.9.1 - 2026-05-12
 - Fixed memory leaks from dangling event handlers.
 - Improved performance
   - Moved several PAW item updates out of FixedUpdate and running them only when the PAW is open
@@ -17,6 +15,8 @@
   - Added option to avoid running stock radiator logic if SystemHeatConverters and SystemHeatHarvesters are installed.  
     This is one of the biggest performance hits for large vessels with lots of radiators.
     This is disabled by default; you can opt in by setting ForceStockRadiatorLogic to false in the SystemHeat settings.cfg file
+  - SystemHeat resource converters now fully disable themselves when inactive.
+  - Several other optimizations to make resource converters faster.
 - Fixed potential fatal NRE for badly configured parts
 - Fixed NRE when launching a vessel
 - Fixed NRE when opening the reactor UI for fission engines that don't have heat modules
