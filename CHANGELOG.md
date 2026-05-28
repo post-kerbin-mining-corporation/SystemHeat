@@ -1,5 +1,9 @@
-## 0.9.1 - 2026-05-12
 
+## Unreleased
+- Improved performance
+  - Color animations no longer update all materials when they haven't changed.
+
+## 0.9.1 - 2026-05-12
 - Fixed memory leaks from dangling event handlers.
 - Improved performance
   - Moved several PAW item updates out of FixedUpdate and running them only when the PAW is open
