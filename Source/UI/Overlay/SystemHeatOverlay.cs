@@ -135,33 +135,61 @@ namespace SystemHeat.UI
 
     protected void onEditorPartDeleted(Part part)
     {
-      if (overlayPanels != null)
-        for (int i = overlayPanels.Count - 1; i >= 0; i--)
-        {
-          if (overlayPanels[i].heatModule.part == part)
-          {
-
-            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"), LogType.Overlay);
-
-            Destroy(overlayPanels[i].gameObject);
-            overlayPanels.RemoveAt(i);
-          }
-        }
+      RemoveOverlayObjectsForPart(part);
     }
     protected void onEditorPartPicked(Part part)
     {
+      RemoveOverlayObjectsForPart(part);
+    }
+
+    private void RemoveOverlayObjectsForPart(Part part)
+    {
       if (overlayPanels != null)
+      {
         for (int i = overlayPanels.Count - 1; i >= 0; i--)
         {
-          if (overlayPanels[i].heatModule.part == part)
+          OverlayPanel panel = overlayPanels[i];
+          ModuleSystemHeat heatModule = panel != null ? panel.heatModule : null;
+          if (panel == null || heatModule == null || heatModule.part == null || heatModule.part == part)
           {
-
-            Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel because it was deleted"), LogType.Overlay);
-
-            Destroy(overlayPanels[i].gameObject);
+            Utils.Log("[SystemHeatOverlay]: Destroying unused overlay panel", LogType.Overlay);
+            if (panel != null)
+              Destroy(panel.gameObject);
             overlayPanels.RemoveAt(i);
           }
         }
+      }
+
+      // Rebuild affected loop renderers on the next update. A loop can retain a
+      // destroyed module for the remainder of the editor deletion event.
+      if (overlayLoops != null)
+      {
+        for (int i = overlayLoops.Count - 1; i >= 0; i--)
+        {
+          OverlayLoop overlayLoop = overlayLoops[i];
+          HeatLoop heatLoop = overlayLoop != null ? overlayLoop.heatLoop : null;
+          bool remove = overlayLoop == null || heatLoop == null || heatLoop.LoopModules == null;
+
+          if (!remove)
+          {
+            foreach (ModuleSystemHeat heatModule in heatLoop.LoopModules)
+            {
+              if (heatModule == null || heatModule.part == null || heatModule.part == part)
+              {
+                remove = true;
+                break;
+              }
+            }
+          }
+
+          if (remove)
+          {
+            if (overlayLoop != null)
+              overlayLoop.Destroy();
+            overlayLoops.RemoveAt(i);
+          }
+        }
+      }
     }
     public void ClearPanels()
     {
@@ -197,10 +225,10 @@ namespace SystemHeat.UI
     }
     protected void LateUpdate()
     {
+      RemoveInvalidOverlayObjects();
 
       if (simulator != null && !(HighLogic.LoadedSceneIsFlight && MapView.MapIsEnabled))
       {
-
         if (simulator.HeatLoops == null || simulator.HeatLoops.Count == 0 && overlayLoops.Count > 0)
         {
 
@@ -212,8 +240,11 @@ namespace SystemHeat.UI
           // Update each loop, build a new loop when needed
           foreach (HeatLoop loop in simulator.HeatLoops)
           {
+            if (!IsValidHeatLoop(loop))
+              continue;
+
             // if we have an overlay for this loop, update it
-            OverlayLoop curOverlay = overlayLoops.FirstOrDefault(x => x.heatLoop.ID == loop.ID);
+            OverlayLoop curOverlay = overlayLoops.FirstOrDefault(x => x != null && x.heatLoop != null && x.heatLoop.ID == loop.ID);
             if (curOverlay != null)
             {
               // if no modules, hide the loop
@@ -243,7 +274,10 @@ namespace SystemHeat.UI
 
             foreach (ModuleSystemHeat system in loop.LoopModules)
             {
-              int index = overlayPanels.FindIndex(f => f.heatModule == system);
+              if (system == null)
+                continue;
+
+              int index = overlayPanels.FindIndex(f => f != null && f.heatModule == system);
 
               if (index == -1)
               {
@@ -283,24 +317,15 @@ namespace SystemHeat.UI
           }
 
 
-          for (int i = overlayPanels.Count - 1; i >= 0; i--)
+          for (int i = overlayLoops.Count - 1; i >= 0; i--)
           {
-            if (overlayPanels[i].heatModule == null)
+            OverlayLoop overlayLoop = overlayLoops[i];
+            if (overlayLoop == null || overlayLoop.heatLoop == null || !simulator.HasLoop(overlayLoop.heatLoop.ID))
             {
-
-              Utils.Log(String.Format("[SystemHeatOverlay]: Destroying unusued overlay panel"), LogType.Overlay);
-
-              Destroy(overlayPanels[i].gameObject);
-              overlayPanels.RemoveAt(i);
+              if (overlayLoop != null)
+                overlayLoop.Destroy();
+              overlayLoops.RemoveAt(i);
             }
-          }
-          foreach (OverlayLoop l in overlayLoops)
-          {
-            if (!simulator.HasLoop(l.heatLoop.ID))
-            {
-              l.SetVisible(false);
-            }
-
           }
         }
       }
@@ -314,6 +339,52 @@ namespace SystemHeat.UI
 
       }
     }
+
+    private bool IsValidHeatLoop(HeatLoop heatLoop)
+    {
+      if (heatLoop == null || heatLoop.LoopModules == null)
+        return false;
+
+      foreach (ModuleSystemHeat heatModule in heatLoop.LoopModules)
+      {
+        if (heatModule == null || heatModule.part == null)
+          return false;
+      }
+
+      return true;
+    }
+
+    private void RemoveInvalidOverlayObjects()
+    {
+      if (overlayPanels != null)
+      {
+        for (int i = overlayPanels.Count - 1; i >= 0; i--)
+        {
+          OverlayPanel panel = overlayPanels[i];
+          if (panel == null || panel.heatModule == null || panel.heatModule.part == null)
+          {
+            Utils.Log("[SystemHeatOverlay]: Destroying unused overlay panel", LogType.Overlay);
+            if (panel != null)
+              Destroy(panel.gameObject);
+            overlayPanels.RemoveAt(i);
+          }
+        }
+      }
+
+      if (overlayLoops != null)
+      {
+        for (int i = overlayLoops.Count - 1; i >= 0; i--)
+        {
+          OverlayLoop overlayLoop = overlayLoops[i];
+          if (overlayLoop == null || !IsValidHeatLoop(overlayLoop.heatLoop))
+          {
+            if (overlayLoop != null)
+              overlayLoop.Destroy();
+            overlayLoops.RemoveAt(i);
+          }
+        }
+      }
+    }
     public void AssignSimulator(SystemHeatSimulator sim)
     {
       simulator = sim;
@@ -322,6 +393,7 @@ namespace SystemHeat.UI
     {
       Utils.Log(String.Format("[SystemHeatOverlay]: Visibility set to {0}", visible), LogType.Overlay);
 
+      RemoveInvalidOverlayObjects();
       Drawn = visible;
 
       SetLoopVisiblity(visible);
@@ -331,6 +403,7 @@ namespace SystemHeat.UI
     {
       Utils.Log(String.Format("[SystemHeatOverlay]: Visibility of loop {0} set to {1}", loopID, visible), LogType.Overlay);
 
+      RemoveInvalidOverlayObjects();
       Drawn = visible;
 
       SetLoopVisiblity(visible, loopID);
@@ -342,12 +415,13 @@ namespace SystemHeat.UI
 
       for (int i = 0; i < overlayPanels.Count; i++)
       {
-        if (overlayPanels[i] != null)
+        OverlayPanel panel = overlayPanels[i];
+        if (panel != null && panel.heatModule != null)
         {
-          if (overlayPanels[i].heatModule.moduleUsed)          
-            overlayPanels[i].SetVisibility(visible);
+          if (panel.heatModule.moduleUsed)
+            panel.SetVisibility(visible);
           else
-            overlayPanels[i].SetVisibility(false);
+            panel.SetVisibility(false);
         }
       }
     }
@@ -356,17 +430,18 @@ namespace SystemHeat.UI
 
       for (int i = 0; i < overlayPanels.Count; i++)
       {
-        if (overlayPanels[i] == null) continue;
-        if (overlayPanels[i].loop.ID == loopID)
+        OverlayPanel panel = overlayPanels[i];
+        if (panel == null || panel.loop == null || panel.heatModule == null) continue;
+        if (panel.loop.ID == loopID)
         {
-          if (overlayPanels[i].heatModule.moduleUsed)
-            overlayPanels[i].SetVisibility(visible);
+          if (panel.heatModule.moduleUsed)
+            panel.SetVisibility(visible);
           else
-            overlayPanels[i].SetVisibility(false);
+            panel.SetVisibility(false);
         }
         else
         {
-          Drawn = Drawn || overlayPanels[i].active;
+          Drawn = Drawn || panel.active;
         }
       }
     }
@@ -377,14 +452,16 @@ namespace SystemHeat.UI
       {
         foreach (OverlayLoop loop in overlayLoops)
         {
-          loop.SetVisible(visible);
+          if (loop != null && loop.heatLoop != null)
+            loop.SetVisible(visible);
         }
       }
       else
       {
         foreach (OverlayLoop loop in overlayLoops)
         {
-          loop.SetVisible(false);
+          if (loop != null && loop.heatLoop != null)
+            loop.SetVisible(false);
         }
       }
     }
@@ -394,6 +471,7 @@ namespace SystemHeat.UI
       {
         foreach (OverlayLoop loop in overlayLoops)
         {
+          if (loop == null || loop.heatLoop == null) continue;
           if (loop.heatLoop.ID == loopID)
             loop.SetVisible(visible);
           else
@@ -409,6 +487,7 @@ namespace SystemHeat.UI
     {
       foreach (OverlayLoop loop in overlayLoops)
       {
+        if (loop == null || loop.heatLoop == null) continue;
         if (loop.heatLoop.ID == loopID)
           return loop.Drawn;
       }
