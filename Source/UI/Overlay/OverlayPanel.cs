@@ -94,7 +94,7 @@ namespace SystemHeat.UI
 
     public void LateUpdate()
     {
-      if (active && loop != null && heatModule != null)
+      if (active && loop != null && heatModule != null && heatModule.part != null && Camera.main != null && parentCanvas != null)
       {
         float nominalLoopTempDelta = loop.NominalTemperature - heatModule.systemNominalTemperature;
         float nominalSystemTempDelta = loop.Temperature - heatModule.systemNominalTemperature;
@@ -170,7 +170,7 @@ namespace SystemHeat.UI
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.GetComponent<RectTransform>(), screenPoint, parentCanvas.worldCamera, out localPoint);
         transform.localPosition = localPoint;
       }
-      if (heatModule == null)
+      if (heatModule == null || heatModule.part == null)
       {
         Destroy(this.gameObject);
       }
