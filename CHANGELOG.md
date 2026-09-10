@@ -2,6 +2,7 @@
 ## Unreleased
 - Improved performance
   - Color animations no longer update all materials when they haven't changed.
+- Fixed the heat-loop list scroll content not expanding when a vessel has more loops than fit in the viewport.
 
 ## 0.9.1 - 2026-05-12
 - Fixed memory leaks from dangling event handlers.

@@ -135,6 +135,11 @@ namespace SystemHeat.UI
       Utils.Log($"Source data: buttonYOffsetFromTop={buttonYOffsetFromTop }, loopPanelMaxHeight={loopPanelMaxHeight} widgetTotalHeight={widgetTotalHeight}", LogType.UI);
       //loopPanelWidgets.Count * 68f + vlg.padding.top+vlg.padding.bottom+ 3f+7.5f*(loopPanelWidgets.Count-1);
       loopPanelRootRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, loopPanelMaxHeight);
+      // The ScrollRect content must contain the complete list.  Previously only
+      // the viewport was resized, leaving the content at its prefab height when
+      // more loops were added than could be shown at once.  That made some loop
+      // widgets unreachable or appear to be missing from the list.
+      loopPanelScrollRootRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, widgetTotalHeight);
       loopPanelScrollViewportRect.anchorMin = loopPanelScrollBackground.anchorMin = new Vector2(0, 0);
       loopPanelScrollViewportRect.anchorMax = loopPanelScrollBackground.anchorMax = new Vector2(1, 0);
       loopPanelScrollCarat.anchorMin = new Vector2(0, 1);
