@@ -120,6 +120,15 @@ namespace SystemHeat.UI
           RecalculatePanelPositionData();
         }
       }
+
+      // Heat loops are discovered by walking vessel parts, so their creation
+      // order is not guaranteed to match their numeric IDs.  Keep the content
+      // order stable and predictable for the player.
+      loopPanelWidgets.Sort((left, right) => left.TrackedLoopID.CompareTo(right.TrackedLoopID));
+      for (int i = 0; i < loopPanelWidgets.Count; i++)
+      {
+        loopPanelWidgets[i].transform.SetSiblingIndex(i);
+      }
     }
     protected void RecalculatePanelPositionData()
     {
