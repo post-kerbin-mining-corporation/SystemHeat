@@ -1,5 +1,6 @@
 
 ## Unreleased
+- Fixed heat loop assignment in the editor so the selected loop is applied consistently.
 - Improved performance
   - Color animations no longer update all materials when they haven't changed.
 
