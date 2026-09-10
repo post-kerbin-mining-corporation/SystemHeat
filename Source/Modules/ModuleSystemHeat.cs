@@ -293,17 +293,10 @@ namespace SystemHeat
 
       SystemFluxUI = String.Format("{0}W", Utils.ToSI(totalSystemFlux, "F0"));
       LoopTemperatureUI = String.Format("{0:F0} / {1:F0} K", currentLoopTemperature, nominalLoopTemperature);
-      if (totalSystemFlux > 0f)
-      {
-        Fields["SystemTemperatureUI"].guiActive = true;
-        Fields["SystemTemperatureUI"].guiActiveEditor = true;
-        SystemTemperatureUI = String.Format("{0:F0} K", totalSystemTemperature);
-      }
-      else
-      {
-        Fields["SystemTemperatureUI"].guiActive = false;
-        Fields["SystemTemperatureUI"].guiActiveEditor = false;
-      }
+      // Keep the PAW layout stable when flux briefly reaches zero or changes sign.
+      // Visibility is controlled by SetSystemHeatModuleEnabled, not by the
+      // instantaneous value being displayed.
+      SystemTemperatureUI = String.Format("{0:F0} K", totalSystemTemperature);
     }
 
     protected void FindSimulator()

@@ -1,5 +1,6 @@
 
 ## Unreleased
+- Fixed SystemHeat part-action-window fields flickering when system flux changes.
 - Improved performance
   - Color animations no longer update all materials when they haven't changed.
 
