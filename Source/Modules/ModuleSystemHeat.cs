@@ -144,7 +144,13 @@ namespace SystemHeat
 
     private void ChangeLoop(BaseField field, object oldFieldValueObj)
     {
-      if (!HighLogic.LoadedSceneIsFlight)
+      if (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor)
+        return;
+
+      if (simulator == null)
+        FindSimulator();
+
+      if (simulator == null)
         return;
 
       var oldLoopID = (int)oldFieldValueObj;
